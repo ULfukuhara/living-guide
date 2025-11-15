@@ -1,11 +1,311 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>living-guide テスト</title>
+  <meta charset="UTF-8" />
+  <title>入居のしおり | guide.univ-life.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CDN（ビルド・Node.js不要） -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>living-guide テストページ</h1>
-  <p>GitHub Pages 動作確認用です。</p>
+<body class="bg-slate-100 text-slate-900">
+  <div class="min-h-screen flex flex-col">
+    <!-- ヘッダー -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-slate-500">ユニヴ・ライフ株式会社 管理部</p>
+          <h1 class="text-lg font-semibold text-slate-800">
+            入居のしおり
+          </h1>
+        </div>
+        <span class="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700">
+          guide.univ-life.com
+        </span>
+      </div>
+    </header>
+
+    <!-- コンテンツ -->
+    <main class="flex-1">
+      <div class="max-w-3xl mx-auto px-4 py-4 space-y-4">
+        <!-- 物件ヘッダー -->
+        <section class="bg-white rounded-xl shadow-sm p-4 space-y-1">
+          <p class="text-xs text-slate-500">
+            物件No: <span id="propertyNo" class="font-mono">-</span>
+          </p>
+          <h2 id="title" class="text-xl font-semibold text-slate-900">
+            物件名を読み込み中…
+          </h2>
+          <p id="address" class="text-sm text-slate-600">
+            住所を読み込み中…
+          </p>
+        </section>
+
+        <!-- お知らせ -->
+        <section id="notice-card" class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 hidden">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+              !
+            </span>
+            <h3 class="text-sm font-semibold text-amber-800">
+              注意事項・お知らせ
+            </h3>
+          </div>
+          <p class="text-xs text-amber-700">
+            最終更新日：<span id="notice_updated_at">-</span>
+          </p>
+          <p id="latest_notice" class="text-sm text-amber-800 leading-relaxed"></p>
+        </section>
+
+        <!-- 各セクション（カード） -->
+        <section id="internet-card" class="bg-white rounded-xl shadow-sm p-4 space-y-2 hidden">
+          <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-indigo-400 inline-block"></span>
+            インターネット・TV
+          </h3>
+          <p id="internet" class="text-sm text-slate-700 leading-relaxed"></p>
+        </section>
+
+        <section id="trash-card" class="bg-white rounded-xl shadow-sm p-4 space-y-2 hidden">
+          <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-emerald-400 inline-block"></span>
+            ごみ出しについて
+          </h3>
+          <p id="trash" class="text-sm text-slate-700 leading-relaxed"></p>
+        </section>
+
+        <section id="bicycle-card" class="bg-white rounded-xl shadow-sm p-4 space-y-2 hidden">
+          <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-sky-400 inline-block"></span>
+            駐輪場について
+          </h3>
+          <p id="bicycle" class="text-sm text-slate-700 leading-relaxed"></p>
+        </section>
+
+        <section id="other-card" class="bg-white rounded-xl shadow-sm p-4 space-y-2 hidden">
+          <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-slate-400 inline-block"></span>
+            その他のルール・お願い
+          </h3>
+          <p id="other" class="text-sm text-slate-700 leading-relaxed"></p>
+        </section>
+
+        <!-- 連絡先 -->
+        <section id="contact-card" class="bg-white rounded-xl shadow-sm p-4 space-y-2 hidden">
+          <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-rose-400 inline-block"></span>
+            連絡先
+          </h3>
+          <div class="text-sm text-slate-700 space-y-1">
+            <p>
+              緊急連絡先：
+              <span id="emergency_contact" class="font-medium"></span>
+            </p>
+            <p>
+              管理会社：
+              <span id="management_contact" class="font-medium"></span>
+            </p>
+          </div>
+        </section>
+
+        <!-- ローディング / エラー -->
+        <p id="status" class="text-xs text-slate-500">データを読み込んでいます…</p>
+      </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="max-w-3xl mx-auto px-4 py-2 flex items-center justify-between">
+        <p class="text-xs text-slate-500">
+          &copy; <span id="year"></span> ユニヴ・ライフ株式会社 管理部
+        </p>
+        <p class="text-[10px] text-slate-400">
+          このページの内容は予告なく変更される場合があります
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ===== 設定 =====
+    const STORYBLOK_TOKEN = "YOUR_PUBLIC_TOKEN_HERE"; // ★ここを書き換え
+    const GUIDES_PREFIX = "guides/";
+    const TEMPLATES_PREFIX = "guide-templates/";
+    const GLOBAL_SLUG = "global/guide-settings";
+
+    // ===== ユーティリティ =====
+    function getPropertyNoFromQuery() {
+      const params = new URLSearchParams(location.search);
+      return params.get("propertyNo") || "P0001";
+    }
+
+    function textOrEmpty(v) {
+      return (v || "").toString().trim();
+    }
+
+    function setText(id, v) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = v || "";
+    }
+
+    function show(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("hidden");
+    }
+
+    async function fetchStories(startsWithPrefix) {
+      const url = new URL("https://api.storyblok.com/v2/cdn/stories");
+      url.searchParams.set("token", STORYBLOK_TOKEN);
+      url.searchParams.set("starts_with", startsWithPrefix);
+      url.searchParams.set("version", "published");
+      url.searchParams.set("per_page", "100");
+      url.searchParams.set("cv", Date.now().toString());
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error("Storyblok API error: " + res.status);
+      const data = await res.json();
+      return data.stories || [];
+    }
+
+    async function fetchSingle(slug) {
+      const url = new URL("https://api.storyblok.com/v2/cdn/stories/" + slug);
+      url.searchParams.set("token", STORYBLOK_TOKEN);
+      url.searchParams.set("version", "published");
+      url.searchParams.set("cv", Date.now().toString());
+      const res = await fetch(url.toString());
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.story || null;
+    }
+
+    function pick(override, common, global) {
+      const o = textOrEmpty(override);
+      if (o) return o;
+      const c = textOrEmpty(common);
+      if (c) return c;
+      return textOrEmpty(global);
+    }
+
+    async function main() {
+      document.getElementById("year").textContent = new Date().getFullYear();
+      const statusEl = document.getElementById("status");
+      const propertyNo = getPropertyNoFromQuery();
+
+      try {
+        // global設定 + テンプレ + 物件ごとをまとめて取得
+        const [globalStory, templates, guides] = await Promise.all([
+          fetchSingle(GLOBAL_SLUG),
+          fetchStories(TEMPLATES_PREFIX),
+          fetchStories(GUIDES_PREFIX),
+        ]);
+
+        const global = (globalStory && globalStory.content) || {};
+
+        const templateMap = {};
+        for (const t of templates) {
+          const c = t.content || {};
+          if (c.template_id) {
+            templateMap[c.template_id] = c;
+          }
+        }
+
+        const guideStory = guides.find(
+          (g) => (g.content || {}).propertyNo === propertyNo
+        );
+        if (!guideStory) {
+          statusEl.textContent =
+            "該当する物件の入居のしおりが見つかりませんでした。（物件No: " +
+            propertyNo +
+            "）";
+          statusEl.classList.remove("text-slate-500");
+          statusEl.classList.add("text-red-600");
+          return;
+        }
+
+        const g = guideStory.content || {};
+        const tmpl = g.template_id ? templateMap[g.template_id] || {} : {};
+
+        // ヘッダー
+        setText("propertyNo", g.propertyNo || propertyNo);
+        setText("title", g.title || "入居のしおり");
+        setText("address", g.address || "");
+
+        // インターネット
+        const internetText = pick(
+          g.internet_override,
+          tmpl.internet_common,
+          ""
+        );
+        if (internetText) {
+          setText("internet", internetText);
+          show("internet-card");
+        }
+
+        // ごみ出し
+        const trashText = pick(
+          g.trash_override,
+          tmpl.trash_common,
+          global.trash_general_note
+        );
+        if (trashText) {
+          setText("trash", trashText);
+          show("trash-card");
+        }
+
+        // 駐輪場
+        const bicycleText = pick(
+          g.bicycle_override,
+          tmpl.bicycle_common,
+          ""
+        );
+        if (bicycleText) {
+          setText("bicycle", bicycleText);
+          show("bicycle-card");
+        }
+
+        // その他
+        const otherText = pick(
+          g.other_override,
+          tmpl.other_common,
+          global.general_living_rules
+        );
+        if (otherText) {
+          setText("other", otherText);
+          show("other-card");
+        }
+
+        // 注意事項
+        const noticeText = textOrEmpty(g.latest_notice);
+        if (noticeText) {
+          setText("latest_notice", noticeText);
+          if (g.notice_updated_at) {
+            setText("notice_updated_at", g.notice_updated_at);
+          }
+          show("notice-card");
+        }
+
+        // 連絡先
+        const emergency = textOrEmpty(
+          g.emergency_contact || global.night_emergency_rules
+        );
+        const management = textOrEmpty(
+          g.management_contact || global.management_contact
+        );
+        if (emergency || management) {
+          if (emergency) setText("emergency_contact", emergency);
+          if (management) setText("management_contact", management);
+          show("contact-card");
+        }
+
+        statusEl.textContent = "最新の情報を表示しています。";
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent =
+          "情報の取得に失敗しました。時間をおいて再度お試しください。";
+        statusEl.classList.remove("text-slate-500");
+        statusEl.classList.add("text-red-600");
+      }
+    }
+
+    main();
+  </script>
 </body>
 </html>

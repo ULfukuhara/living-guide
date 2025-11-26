@@ -26,15 +26,15 @@
   <!-- Main -->
   <main class="flex-1">
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
-
-      <!-- 状態表示 -->
       <p id="statusMessage" class="text-xs text-slate-500">
         Storyblok からデータを読み込んでいます…
       </p>
 
+      <!-- デバッグ用（小さく表示） -->
+      <p id="debugInfo" class="text-[10px] text-slate-400 whitespace-pre-wrap break-all"></p>
+
       <hr class="border-slate-200" />
 
-      <!-- sections を描画する場所 -->
       <div id="guideBody" class="space-y-4"></div>
     </div>
   </main>
@@ -46,147 +46,88 @@
   </footer>
 
   <script>
-    // ==============================
-    // 設定
-    // ==============================
-    // ★ Preview（紫）のトークンを入れてください
-    const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt";
-    // ★ Preview トークンなので draft 固定
-    const STORYBLOK_VERSION = "draft";
+    // ========= 設定 =========
+    const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt"; // ← Preview（紫）のトークン
+    const STORYBLOK_VERSION = "draft";                    // Preview は draft 固定
 
     const statusEl = document.getElementById("statusMessage");
+    const debugEl  = document.getElementById("debugInfo");
     const titleEl  = document.getElementById("propertyTitle");
     const noEl     = document.getElementById("propertyNo");
     const bodyEl   = document.getElementById("guideBody");
 
-    // ==============================
-    // URL から propertyNo を取得
-    // ==============================
+    function log(msg, obj) {
+      console.log(msg, obj ?? "");
+      if (!debugEl) return;
+      debugEl.textContent += msg + (obj ? " " + JSON.stringify(obj, null, 2) : "") + "\n";
+    }
+
+    // ========= URL から propertyNo =========
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const raw = params.get("propertyNo") || "10100"; // デフォルト 10100
+      const raw = params.get("propertyNo") || "10100";
       return raw.toString().trim();
     }
 
     const propertyNo = getPropertyNoFromUrl();
     noEl.textContent = `物件No：${propertyNo}`;
 
-    // ==============================
-    // Storyblok から「一覧」で取得し、slug 一致を探す
-    // ==============================
-    // ==============================
-// Storyblok から一覧を取得し、slug 一致を探す版
-// ==============================
-a// ==============================
-// Storyblok から一覧を取得し、slug 一致を探す版
-// ==============================
-async function loadGuide(propertyNo) {
-  // 一覧 API（最大 100 件）
-  const apiUrl =
-    "https://api.storyblok.com/v2/cdn/stories" +
-    `?token=${STORYBLOK_TOKEN}` +
-    `&version=${STORYBLOK_VERSION}` +
-    `&per_page=100&page=1`;
+    // ========= 一覧から該当の Story を探す =========
+    async function loadGuide(propertyNo) {
+      const apiUrl =
+        "https://api.storyblok.com/v2/cdn/stories" +
+        `?token=${STORYBLOK_TOKEN}` +
+        `&version=${STORYBLOK_VERSION}` +
+        `&per_page=100&page=1`;
 
-  try {
-    const res = await fetch(apiUrl);
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Storyblok error:", res.status, text);
-      statusEl.textContent = "入居のしおりの読み込みに失敗しました。（HTTP エラー）";
-      bodyEl.innerHTML =
-        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
-      return;
-    }
+      log("API URL:", apiUrl);
 
-    const data = await res.json();
-    const stories = data.stories || [];
+      try {
+        const res = await fetch(apiUrl);
+        log("HTTP status:", res.status);
 
-    // slug または full_slug が propertyNo と一致する Story を探す
-    const story = stories.find(
-      (s) => s.slug === propertyNo || s.full_slug === propertyNo
-    );
+        if (!res.ok) {
+          const text = await res.text();
+          log("Error body:", text);
+          statusEl.textContent = "入居のしおりの読み込みに失敗しました。（HTTP エラー）";
+          bodyEl.innerHTML =
+            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+          return;
+        }
 
-    if (!story) {
-      statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
-      bodyEl.innerHTML =
-        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
-      return;
-    }
+        const data = await res.json();
+        const stories = data.stories || [];
 
-    const content = story.content || {};
+        // 利用可能な slug をデバッグ表示（何かあってもここを見れば安心）
+        log("available slugs:", stories.map(s => s.slug));
 
-    // タイトル更新
-    titleEl.textContent =
-      content.title || story.name || `入居のしおり（${propertyNo}）`;
+        const story = stories.find(
+          s => s.slug === propertyNo || s.full_slug === propertyNo
+        );
 
-    // sections 描画
-    renderSections(content.sections || []);
-
-    statusEl.textContent = "最新のデータを表示しています。";
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
-    bodyEl.innerHTML =
-      '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
-  }
-}
-
-    const data = await res.json();
-    const stories = data.stories || [];
-
-    // slug または full_slug が propertyNo と一致する Story を探す
-    const story = stories.find(
-      (s) => s.slug === propertyNo || s.full_slug === propertyNo
-    );
-
-    if (!story) {
-      statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
-      bodyEl.innerHTML =
-        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
-      return;
-    }
-
-    const content = story.content || {};
-
-    // タイトル更新
-    titleEl.textContent =
-      content.title || story.name || `入居のしおり（${propertyNo}）`;
-
-    // sections 描画
-    renderSections(content.sections || []);
-
-    statusEl.textContent = "最新のデータを表示しています。";
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
-    bodyEl.innerHTML =
-      '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
-  }
-}
-
+        if (!story) {
+          statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
+          bodyEl.innerHTML =
+            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
+          return;
+        }
 
         const content = story.content || {};
-
-        // タイトル更新
         titleEl.textContent =
           content.title || story.name || `入居のしおり（${propertyNo}）`;
 
-        // sections 描画
         renderSections(content.sections || []);
-
         statusEl.textContent = "最新のデータを表示しています。";
       } catch (err) {
         console.error(err);
+        log("JS error:", String(err));
         statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
         bodyEl.innerHTML =
           '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
       }
     }
 
-    // ==============================
-    // sections を描画
-    // ==============================
+    // ========= sections 描画 =========
     function renderSections(sections) {
       bodyEl.innerHTML = "";
 
@@ -217,24 +158,18 @@ async function loadGuide(propertyNo) {
       });
     }
 
-    // ==============================
-    // Richtext → プレーンテキスト
-    // ==============================
+    // ========= Richtext → テキスト =========
     function richtextToPlainText(rich) {
       if (!rich || !Array.isArray(rich.content)) return "";
       const lines = [];
-
       rich.content.forEach((node) => {
         if (node.type === "paragraph" && Array.isArray(node.content)) {
           const line = node.content
             .map((child) => (child.text ? child.text : ""))
             .join("");
-          if (line.trim() !== "") {
-            lines.push(line);
-          }
+          if (line.trim() !== "") lines.push(line);
         }
       });
-
       return lines.join("\n\n");
     }
 

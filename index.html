@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
   <!-- Header -->
@@ -26,19 +27,21 @@
   <!-- Main -->
   <main class="flex-1">
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
-      <p id="statusMessage" class="text-xs text-slate-500">
-        Storyblok からデータを読み込んでいます…
-      </p>
 
-      <!-- デバッグ用（小さく表示） -->
-      <p id="debugInfo" class="text-[10px] text-slate-400 whitespace-pre-wrap break-all"></p>
+      <!-- 読み込み状態 -->
+      <p id="statusMessage" class="text-xs text-slate-500">
+        最新のデータを表示しています。
+      </p>
 
       <hr class="border-slate-200" />
 
+      <!-- sections を描画 -->
       <div id="guideBody" class="space-y-4"></div>
+
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-3xl mx-auto px-4 py-3">
       <p class="text-[10px] text-slate-400">© ユニヴ・ライフ株式会社 管理部</p>
@@ -46,100 +49,82 @@
   </footer>
 
   <script>
-    // ========= 設定 =========
-    const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt"; // ← Preview（紫）のトークン
-    const STORYBLOK_VERSION = "draft";                    // Preview は draft 固定
+    // ============================
+    // Storyblok 設定
+    // ============================
+    const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt";  // Preview token
+    const STORYBLOK_VERSION = "draft";                      // preview は draft 固定
 
     const statusEl = document.getElementById("statusMessage");
-    const debugEl  = document.getElementById("debugInfo");
     const titleEl  = document.getElementById("propertyTitle");
     const noEl     = document.getElementById("propertyNo");
     const bodyEl   = document.getElementById("guideBody");
 
-    function log(msg, obj) {
-      console.log(msg, obj ?? "");
-      if (!debugEl) return;
-      debugEl.textContent += msg + (obj ? " " + JSON.stringify(obj, null, 2) : "") + "\n";
-    }
-
-    // ========= URL から propertyNo =========
+    // ============================
+    // URL から propertyNo 取得
+    // ============================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const raw = params.get("propertyNo") || "10100";
-      return raw.toString().trim();
+      return (params.get("propertyNo") || "10100").trim();
     }
-
     const propertyNo = getPropertyNoFromUrl();
     noEl.textContent = `物件No：${propertyNo}`;
 
-    // ========= 一覧から該当の Story を探す =========
+    // ============================
+    // Storyblok 一覧から探す
+    // ============================
     async function loadGuide(propertyNo) {
       const apiUrl =
         "https://api.storyblok.com/v2/cdn/stories" +
         `?token=${STORYBLOK_TOKEN}` +
         `&version=${STORYBLOK_VERSION}` +
-        `&per_page=100&page=1`;
-
-      log("API URL:", apiUrl);
+        "&per_page=100&page=1";
 
       try {
         const res = await fetch(apiUrl);
-        log("HTTP status:", res.status);
-
         if (!res.ok) {
-          const text = await res.text();
-          log("Error body:", text);
-          statusEl.textContent = "入居のしおりの読み込みに失敗しました。（HTTP エラー）";
-          bodyEl.innerHTML =
-            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+          statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
+          bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
           return;
         }
 
         const data = await res.json();
         const stories = data.stories || [];
 
-        // 利用可能な slug をデバッグ表示（何かあってもここを見れば安心）
-        log("available slugs:", stories.map(s => s.slug));
-
         const story = stories.find(
-          s => s.slug === propertyNo || s.full_slug === propertyNo
+          (s) => s.slug === propertyNo || s.full_slug === propertyNo
         );
 
         if (!story) {
-          statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
-          bodyEl.innerHTML =
-            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
+          statusEl.textContent = "入居のしおりが見つかりません。";
+          bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
           return;
         }
 
         const content = story.content || {};
+
         titleEl.textContent =
           content.title || story.name || `入居のしおり（${propertyNo}）`;
 
         renderSections(content.sections || []);
-        statusEl.textContent = "最新のデータを表示しています。";
       } catch (err) {
-        console.error(err);
-        log("JS error:", String(err));
         statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
-        bodyEl.innerHTML =
-          '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+        bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
       }
     }
 
-    // ========= sections 描画 =========
+    // ============================
+    // section 描画
+    // ============================
     function renderSections(sections) {
       bodyEl.innerHTML = "";
 
       if (!sections.length) {
-        bodyEl.innerHTML =
-          '<p class="text-sm text-slate-500">入居のしおりの内容がまだ登録されていません。</p>';
+        bodyEl.innerHTML = `<p class="text-sm text-slate-500">内容が登録されていません。</p>`;
         return;
       }
 
       sections.forEach((section) => {
-        if (!section) return;
-
         const wrapper = document.createElement("section");
         wrapper.className =
           "bg-white rounded-xl shadow-sm border border-slate-100 px-4 py-3 space-y-2";
@@ -147,29 +132,31 @@
         const h2 = document.createElement("h2");
         h2.className = "text-sm font-semibold text-slate-800";
         h2.textContent = section.headline || "";
-        wrapper.appendChild(h2);
 
         const bodyDiv = document.createElement("div");
         bodyDiv.className = "text-sm text-slate-700 whitespace-pre-line";
         bodyDiv.textContent = richtextToPlainText(section.body);
-        wrapper.appendChild(bodyDiv);
 
+        wrapper.appendChild(h2);
+        wrapper.appendChild(bodyDiv);
         bodyEl.appendChild(wrapper);
       });
     }
 
-    // ========= Richtext → テキスト =========
+    // Richtext → テキスト
     function richtextToPlainText(rich) {
       if (!rich || !Array.isArray(rich.content)) return "";
       const lines = [];
+
       rich.content.forEach((node) => {
         if (node.type === "paragraph" && Array.isArray(node.content)) {
-          const line = node.content
-            .map((child) => (child.text ? child.text : ""))
+          const text = node.content
+            .map((child) => child.text || "")
             .join("");
-          if (line.trim() !== "") lines.push(line);
+          if (text.trim()) lines.push(text);
         }
       });
+
       return lines.join("\n\n");
     }
 

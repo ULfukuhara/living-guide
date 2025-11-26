@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居のしおり</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+    }
+    .meta {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    h2 {
+      margin-top: 1.8rem;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      row-gap: 4px;
+      column-gap: 12px;
+      margin: 0 0 12px;
+    }
+    dt {
+      font-weight: 600;
+      color: #555;
+    }
+    dd {
+      margin: 0;
+    }
+    .error {
+      color: #c00;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="title">物件名を読み込み中…</h1>
+
+    <div class="meta">
+      物件No：<span id="property-no"></span>
+    </div>
+
+    <section id="overview-section" style="display:none;">
+      <h2>物件概要</h2>
+      <dl>
+        <dt>物件名</dt><dd id="ov-title"></dd>
+        <dt>住所</dt><dd id="ov-address"></dd>
+        <dt>エリア</dt><dd id="ov-area"></dd>
+        <dt>築年</dt><dd id="ov-built-year"></dd>
+      </dl>
+      <div id="ov-description" style="white-space:pre-wrap;"></div>
+    </section>
+
+    <div id="error" class="error"></div>
+  </div>
+
+  <script>
+    // ===== Storyblok 設定 =====
+    const STORYBLOK_TOKEN = "ir2Hm2c38mI69te9Vr92RAtt";
+    const DEFAULT_SLUG = "demo-guide";
+
+    // ===== URLパラメータから propertyNo を取得 =====
+    const params = new URLSearchParams(window.location.search);
+    const propertyNo = params.get("propertyNo") || DEFAULT_SLUG;
+    document.getElementById("property-no").textContent = propertyNo;
+
+    // ===== Storyblok API URL =====
+    const API_URL = `https://api.storyblok.com/v2/cdn/stories/${propertyNo}?version=published&token=${STORYBLOK_TOKEN}`;
+
+    // ===== データ取得 =====
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Storyblok API エラー: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Storyblok response:", data); // ← デバッグ用
+
+        const story = data.story;
+        const content = story.content || {};
+
+        // タイトル設定
+        document.getElementById("title").textContent =
+          content.title || story.name || propertyNo;
+
+        // body 配列を確実に配列化
+        let body = content.body;
+        if (!Array.isArray(body)) {
+          body = body ? [body] : [];
+        }
+        console.log("Body blocks:", body); // ← デバッグ用
+
+        // overview を探す（component 名に overview を含むもの）
+        const overview =
+          body.find((b) => (b.component || "").toLowerCase().includes("overview")) ||
+          body[0];
+
+        if (!overview) {
+          document.getElementById("error").textContent =
+            "Overview ブロックが見つかりません。Storyblok 側の構造を確認してください。";
+          return;
+        }
+
+        // 表示 ON
+        document.getElementById("overview-section").style.display = "block";
+
+        // 各フィールド表示
+        document.getElementById("ov-title").textContent =
+          overview.title || content.title || story.name || propertyNo;
+
+        document.getElementById("ov-address").textContent =
+          overview.address || "";
+
+        document.getElementById("ov-area").textContent =
+          overview.area || "";
+
+        document.getElementById("ov-built-year").textContent =
+          overview.built_year || overview.builtYear || "";
+
+        // Description
+        const descElem = document.getElementById("ov-description");
+        if (overview.description) {
+          if (typeof overview.description === "string") {
+            descElem.textContent = overview.description;
+          } else {
+            // JSON のままでもとりあえず表示
+            descElem.textContent = JSON.stringify(overview.description, null, 2);
+          }
+        } else {
+          descElem.textContent = "";
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        document.getElementById("error").textContent =
+          "データ取得に失敗しました：" + err.message;
+      });
+  </script>
+</body>
+</html>

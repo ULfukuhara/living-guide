@@ -9,159 +9,167 @@
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-  <!-- Header -->
-  <header class="bg-white shadow-sm">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div>
-        <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
-          入居のしおりを読み込み中…
-        </h1>
-        <p id="propertyNo" class="text-xs text-slate-500"></p>
-      </div>
-      <span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-        入居のしおり
-      </span>
+  <!-- ========= Header ========= -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-4">
+      <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
+        入居のしおりを読み込み中…
+      </h1>
+      <p id="propertyNo" class="text-xs text-slate-500"></p>
     </div>
   </header>
 
-  <!-- Main -->
+  <!-- ========= Main ========= -->
   <main class="flex-1">
-    <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
-
-      <!-- 読み込み状態 -->
-      <p id="statusMessage" class="text-xs text-slate-500">
-        最新のデータを表示しています。
-      </p>
-
-      <hr class="border-slate-200" />
-
-      <!-- sections を描画 -->
-      <div id="guideBody" class="space-y-4"></div>
-
+    <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div id="guideBody" class="space-y-6"></div>
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="max-w-3xl mx-auto px-4 py-3">
-      <p class="text-[10px] text-slate-400">© ユニヴ・ライフ株式会社 管理部</p>
-    </div>
-  </footer>
-
+  <!-- ========= Storyblok JS ========= -->
   <script>
-    // ============================
-    // Storyblok 設定
-    // ============================
-    const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt";  // Preview token
-    const STORYBLOK_VERSION = "draft";                      // preview は draft 固定
+    // ======================
+    //  設定
+    // ======================
+    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt"; // Public Token（公開用）
 
-    const statusEl = document.getElementById("statusMessage");
-    const titleEl  = document.getElementById("propertyTitle");
-    const noEl     = document.getElementById("propertyNo");
-    const bodyEl   = document.getElementById("guideBody");
 
-    // ============================
-    // URL から propertyNo 取得
-    // ============================
+    // ======================
+    // URL から propertyNo を取得
+    // ======================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return (params.get("propertyNo") || "10100").trim();
+      return params.get("propertyNo")?.trim() || "";
     }
-    const propertyNo = getPropertyNoFromUrl();
-    noEl.textContent = `物件No：${propertyNo}`;
 
-    // ============================
-    // Storyblok 一覧から探す
-    // ============================
-    async function loadGuide(propertyNo) {
+    const propertyNo = getPropertyNoFromUrl();
+    document.getElementById("propertyNo").textContent = `物件 No：${propertyNo}`;
+
+
+    // ======================
+    // Storyblok から一覧を取得 → slug 完全一致で抽出
+    // ======================
+    async function loadGuide() {
       const apiUrl =
-        "https://api.storyblok.com/v2/cdn/stories" +
-        `?token=${STORYBLOK_TOKEN}` +
-        `&version=${STORYBLOK_VERSION}` +
-        "&per_page=100&page=1";
+        `https://api.storyblok.com/v2/cdn/stories?token=${STORYBLOK_TOKEN}&version=published&per_page=100&page=1`;
 
       try {
         const res = await fetch(apiUrl);
-        if (!res.ok) {
-          statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
-          bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
-          return;
-        }
+        if (!res.ok) throw new Error(`Storyblok error ${res.status}`);
 
         const data = await res.json();
-        const stories = data.stories || [];
+        const stories = data.stories;
 
         const story = stories.find(
           (s) => s.slug === propertyNo || s.full_slug === propertyNo
         );
 
         if (!story) {
-          statusEl.textContent = "入居のしおりが見つかりません。";
-          bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
+          showError("入居のしおりが見つかりませんでした。");
           return;
         }
 
-        const content = story.content || {};
+        const content = story.content;
 
+        // タイトル更新
+        const titleEl = document.getElementById("propertyTitle");
         titleEl.textContent =
           content.title || story.name || `入居のしおり（${propertyNo}）`;
 
+        // セクション描画
         renderSections(content.sections || []);
+
       } catch (err) {
-        statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
-        bodyEl.innerHTML = `<p class="text-sm text-red-600">管理会社までご連絡ください。</p>`;
+        console.error(err);
+        showError("入居のしおりの読み込みに失敗しました。");
       }
     }
 
-    // ============================
-    // section 描画
-    // ============================
+
+    // ======================
+    // Section の描画
+    // ======================
     function renderSections(sections) {
-      bodyEl.innerHTML = "";
+      const container = document.getElementById("guideBody");
+      container.innerHTML = "";
 
       if (!sections.length) {
-        bodyEl.innerHTML = `<p class="text-sm text-slate-500">内容が登録されていません。</p>`;
+        container.innerHTML =
+          `<p class="text-sm text-slate-500">入居のしおりの内容がまだ登録されていません。</p>`;
         return;
       }
 
-      sections.forEach((section) => {
+      sections.forEach((sec) => {
+        if (!sec) return;
+
         const wrapper = document.createElement("section");
-        wrapper.className =
-          "bg-white rounded-xl shadow-sm border border-slate-100 px-4 py-3 space-y-2";
+        wrapper.className = "rounded-lg bg-white p-5 shadow-sm space-y-3 border border-slate-200";
 
+        // 見出し
         const h2 = document.createElement("h2");
-        h2.className = "text-sm font-semibold text-slate-800";
-        h2.textContent = section.headline || "";
-
-        const bodyDiv = document.createElement("div");
-        bodyDiv.className = "text-sm text-slate-700 whitespace-pre-line";
-        bodyDiv.textContent = richtextToPlainText(section.body);
-
+        h2.className = "text-lg font-semibold text-slate-800 border-b border-slate-300 pb-1";
+        h2.textContent = sec.headline || "";
         wrapper.appendChild(h2);
+
+        // 本文（Richtext → HTML）
+        const bodyHTML = richtextToHtml(sec.body);
+        const bodyDiv = document.createElement("div");
+        bodyDiv.className = "prose prose-sm max-w-none text-slate-800";
+        bodyDiv.innerHTML = bodyHTML;
+
         wrapper.appendChild(bodyDiv);
-        bodyEl.appendChild(wrapper);
+        container.appendChild(wrapper);
       });
     }
 
-    // Richtext → テキスト
-    function richtextToPlainText(rich) {
+
+    // ======================
+    // Richtext → HTML（段落・改行・リンク対応）
+    // ======================
+    function richtextToHtml(rich) {
       if (!rich || !Array.isArray(rich.content)) return "";
-      const lines = [];
+
+      let html = "";
 
       rich.content.forEach((node) => {
-        if (node.type === "paragraph" && Array.isArray(node.content)) {
-          const text = node.content
-            .map((child) => child.text || "")
-            .join("");
-          if (text.trim()) lines.push(text);
+        if (node.type === "paragraph") {
+          let line = "";
+
+          (node.content || []).forEach((child) => {
+            if (child.type === "text") {
+              line += child.text.replace(/\n/g, "<br>");
+            }
+            if (child.type === "link") {
+              const href = child.attrs.href;
+              const text = child.content?.[0]?.text || href;
+              line += `<a href="${href}" class="text-blue-600 underline" target="_blank">${text}</a>`;
+            }
+          });
+
+          html += `<p>${line}</p>`;
         }
       });
 
-      return lines.join("\n\n");
+      return html;
     }
 
+
+    // ======================
+    // エラー表示
+    // ======================
+    function showError(msg) {
+      const container = document.getElementById("guideBody");
+      container.innerHTML = `
+        <p class="text-sm text-red-600">${msg}</p>
+        <p class="text-xs text-slate-500 mt-2">お手数ですが、管理会社までご連絡ください。</p>
+      `;
+    }
+
+    // ======================
     // 実行
-    loadGuide(propertyNo);
+    // ======================
+    loadGuide();
   </script>
+
 </body>
 </html>

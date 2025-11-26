@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>入居のしおり | guide.univ-life.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -25,48 +25,55 @@
 
   <!-- Main -->
   <main class="flex-1">
-    <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      <p id="statusMessage" class="text-xs text-slate-500">
-        最新のデータを読み込んでいます…
-      </p>
+    <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
+
+      <!-- 状態表示 / デバッグ -->
+      <div class="text-xs text-slate-500 space-y-1">
+        <p id="statusMessage">Storyblok からデータを読み込んでいます…</p>
+        <p id="debugUrl" class="break-all"></p>
+        <p id="debugStatus" class="break-all text-red-600"></p>
+      </div>
 
       <hr class="border-slate-200" />
 
-      <!-- Storyblok の sections を描画 -->
+      <!-- sections を描画する場所 -->
       <div id="guideBody" class="space-y-4"></div>
+
+      <!-- 生の JSON を確認したくなったとき用（小さく表示） -->
+      <pre id="debugJson" class="text-[10px] text-slate-400 whitespace-pre-wrap bg-slate-100 rounded p-2 overflow-x-auto"></pre>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-3xl mx-auto px-4 py-3">
-      <p class="text-[10px] text-slate-400">
-        © ユニヴ・ライフ株式会社 管理部
-      </p>
+      <p class="text-[10px] text-slate-400">© ユニヴ・ライフ株式会社 管理部</p>
     </div>
   </footer>
 
-  <!-- Storyblok 取得スクリプト -->
   <script>
     // ==============================
-    // 設定
+    // 設定（★ここだけ必ず確認）
     // ==============================
-    // ★ ここを「Preview（紫）」のトークンにする
+
+    // ★ Preview（紫）のトークンを入れてください
     const STORYBLOK_TOKEN   = "ir2Hm2c38mI69te9Vr92RAtt";
-    // ★ draft 固定（Preview トークンは draft 専用）
+    // ★ Preview トークンを使うので draft 固定
     const STORYBLOK_VERSION = "draft";
 
-    const statusEl   = document.getElementById("statusMessage");
-    const titleEl    = document.getElementById("propertyTitle");
-    const noEl       = document.getElementById("propertyNo");
-    const bodyEl     = document.getElementById("guideBody");
+    const statusEl = document.getElementById("statusMessage");
+    const urlEl    = document.getElementById("debugUrl");
+    const statEl   = document.getElementById("debugStatus");
+    const jsonEl   = document.getElementById("debugJson");
+    const titleEl  = document.getElementById("propertyTitle");
+    const noEl     = document.getElementById("propertyNo");
+    const bodyEl   = document.getElementById("guideBody");
 
     // ==============================
     // URL から propertyNo を取得
     // ==============================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const raw = params.get("propertyNo") || "10100"; // デフォルトを 10100 に
+      const raw = params.get("propertyNo") || "10100"; // デフォルト 10100
       return raw.toString().trim();
     }
 
@@ -77,24 +84,39 @@
     // Storyblok から Story を取得
     // ==============================
     async function loadGuide(propertyNo) {
-      const slug = propertyNo; // full_slug が "10100" なのでそのまま利用
+      const slug = propertyNo; // full_slug が "10100" なのでそのまま
 
       const apiUrl =
         "https://api.storyblok.com/v2/cdn/stories/" +
         encodeURIComponent(slug) +
         `?token=${STORYBLOK_TOKEN}&version=${STORYBLOK_VERSION}`;
 
+      urlEl.textContent = `API URL: ${apiUrl}`;
+
       try {
         const res = await fetch(apiUrl);
+        statEl.textContent = `HTTP status: ${res.status} ${res.statusText}`;
+
+        const text = await res.text();       // 生テキスト
+        jsonEl.textContent = text;           // そのまま表示（成功でもエラーでも）
+
         if (!res.ok) {
-          const text = await res.text();
-          console.error("Storyblok error:", res.status, text);
-          throw new Error(`Storyblok API error: ${res.status}`);
+          statusEl.textContent = "入居のしおりの読み込みに失敗しました。（HTTP エラー）";
+          bodyEl.innerHTML =
+            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+          return;
         }
 
-        const data    = await res.json();
-        const story   = data.story;
-        const content = story.content || {};
+        const data = JSON.parse(text);
+        const story = data.story;
+        if (!story || !story.content) {
+          statusEl.textContent = "ストーリーの内容が見つかりません。";
+          bodyEl.innerHTML =
+            '<p class="text-sm text-slate-500">入居のしおりの内容がまだ登録されていません。</p>';
+          return;
+        }
+
+        const content = story.content;
 
         // タイトル更新
         titleEl.textContent =
@@ -106,14 +128,15 @@
         statusEl.textContent = "最新のデータを表示しています。";
       } catch (err) {
         console.error(err);
-        statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
+        statusEl.textContent = "入居のしおりの読み込みに失敗しました。（JavaScript エラー）";
+        statEl.textContent += " / JS Error: " + String(err);
         bodyEl.innerHTML =
           '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
       }
     }
 
     // ==============================
-    // sections（section配列）を描画
+    // sections を描画
     // ==============================
     function renderSections(sections) {
       bodyEl.innerHTML = "";
@@ -131,18 +154,14 @@
         wrapper.className =
           "bg-white rounded-xl shadow-sm border border-slate-100 px-4 py-3 space-y-2";
 
-        // 見出し
         const h2 = document.createElement("h2");
         h2.className = "text-sm font-semibold text-slate-800";
         h2.textContent = section.headline || "";
         wrapper.appendChild(h2);
 
-        // 本文（Richtext → プレーンテキスト）
         const bodyDiv = document.createElement("div");
         bodyDiv.className = "text-sm text-slate-700 whitespace-pre-line";
-
-        const text = richtextToPlainText(section.body);
-        bodyDiv.textContent = text;
+        bodyDiv.textContent = richtextToPlainText(section.body);
         wrapper.appendChild(bodyDiv);
 
         bodyEl.appendChild(wrapper);
@@ -150,7 +169,7 @@
     }
 
     // ==============================
-    // Storyblok Richtext → プレーンテキスト
+    // Richtext → プレーンテキスト
     // ==============================
     function richtextToPlainText(rich) {
       if (!rich || !Array.isArray(rich.content)) return "";
@@ -170,9 +189,7 @@
       return lines.join("\n\n");
     }
 
-    // ==============================
     // 実行
-    // ==============================
     loadGuide(propertyNo);
   </script>
 </body>

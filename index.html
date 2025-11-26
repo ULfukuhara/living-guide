@@ -74,36 +74,97 @@
     // ==============================
     // Storyblok から「一覧」で取得し、slug 一致を探す
     // ==============================
-    async function loadGuide(propertyNo) {
-      // 一覧 API（最大 100 件まで）
-      const apiUrl =
-        "https://api.storyblok.com/v2/cdn/stories" +
-        `?token=${STORYBLOK_TOKEN}` +
-        `&version=${STORYBLOK_VERSION}` +
-        `&per_page=100&page=1`;
+    // ==============================
+// Storyblok から一覧を取得し、slug 一致を探す版
+// ==============================
+a// ==============================
+// Storyblok から一覧を取得し、slug 一致を探す版
+// ==============================
+async function loadGuide(propertyNo) {
+  // 一覧 API（最大 100 件）
+  const apiUrl =
+    "https://api.storyblok.com/v2/cdn/stories" +
+    `?token=${STORYBLOK_TOKEN}` +
+    `&version=${STORYBLOK_VERSION}` +
+    `&per_page=100&page=1`;
 
-      try {
-        const res = await fetch(apiUrl);
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Storyblok error:", res.status, text);
-          throw new Error(`Storyblok API error: ${res.status}`);
-        }
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Storyblok error:", res.status, text);
+      statusEl.textContent = "入居のしおりの読み込みに失敗しました。（HTTP エラー）";
+      bodyEl.innerHTML =
+        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+      return;
+    }
 
-        const data = await res.json();
-        const stories = data.stories || [];
+    const data = await res.json();
+    const stories = data.stories || [];
 
-        // slug または full_slug が propertyNo と一致する Story を探す
-        const story = stories.find((s) =>
-          s.slug === propertyNo || s.full_slug === propertyNo
-        );
+    // slug または full_slug が propertyNo と一致する Story を探す
+    const story = stories.find(
+      (s) => s.slug === propertyNo || s.full_slug === propertyNo
+    );
 
-        if (!story) {
-          statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
-          bodyEl.innerHTML =
-            '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
-          return;
-        }
+    if (!story) {
+      statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
+      bodyEl.innerHTML =
+        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
+      return;
+    }
+
+    const content = story.content || {};
+
+    // タイトル更新
+    titleEl.textContent =
+      content.title || story.name || `入居のしおり（${propertyNo}）`;
+
+    // sections 描画
+    renderSections(content.sections || []);
+
+    statusEl.textContent = "最新のデータを表示しています。";
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
+    bodyEl.innerHTML =
+      '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+  }
+}
+
+    const data = await res.json();
+    const stories = data.stories || [];
+
+    // slug または full_slug が propertyNo と一致する Story を探す
+    const story = stories.find(
+      (s) => s.slug === propertyNo || s.full_slug === propertyNo
+    );
+
+    if (!story) {
+      statusEl.textContent = "該当する入居のしおりが見つかりませんでした。";
+      bodyEl.innerHTML =
+        '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。（slug が見つかりません）</p>';
+      return;
+    }
+
+    const content = story.content || {};
+
+    // タイトル更新
+    titleEl.textContent =
+      content.title || story.name || `入居のしおり（${propertyNo}）`;
+
+    // sections 描画
+    renderSections(content.sections || []);
+
+    statusEl.textContent = "最新のデータを表示しています。";
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "入居のしおりの読み込みに失敗しました。";
+    bodyEl.innerHTML =
+      '<p class="text-sm text-red-600">お手数ですが、管理会社までご連絡ください。</p>';
+  }
+}
+
 
         const content = story.content || {};
 

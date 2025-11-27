@@ -12,15 +12,15 @@
   <!-- ========= Header ========= -->
   <header class="bg-white shadow-sm sticky top-0 z-10">
     <div class="max-w-3xl mx-auto px-4 py-4 space-y-1">
-      <!-- 物件名（Firestore から上書き） -->
+      <!-- 物件名 -->
       <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
         入居のしおりを読み込み中…
       </h1>
 
-      <!-- 物件No（URLのpropertyNoをそのまま表示） -->
+      <!-- 物件No -->
       <p id="propertyNo" class="text-xs text-slate-500"></p>
 
-      <!-- Firestore properties から取得する 物件名／郵便番号／住所 -->
+      <!-- 物件情報：郵便番号／住所 -->
       <div id="propertyInfo" class="text-xs text-slate-700 leading-relaxed"></div>
     </div>
   </header>
@@ -28,7 +28,6 @@
   <!-- ========= Main ========= -->
   <main class="flex-1">
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      <!-- Storyblok の sections を描画 -->
       <div id="guideBody" class="space-y-6"></div>
     </div>
   </main>
@@ -45,21 +44,31 @@
     // ======================
     // 設定
     // ======================
-    // Storyblok の Public Token（緑の公開用）
     const STORYBLOK_TOKEN   = "sdvg2FfGE4TIQ6wTLIJItQtt";
-    const STORYBLOK_VERSION = "published"; // 公開版を表示
+    const STORYBLOK_VERSION = "published";
 
     const titleEl  = document.getElementById("propertyTitle");
     const noEl     = document.getElementById("propertyNo");
     const infoEl   = document.getElementById("propertyInfo");
     const bodyEl   = document.getElementById("guideBody");
 
+    // 🔹 物件マスタ（いったんここに直書き）
+    //   将来ここを Firestore から自動生成してもOK
+    const PROPERTY_MASTER = {
+      "10100": {
+        name: "尚志ハウス",
+        postalCode: "536-0006",
+        address: "大阪府大阪市城東区野江4-4-3"
+      }
+      // 10200 以降はここに追加していくイメージ
+      // "10200": { ... }
+    };
+
     // ======================
     // URL から propertyNo を取得
     // ======================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      // なければ一旦 10100 をデフォルトに
       return (params.get("propertyNo") || "10100").trim();
     }
 
@@ -67,58 +76,34 @@
     noEl.textContent = `物件No：${propertyNo}`;
 
     // ======================
-    // Firestore から書き出した JSON を読み込み
-    //   /public/properties_for_guide.json 想定
-    //   {
-    //     "10100": {
-    //       "name": "尚志ハウス",
-    //       "postalCode": "536-0006",
-    //       "address": "大阪府大阪市城東区野江4-4-3"
-    //     },
-    //     ...
-    //   }
+    // 物件マスタを画面に反映
     // ======================
-    async function loadPropertyMaster() {
-      try {
-        const res = await fetch("/properties_for_guide.json");
-        if (!res.ok) {
-          throw new Error("物件マスタ取得エラー: " + res.status);
-        }
+    function applyPropertyInfo() {
+      const info = PROPERTY_MASTER[propertyNo];
 
-        const master = await res.json();
-        const info = master[propertyNo];
-
-        if (!info) {
-          // 物件No が JSON にない場合は、それがわかるように表示
-          infoEl.innerHTML =
-            `<span class="text-[11px] text-red-600">物件マスタに「${propertyNo}」がありません。</span>`;
-          return;
-        }
-
-        // タイトル：物件名（＋物件No）
-        if (info.name) {
-          titleEl.textContent = `${info.name}（${propertyNo}）`;
-        }
-
-        // 物件情報：郵便番号＋住所
-        const lines = [];
-        if (info.postalCode) {
-          lines.push(`〒${info.postalCode}`);
-        }
-        if (info.address) {
-          lines.push(info.address);
-        }
-        infoEl.innerHTML = lines.join("<br>");
-
-      } catch (e) {
-        console.warn("物件マスタの読み込みに失敗しました:", e);
-        infoEl.innerHTML =
-          `<span class="text-[11px] text-red-600">物件情報の読み込みに失敗しました。</span>`;
+      if (!info) {
+        // マスタに定義がなければ何もしない（Storyblok タイトルだけで表示）
+        return;
       }
+
+      // タイトル（物件名＋物件No）
+      if (info.name) {
+        titleEl.textContent = `${info.name}（${propertyNo}）`;
+      }
+
+      // 郵便番号＋住所
+      const lines = [];
+      if (info.postalCode) {
+        lines.push(`〒${info.postalCode}`);
+      }
+      if (info.address) {
+        lines.push(info.address);
+      }
+      infoEl.innerHTML = lines.join("<br>");
     }
 
     // ======================
-    // Storyblok から guide_page を取得（一覧から slug を検索）
+    // Storyblok から guide_page を取得
     // ======================
     async function loadGuideFromStoryblok() {
       const apiUrl =
@@ -136,7 +121,6 @@
         const data = await res.json();
         const stories = data.stories || [];
 
-        // slug または full_slug が propertyNo と一致するものを探す
         const story = stories.find(
           (s) => s.slug === propertyNo || s.full_slug === propertyNo
         );
@@ -148,7 +132,7 @@
 
         const content = story.content || {};
 
-        // Firestore 側でタイトルが設定されていなければ Storyblok の title を使う
+        // 物件マスタでタイトルが入っていない場合だけ Storyblok の title を使う
         if (
           !titleEl.textContent ||
           titleEl.textContent === "入居のしおりを読み込み中…"
@@ -184,13 +168,11 @@
         wrapper.className =
           "rounded-lg bg-white p-5 shadow-sm space-y-3 border border-slate-200";
 
-        // 見出し
         const h2 = document.createElement("h2");
         h2.className = "text-lg font-semibold text-slate-800 border-b border-slate-300 pb-1";
         h2.textContent = sec.headline || "";
         wrapper.appendChild(h2);
 
-        // 本文（Richtext → HTML）
         const bodyHTML = richtextToHtml(sec.body);
         const bodyDiv = document.createElement("div");
         bodyDiv.className = "prose prose-sm max-w-none text-slate-800";
@@ -202,8 +184,7 @@
     }
 
     // ======================
-    // Storyblok Richtext → HTML 変換
-    // （段落＋リンクのみ対応／必要に応じて拡張可能）
+    // Storyblok Richtext → HTML
     // ======================
     function richtextToHtml(rich) {
       if (!rich || !Array.isArray(rich.content)) return "";
@@ -247,13 +228,11 @@
     }
 
     // ======================
-    // 実行順序
-    // 1) 物件マスタ（Firestore JSON）を読み込み
-    // 2) Storyblok から本文を取得
+    // 実行
     // ======================
     (async () => {
-      await loadPropertyMaster();
-      await loadGuideFromStoryblok();
+      applyPropertyInfo();       // まず物件名／住所を反映
+      await loadGuideFromStoryblok(); // その後に Storyblok 本文を読み込み
     })();
   </script>
 </body>

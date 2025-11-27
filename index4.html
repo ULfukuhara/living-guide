@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居のしおり | guide.univ-life.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- ========= Header ========= -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-4">
+      <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
+        入居のしおりを読み込み中…
+      </h1>
+      <p id="propertyNo" class="text-xs text-slate-500"></p>
+    </div>
+  </header>
+
+  <!-- ========= Main ========= -->
+  <main class="flex-1">
+    <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div id="guideBody" class="space-y-6"></div>
+    </div>
+  </main>
+
+  <!-- ========= Storyblok JS ========= -->
+  <script>
+    // ======================
+    //  設定
+    // ======================
+    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt"; // Public Token（公開用）
+
+
+    // ======================
+    // URL から propertyNo を取得
+    // ======================
+    function getPropertyNoFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("propertyNo")?.trim() || "";
+    }
+
+    const propertyNo = getPropertyNoFromUrl();
+    document.getElementById("propertyNo").textContent = `物件 No：${propertyNo}`;
+
+
+    // ======================
+    // Storyblok から一覧を取得 → slug 完全一致で抽出
+    // ======================
+    async function loadGuide() {
+      const apiUrl =
+        `https://api.storyblok.com/v2/cdn/stories?token=${STORYBLOK_TOKEN}&version=published&per_page=100&page=1`;
+
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error(`Storyblok error ${res.status}`);
+
+        const data = await res.json();
+        const stories = data.stories;
+
+        const story = stories.find(
+          (s) => s.slug === propertyNo || s.full_slug === propertyNo
+        );
+
+        if (!story) {
+          showError("入居のしおりが見つかりませんでした。");
+          return;
+        }
+
+        const content = story.content;
+
+        // タイトル更新
+        const titleEl = document.getElementById("propertyTitle");
+        titleEl.textContent =
+          content.title || story.name || `入居のしおり（${propertyNo}）`;
+
+        // セクション描画
+        renderSections(content.sections || []);
+
+      } catch (err) {
+        console.error(err);
+        showError("入居のしおりの読み込みに失敗しました。");
+      }
+    }
+
+
+    // ======================
+    // Section の描画
+    // ======================
+    function renderSections(sections) {
+      const container = document.getElementById("guideBody");
+      container.innerHTML = "";
+
+      if (!sections.length) {
+        container.innerHTML =
+          `<p class="text-sm text-slate-500">入居のしおりの内容がまだ登録されていません。</p>`;
+        return;
+      }
+
+      sections.forEach((sec) => {
+        if (!sec) return;
+
+        const wrapper = document.createElement("section");
+        wrapper.className = "rounded-lg bg-white p-5 shadow-sm space-y-3 border border-slate-200";
+
+        // 見出し
+        const h2 = document.createElement("h2");
+        h2.className = "text-lg font-semibold text-slate-800 border-b border-slate-300 pb-1";
+        h2.textContent = sec.headline || "";
+        wrapper.appendChild(h2);
+
+        // 本文（Richtext → HTML）
+        const bodyHTML = richtextToHtml(sec.body);
+        const bodyDiv = document.createElement("div");
+        bodyDiv.className = "prose prose-sm max-w-none text-slate-800";
+        bodyDiv.innerHTML = bodyHTML;
+
+        wrapper.appendChild(bodyDiv);
+        container.appendChild(wrapper);
+      });
+    }
+
+
+    // ======================
+    // Richtext → HTML（段落・改行・リンク対応）
+    // ======================
+    function richtextToHtml(rich) {
+      if (!rich || !Array.isArray(rich.content)) return "";
+
+      let html = "";
+
+      rich.content.forEach((node) => {
+        if (node.type === "paragraph") {
+          let line = "";
+
+          (node.content || []).forEach((child) => {
+            if (child.type === "text") {
+              line += child.text.replace(/\n/g, "<br>");
+            }
+            if (child.type === "link") {
+              const href = child.attrs.href;
+              const text = child.content?.[0]?.text || href;
+              line += `<a href="${href}" class="text-blue-600 underline" target="_blank">${text}</a>`;
+            }
+          });
+
+          html += `<p>${line}</p>`;
+        }
+      });
+
+      return html;
+    }
+
+
+    // ======================
+    // エラー表示
+    // ======================
+    function showError(msg) {
+      const container = document.getElementById("guideBody");
+      container.innerHTML = `
+        <p class="text-sm text-red-600">${msg}</p>
+        <p class="text-xs text-slate-500 mt-2">お手数ですが、管理会社までご連絡ください。</p>
+      `;
+    }
+
+    // ======================
+    // 実行
+    // ======================
+    loadGuide();
+  </script>
+
+</body>
+</html>

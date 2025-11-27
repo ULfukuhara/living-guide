@@ -52,18 +52,6 @@
     const infoEl   = document.getElementById("propertyInfo");
     const bodyEl   = document.getElementById("guideBody");
 
-    // 🔹 物件マスタ（いったんここに直書き）
-    //   将来ここを Firestore から自動生成してもOK
-    const PROPERTY_MASTER = {
-      "10100": {
-        name: "尚志ハウス",
-        postalCode: "536-0006",
-        address: "大阪府大阪市城東区野江4-4-3"
-      }
-      // 10200 以降はここに追加していくイメージ
-      // "10200": { ... }
-    };
-
     // ======================
     // URL から propertyNo を取得
     // ======================
@@ -76,30 +64,44 @@
     noEl.textContent = `物件No：${propertyNo}`;
 
     // ======================
-    // 物件マスタを画面に反映
+    // properties_for_guide.json を読み込んで、物件名／住所を表示
     // ======================
-    function applyPropertyInfo() {
-      const info = PROPERTY_MASTER[propertyNo];
+    async function loadPropertyMaster() {
+      try {
+        // index.html と同じ階層にある前提（相対パス）
+        const res = await fetch("properties_for_guide.json");
+        if (!res.ok) {
+          throw new Error("物件マスタ取得エラー: " + res.status);
+        }
 
-      if (!info) {
-        // マスタに定義がなければ何もしない（Storyblok タイトルだけで表示）
-        return;
-      }
+        const master = await res.json();
+        const info = master[propertyNo];
 
-      // タイトル（物件名＋物件No）
-      if (info.name) {
-        titleEl.textContent = `${info.name}（${propertyNo}）`;
-      }
+        if (!info) {
+          infoEl.innerHTML =
+            `<span class="text-[11px] text-red-600">物件マスタに「${propertyNo}」がありません。</span>`;
+          return;
+        }
 
-      // 郵便番号＋住所
-      const lines = [];
-      if (info.postalCode) {
-        lines.push(`〒${info.postalCode}`);
+        // タイトル：物件名＋物件No
+        if (info.name) {
+          titleEl.textContent = `${info.name}（${propertyNo}）`;
+        }
+
+        const lines = [];
+        if (info.postalCode) {
+          lines.push(`〒${info.postalCode}`);
+        }
+        if (info.address) {
+          lines.push(info.address);
+        }
+        infoEl.innerHTML = lines.join("<br>");
+
+      } catch (e) {
+        console.warn("物件マスタの読み込みに失敗しました:", e);
+        infoEl.innerHTML =
+          `<span class="text-[11px] text-red-600">物件情報の読み込みに失敗しました。</span>`;
       }
-      if (info.address) {
-        lines.push(info.address);
-      }
-      infoEl.innerHTML = lines.join("<br>");
     }
 
     // ======================
@@ -132,7 +134,7 @@
 
         const content = story.content || {};
 
-        // 物件マスタでタイトルが入っていない場合だけ Storyblok の title を使う
+        // Firestore 側でタイトルが入っていない場合のみ Storyblok の title を使う
         if (
           !titleEl.textContent ||
           titleEl.textContent === "入居のしおりを読み込み中…"
@@ -231,8 +233,8 @@
     // 実行
     // ======================
     (async () => {
-      applyPropertyInfo();       // まず物件名／住所を反映
-      await loadGuideFromStoryblok(); // その後に Storyblok 本文を読み込み
+      await loadPropertyMaster();     // 物件名・住所
+      await loadGuideFromStoryblok(); // しおり本文
     })();
   </script>
 </body>

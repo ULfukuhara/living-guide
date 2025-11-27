@@ -68,26 +68,34 @@
 
     // ======================
     // Firestore から書き出した JSON を読み込み
-    //   /properties_for_guide.json
+    //   /public/properties_for_guide.json 想定
     //   {
-    //     "10100": { "name": "尚志ハウス", "postalCode": "536-0006", "address": "大阪府大阪市…" },
+    //     "10100": {
+    //       "name": "尚志ハウス",
+    //       "postalCode": "536-0006",
+    //       "address": "大阪府大阪市城東区野江4-4-3"
+    //     },
     //     ...
     //   }
     // ======================
     async function loadPropertyMaster() {
       try {
         const res = await fetch("/properties_for_guide.json");
-        if (!res.ok) throw new Error("物件マスタ取得エラー: " + res.status);
+        if (!res.ok) {
+          throw new Error("物件マスタ取得エラー: " + res.status);
+        }
 
         const master = await res.json();
         const info = master[propertyNo];
 
         if (!info) {
-          // 物件が見つからない場合は何もせず Storyblok 側のタイトルに任せる
+          // 物件No が JSON にない場合は、それがわかるように表示
+          infoEl.innerHTML =
+            `<span class="text-[11px] text-red-600">物件マスタに「${propertyNo}」がありません。</span>`;
           return;
         }
 
-        // タイトル：物件名（必須）＋物件No
+        // タイトル：物件名（＋物件No）
         if (info.name) {
           titleEl.textContent = `${info.name}（${propertyNo}）`;
         }
@@ -104,7 +112,8 @@
 
       } catch (e) {
         console.warn("物件マスタの読み込みに失敗しました:", e);
-        // 失敗しても、最低限 Storyblok のタイトルで動くようにしておく
+        infoEl.innerHTML =
+          `<span class="text-[11px] text-red-600">物件情報の読み込みに失敗しました。</span>`;
       }
     }
 
@@ -211,7 +220,9 @@
             }
             if (child.type === "link") {
               const href = child.attrs?.href || "#";
-              const text = (child.content && child.content[0] && child.content[0].text) || href;
+              const text =
+                (child.content && child.content[0] && child.content[0].text) ||
+                href;
               line += `<a href="${href}" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">${text}</a>`;
             }
           });

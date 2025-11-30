@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居のしおり | guide.univ-life.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- ========= Header ========= -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-4 space-y-1">
+      <!-- 物件名 -->
+      <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
+        入居のしおりを読み込み中…
+      </h1>
+
+      <!-- 物件No -->
+      <p id="propertyNo" class="text-xs text-slate-500"></p>
+
+      <!-- 物件情報：郵便番号／住所 -->
+      <div id="propertyInfo" class="text-xs text-slate-700 leading-relaxed"></div>
+    </div>
+  </header>
+
+  <!-- ========= Main ========= -->
+  <main class="flex-1">
+    <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <div id="guideBody" class="space-y-6"></div>
+    </div>
+  </main>
+
+  <!-- ========= Footer ========= -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-3xl mx-auto px-4 py-3">
+      <p class="text-[10px] text-slate-400">© ユニヴ・ライフ株式会社 管理部</p>
+    </div>
+  </footer>
+
+  <!-- ========= Script ========= -->
+  <script>
+    // ======================
+    // 設定
+    // ======================
+    const STORYBLOK_TOKEN   = "sdvg2FfGE4TIQ6wTLIJItQtt";
+    const STORYBLOK_VERSION = "published";
+
+    const titleEl  = document.getElementById("propertyTitle");
+    const noEl     = document.getElementById("propertyNo");
+    const infoEl   = document.getElementById("propertyInfo");
+    const bodyEl   = document.getElementById("guideBody");
+
+    // ======================
+    // URL から propertyNo を取得
+    // ======================
+    function getPropertyNoFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("propertyNo") || "10100").trim();
+    }
+
+    const propertyNo = getPropertyNoFromUrl();
+    noEl.textContent = `物件No：${propertyNo}`;
+
+    // ======================
+    // properties_for_guide.json を読み込んで、物件名／住所を表示
+    // ======================
+    async function loadPropertyMaster() {
+      try {
+        // index.html と同じ階層にある前提（相対パス）
+        const res = await fetch("properties_for_guide.json");
+        if (!res.ok) {
+          throw new Error("物件マスタ取得エラー: " + res.status);
+        }
+
+        const master = await res.json();
+        const info = master[propertyNo];
+
+        if (!info) {
+          infoEl.innerHTML =
+            `<span class="text-[11px] text-red-600">物件マスタに「${propertyNo}」がありません。</span>`;
+          return;
+        }
+
+        // タイトル：物件名＋物件No
+        if (info.name) {
+          titleEl.textContent = `${info.name}（${propertyNo}）`;
+        }
+
+        const lines = [];
+        if (info.postalCode) {
+          lines.push(`〒${info.postalCode}`);
+        }
+        if (info.address) {
+          lines.push(info.address);
+        }
+        infoEl.innerHTML = lines.join("<br>");
+
+      } catch (e) {
+        console.warn("物件マスタの読み込みに失敗しました:", e);
+        infoEl.innerHTML =
+          `<span class="text-[11px] text-red-600">物件情報の読み込みに失敗しました。</span>`;
+      }
+    }
+
+    // ======================
+    // Storyblok から guide_page を取得
+    // ======================
+    async function loadGuideFromStoryblok() {
+      const apiUrl =
+        "https://api.storyblok.com/v2/cdn/stories" +
+        `?token=${STORYBLOK_TOKEN}` +
+        `&version=${STORYBLOK_VERSION}` +
+        `&per_page=100&page=1`;
+
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) {
+          throw new Error(`Storyblok error: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        const stories = data.stories || [];
+
+        const story = stories.find(
+          (s) => s.slug === propertyNo || s.full_slug === propertyNo
+        );
+
+        if (!story) {
+          showError("該当する入居のしおりが見つかりませんでした。");
+          return;
+        }
+
+        const content = story.content || {};
+
+        // Firestore 側でタイトルが入っていない場合のみ Storyblok の title を使う
+        if (
+          !titleEl.textContent ||
+          titleEl.textContent === "入居のしおりを読み込み中…"
+        ) {
+          titleEl.textContent =
+            content.title || story.name || `入居のしおり（${propertyNo}）`;
+        }
+
+        renderSections(content.sections || []);
+
+      } catch (err) {
+        console.error(err);
+        showError("入居のしおりの読み込みに失敗しました。");
+      }
+    }
+
+    // ======================
+    // sections を描画
+    // ======================
+    function renderSections(sections) {
+      bodyEl.innerHTML = "";
+
+      if (!sections || !sections.length) {
+        bodyEl.innerHTML =
+          '<p class="text-sm text-slate-500">入居のしおりの内容がまだ登録されていません。</p>';
+        return;
+      }
+
+      sections.forEach((sec) => {
+        if (!sec) return;
+
+        const wrapper = document.createElement("section");
+        wrapper.className =
+          "rounded-lg bg-white p-5 shadow-sm space-y-3 border border-slate-200";
+
+        const h2 = document.createElement("h2");
+        h2.className = "text-lg font-semibold text-slate-800 border-b border-slate-300 pb-1";
+        h2.textContent = sec.headline || "";
+        wrapper.appendChild(h2);
+
+        const bodyHTML = richtextToHtml(sec.body);
+        const bodyDiv = document.createElement("div");
+        bodyDiv.className = "prose prose-sm max-w-none text-slate-800";
+        bodyDiv.innerHTML = bodyHTML;
+
+        wrapper.appendChild(bodyDiv);
+        bodyEl.appendChild(wrapper);
+      });
+    }
+
+    // ======================
+    // Storyblok Richtext → HTML
+    // ======================
+    function richtextToHtml(rich) {
+      if (!rich || !Array.isArray(rich.content)) return "";
+
+      let html = "";
+
+      rich.content.forEach((node) => {
+        if (node.type === "paragraph") {
+          let line = "";
+
+          (node.content || []).forEach((child) => {
+            if (child.type === "text") {
+              line += child.text.replace(/\n/g, "<br>");
+            }
+            if (child.type === "link") {
+              const href = child.attrs?.href || "#";
+              const text =
+                (child.content && child.content[0] && child.content[0].text) ||
+                href;
+              line += `<a href="${href}" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            }
+          });
+
+          html += `<p>${line}</p>`;
+        }
+      });
+
+      return html;
+    }
+
+    // ======================
+    // エラー表示
+    // ======================
+    function showError(message) {
+      bodyEl.innerHTML = `
+        <p class="text-sm text-red-600">${message}</p>
+        <p class="text-xs text-slate-500 mt-2">
+          お手数ですが、管理会社までご連絡ください。
+        </p>
+      `;
+    }
+
+    // ======================
+    // 実行
+    // ======================
+    (async () => {
+      await loadPropertyMaster();     // 物件名・住所
+      await loadGuideFromStoryblok(); // しおり本文
+    })();
+  </script>
+</body>
+</html>

@@ -4,245 +4,411 @@
   <meta charset="UTF-8" />
   <title>入居のしおり | guide.univ-life.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white shadow-sm sticky top-0 z-10">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div>
-        <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
-          物件名を読み込み中…
-        </h1>
-        <p id="propertyMeta" class="text-xs text-slate-500">
-          物件情報を取得しています…
-        </p>
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+          UL
+        </span>
+        <div>
+          <p class="text-xs text-slate-500">UniLife 入居者専用</p>
+          <h1 class="text-base sm:text-lg font-semibold text-slate-800">入居のしおり</h1>
+        </div>
       </div>
-      <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-        入居のしおり
+      <span class="hidden sm:inline-flex text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+        スマホでいつでも確認できます
       </span>
     </div>
   </header>
 
   <!-- Main -->
   <main class="flex-1">
-    <div class="max-w-3xl mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
-      <!-- ローディング -->
-      <div id="loading" class="mb-4">
-        <p class="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
-          最新のデータを読み込み中です…
+      <!-- 物件情報カード -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <p id="propertyNo" class="text-[11px] uppercase tracking-wide text-slate-400">
+              物件No. P0001
+            </p>
+            <h2 id="propertyTitle" class="text-xl sm:text-2xl font-semibold text-slate-900">
+              ソフィア武庫川（サンプル）
+            </h2>
+            <p id="propertyAddress" class="text-xs sm:text-sm text-slate-500 mt-1">
+              兵庫県西宮市〇〇町1-2-3
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-[11px]">
+            <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Wi-Fi無料</span>
+            <span class="px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">オートロック</span>
+            <span class="px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">宅配BOXあり</span>
+          </div>
+        </div>
+
+        <!-- クイック操作 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+          <a href="#trouble" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-rose-50 text-rose-700 text-sm font-medium border border-rose-100">
+            <span class="text-lg">⚠️</span>
+            <span>トラブル時の連絡先</span>
+          </a>
+          <a href="#garbage" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-sm font-medium border border-emerald-100">
+            <span class="text-lg">🗑</span>
+            <span>ごみの出し方</span>
+          </a>
+          <a href="#internet" class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-sky-50 text-sky-800 text-sm font-medium border border-sky-100">
+            <span class="text-lg">🌐</span>
+            <span>インターネット</span>
+          </a>
+        </div>
+
+        <p class="text-[11px] text-slate-400 mt-1">
+          ※ 内容は物件ごとに異なります。最新情報は管理会社からの連絡もあわせてご確認ください。
         </p>
-      </div>
+      </section>
 
-      <!-- お知らせ -->
-      <div id="notice" class="mb-4 hidden">
-        <p id="noticeText"
-          class="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2"></p>
-      </div>
+      <!-- タブナビゲーション -->
+      <section>
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold text-slate-500 tracking-wide">
+            生活のルール・設備の使い方
+          </h3>
+          <span class="text-[11px] text-slate-400 hidden sm:inline">タブを切り替えて確認してください</span>
+        </div>
 
-      <!-- セクション -->
-      <div id="sectionsContainer" class="space-y-4"></div>
+        <div class="relative">
+          <div class="flex gap-2 overflow-x-auto pb-1 text-sm" id="tabNav">
+            <!-- data-tab の値とパネルの data-tab-panel をそろえる -->
+            <button data-tab="garbage" class="tab-btn px-3 py-1.5 rounded-full bg-slate-900 text-white whitespace-nowrap text-xs sm:text-sm">
+              ごみ
+            </button>
+            <button data-tab="noise" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              騒音
+            </button>
+            <button data-tab="equipment" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              室内設備
+            </button>
+            <button data-tab="internet" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              インターネット
+            </button>
+            <button data-tab="parking" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              駐輪・駐車
+            </button>
+            <button data-tab="common" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              共用部
+            </button>
+            <button data-tab="pet" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              ペット
+            </button>
+            <button data-tab="cancel" class="tab-btn px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap text-xs sm:text-sm">
+              解約
+            </button>
+          </div>
+        </div>
+      </section>
 
-      <p class="mt-8 text-[11px] text-slate-400 text-right">
-        ※ 記載内容は予告なく変更される場合があります。最新情報は管理会社までお問い合わせください。
-      </p>
+      <!-- タブパネル：ごみ -->
+      <section id="garbage" data-tab-panel="garbage" class="tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🗑 ごみの出し方
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          ごみの収集曜日や分別方法は自治体・物件により異なります。この物件のルールは以下をご確認ください。
+          <span class="font-semibold text-emerald-700">（ここにFirestoreの値を差し込み）</span>
+        </p>
+
+        <!-- details を使った簡易アコーディオン -->
+        <div class="space-y-2">
+          <details class="group rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <summary class="flex items-center justify-between cursor-pointer text-sm font-medium text-slate-800">
+              <span>可燃ごみ</span>
+              <span class="text-[11px] text-emerald-700 ml-2">例：月・木（朝8:00まで）</span>
+            </summary>
+            <div class="mt-2 pl-1 text-xs sm:text-sm text-slate-600 space-y-1.5">
+              <p>・前日の夜からの持ち出しはご遠慮ください。</p>
+              <p>・台所ごみは水気をよく切ってから袋に入れてください。</p>
+              <p class="text-[11px] text-slate-400">※ 具体的な曜日・時間はFirestoreのデータから表示予定</p>
+            </div>
+          </details>
+
+          <details class="group rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <summary class="flex items-center justify-between cursor-pointer text-sm font-medium text-slate-800">
+              <span>資源ごみ・リサイクル</span>
+              <span class="text-[11px] text-sky-700 ml-2">例：第2・第4金曜</span>
+            </summary>
+            <div class="mt-2 pl-1 text-xs sm:text-sm text-slate-600 space-y-1.5">
+              <p>・びん・かん・ペットボトルは必ず洗ってから指定袋へ入れてください。</p>
+              <p>・ダンボールはひもで十字にしばり、指定場所にまとめて出してください。</p>
+            </div>
+          </details>
+
+          <details class="group rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <summary class="flex items-center justify-between cursor-pointer text-sm font-medium text-slate-800">
+              <span>粗大ごみ</span>
+              <span class="text-[11px] text-amber-700 ml-2">事前申込が必要</span>
+            </summary>
+            <div class="mt-2 pl-1 text-xs sm:text-sm text-slate-600 space-y-1.5">
+              <p>・粗大ごみは勝手にごみ置場へ出さないでください。</p>
+              <p>・自治体の粗大ごみ受付センターへ事前に申込のうえ、指定方法で出してください。</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-[13px]">
+          <p class="text-slate-500">
+            ごみ置場の場所は、<span class="font-medium text-slate-700">物件案内図</span>または
+            <span class="font-medium text-slate-700">入居時の資料</span>をご確認ください。
+          </p>
+          <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-900 text-white text-[11px]">
+            自治体のごみ情報ページへ
+            <span>↗</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- タブパネル：騒音 -->
+      <section data-tab-panel="noise" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🔊 騒音について
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          共同住宅では、生活音を完全になくすことはできません。お互いに配慮し、迷惑にならない範囲で生活いただくことが大切です。
+        </p>
+
+        <ul class="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
+          <li>夜間（目安：22時〜翌朝7時）の洗濯機・掃除機・楽器演奏はお控えください。</li>
+          <li>ドアの開閉や階段の上り下りは静かに行い、スリッパを引きずらないようご注意ください。</li>
+          <li>テレビ・音楽は窓を閉め、隣戸に聞こえない程度の音量でご利用ください。</li>
+        </ul>
+
+        <details class="group rounded-xl border border-rose-100 bg-rose-50/60 px-3 py-2">
+          <summary class="cursor-pointer text-sm font-semibold text-rose-700">
+            近隣の生活音が気になる場合は…
+          </summary>
+          <div class="mt-2 text-xs sm:text-sm text-slate-700 space-y-1.5">
+            <p>・大きなトラブルを避けるため、原則として直接の注意はお控えください。</p>
+            <p>・日時や状況をメモしたうえで、管理会社までご相談ください。</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- タブパネル：室内設備 -->
+      <section data-tab-panel="equipment" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🏠 室内設備の使い方
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          お部屋の設備は、正しい方法でご利用いただくことで、故障やトラブルを防ぐことができます。
+        </p>
+
+        <details class="group rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+          <summary class="cursor-pointer text-sm font-medium text-slate-800 flex items-center justify-between">
+            <span>エアコン</span>
+            <span class="text-[11px] text-slate-400">フィルター清掃のお願い</span>
+          </summary>
+          <div class="mt-2 text-xs sm:text-sm text-slate-600 space-y-1.5">
+            <p>・フィルターは月1回を目安に掃除してください。</p>
+            <p>・冷暖房が効きにくい場合も、まずフィルターの汚れをご確認ください。</p>
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+          <summary class="cursor-pointer text-sm font-medium text-slate-800">
+            給湯器・お湯が出ないとき
+          </summary>
+          <div class="mt-2 text-xs sm:text-sm text-slate-600 space-y-1.5">
+            <ol class="list-decimal pl-5 space-y-1">
+              <li>ガスの元栓が開いているか確認する</li>
+              <li>給湯器の電源が入っているか確認する</li>
+              <li>ブレーカーが落ちていないか確認する</li>
+            </ol>
+            <p class="text-[11px] text-slate-400">※ それでも改善しない場合は管理会社までご連絡ください。</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- タブパネル：インターネット -->
+      <section id="internet" data-tab-panel="internet" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🌐 インターネットのご利用
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          この物件のインターネットサービス内容は、下記のとおりです。
+          <span class="font-semibold text-emerald-700">（サービス名や問い合わせ先はFirestoreから差し込み）</span>
+        </p>
+
+        <ul class="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
+          <li>動画視聴やオンラインゲームなどで回線が混雑する場合があります。他の入居者様へのご配慮をお願いいたします。</li>
+          <li>違法ダウンロードや著作権侵害行為は禁止されています。</li>
+        </ul>
+      </section>
+
+      <!-- タブパネル：駐輪・駐車 -->
+      <section data-tab-panel="parking" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🚲 駐輪場・駐車場
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          無断駐輪・無断駐車は他の入居者様のご迷惑となるため、必ず所定の手続きのうえご利用ください。
+        </p>
+      </section>
+
+      <!-- タブパネル：共用部 -->
+      <section data-tab-panel="common" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🏢 共用部のご利用
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          廊下・階段・エレベーターなどの共用部は、すべての入居者様が利用するスペースです。
+        </p>
+      </section>
+
+      <!-- タブパネル：ペット -->
+      <section data-tab-panel="pet" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          🐶 ペットの飼育
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          この物件は <span class="font-semibold text-rose-700">原則ペット不可 / 条件付き可</span> など、
+          物件ごとにルールが異なります。契約内容をご確認ください。
+        </p>
+      </section>
+
+      <!-- タブパネル：解約 -->
+      <section data-tab-panel="cancel" class="tab-panel hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          📤 解約・退去の流れ
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600">
+          解約の申し出は、通常 <span class="font-semibold">1か月前</span> までに書面または専用フォームでの手続きが必要です。
+        </p>
+        <ol class="list-decimal pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
+          <li>解約申込（マイページまたは書面）</li>
+          <li>退去立会日時の調整</li>
+          <li>鍵の返却・室内確認</li>
+          <li>原状回復費用の精算</li>
+        </ol>
+      </section>
+
+      <!-- 困ったときの連絡先 -->
+      <section id="trouble" class="bg-slate-900 text-slate-50 rounded-2xl p-4 sm:p-5 space-y-3">
+        <h3 class="text-base sm:text-lg font-semibold flex items-center gap-2">
+          ⚠️ 困ったときは
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-100">
+          設備の故障・水漏れ・鍵のトラブルなど、緊急時は下記までご連絡ください。
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div class="rounded-xl bg-slate-800/60 p-3 space-y-1.5">
+            <p class="text-[11px] text-slate-400">管理会社（営業時間）</p>
+            <p class="font-semibold text-slate-50">ユニヴ・ライフ 管理部</p>
+            <a href="tel:0120107001" class="inline-flex items-center gap-2 mt-1 px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-medium">
+              0120-107-001 に電話する
+            </a>
+          </div>
+          <div class="rounded-xl bg-slate-800/60 p-3 space-y-1.5">
+            <p class="text-[11px] text-slate-400">夜間・休日のトラブル</p>
+            <p class="font-semibold text-slate-50">夜間コールセンター</p>
+            <a href="tel:0120000000" class="inline-flex items-center gap-2 mt-1 px-3 py-1.5 rounded-full bg-rose-500 text-white text-xs font-medium">
+              0120-000-000 に電話する
+            </a>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400">
+          ※ 火災・ガス漏れなど危険を伴う場合は、まずは消防・警察・ガス会社などへ通報してください。
+        </p>
+      </section>
+
     </div>
   </main>
 
-  <!-- Firebase + Firestore ロジック -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs,
-    } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <p class="text-[11px] text-slate-400">
+        © UniLife / 入居のしおりデモUI
+      </p>
+      <p class="text-[11px] text-slate-400">
+        内容は予告なく変更される場合があります。
+      </p>
+    </div>
+  </footer>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
-      authDomain: "univlife-kanri.firebaseapp.com",
-      projectId: "univlife-kanri",
-      storageBucket: "univlife-kanri.firebasestorage.app",
-      messagingSenderId: "405011982427",
-      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
-      measurementId: "G-DXMR0VL972"
-    };
+  <!-- JS: タブ切り替え ＋ URLパラメータ(propertyNo)の読み取り（ダミー） -->
+  <script>
+    // タブ切り替え
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
 
-    function flagOn(v) {
-      return v === true || v === "TRUE" || v === "true" || v === 1 || v === "1";
-    }
+        tabButtons.forEach((b) =>
+          b.classList.toggle(
+            "bg-slate-900",
+            b === btn
+          )
+        );
+        tabButtons.forEach((b) =>
+          b.classList.toggle(
+            "text-white",
+            b === btn
+          )
+        );
+        tabButtons.forEach((b) =>
+          b.classList.toggle(
+            "bg-slate-100",
+            b !== btn
+          )
+        );
+        tabButtons.forEach((b) =>
+          b.classList.toggle(
+            "text-slate-700",
+            b !== btn
+          )
+        );
 
-    function getSlug() {
-      let path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-      if (path) return path;
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle(
+            "hidden",
+            panel.dataset.tabPanel !== target
+          );
+        });
 
+        // スクロールしてパネルを画面内に
+        const rect = tabPanels[0].getBoundingClientRect();
+        if (window.scrollY + rect.top > window.scrollY + 80) {
+          window.scrollTo({
+            top: window.scrollY + rect.top - 80,
+            behavior: "smooth",
+          });
+        }
+      });
+    });
+
+    // URLから propertyNo を取得して表示（ダミー処理）
+    (function setPropertyFromQuery() {
       const params = new URLSearchParams(window.location.search);
-      const fromQuery = params.get("propertyNo");
-      if (fromQuery) return fromQuery;
+      const propertyNo = params.get("propertyNo");
+      if (!propertyNo) return;
 
-      return "10100";
-    }
-
-    async function loadPropertyBySlug(slug) {
-      const colRef = collection(db, "properties_shiori");
-      const q = query(colRef, where("shiori_slug", "==", slug));
-      const snap = await getDocs(q);
-      if (snap.empty) return null;
-      const doc = snap.docs[0];
-      return { doc_id: doc.id, ...doc.data() };
-    }
-
-    async function loadGuidesMaster() {
-      const colRef = collection(db, "guides_master");
-      const snap = await getDocs(colRef);
-      const guides = {};
-      snap.forEach(doc => {
-        const data = doc.data();
-        const key = data.section_key || doc.id;
-        guides[key] = data;
-      });
-      return guides;
-    }
-
-    const SECTION_DEFS = [
-      { key: "key",            title: "鍵" },
-      { key: "mailbox",        title: "メールBOX" },
-      { key: "delivery_box",   title: "宅配ボックス" },
-      { key: "bicycle_space",  title: "自転車区画" },
-      { key: "room_equipment", title: "室内設備" },
-      { key: "moving",         title: "引っ越し" },
-      { key: "electricity",    title: "電気" },
-      { key: "gas",            title: "ガス" },
-      { key: "water",          title: "水道" },
-      { key: "internet",       title: "インターネット" },
-      { key: "trash",          title: "ゴミ" },
-      { key: "common_area",    title: "共用部の使用" },
-      { key: "pets",           title: "ペットの飼育" },
-      { key: "toilet",         title: "トイレの使用" },
-      { key: "noise",          title: "騒音" },
-      { key: "drainage",       title: "排水" },
-      { key: "ventilation",    title: "換気" },
-      { key: "heater",         title: "暖房器具" },
-      { key: "bike_parking",   title: "駐輪場" },
-      { key: "car_parking",    title: "駐車場" },
-      { key: "sales",          title: "訪問販売" },
-      { key: "expenses",       title: "入居中の費用負担" },
-      { key: "cancellation",   title: "解約" },
-    ];
-
-    function renderSections(propertyData, guidesMaster) {
-      const container = document.getElementById("sectionsContainer");
-      container.innerHTML = "";
-
-      SECTION_DEFS.forEach(section => {
-        if (!flagOn(propertyData[section.key])) return;
-
-        const guide = guidesMaster[section.key] || {};
-        const bodies = guide.bodies || {};
-
-        const parts = [];
-        if (bodies.base) {
-          parts.push(bodies.base);
-        }
-
-        const variantField = section.key + "_variant";
-        const variantKey = propertyData[variantField];
-
-        if (variantKey && bodies[variantKey]) {
-          parts.push(bodies[variantKey]);
-        }
-
-        const bodyHtml = parts.length > 0
-          ? parts.join("<br><br>")
-          : "この項目の説明文は現在準備中です。";
-
-        const sec = document.createElement("section");
-        sec.className =
-          "bg-white rounded-xl shadow-sm border border-slate-100 px-4 py-3";
-        sec.id = section.key;
-
-        sec.innerHTML = `
-          <h2 class="text-base font-semibold text-slate-800 mb-1">${section.title}</h2>
-          <div class="text-sm text-slate-700 leading-relaxed">
-            ${bodyHtml}
-          </div>
-        `;
-
-        container.appendChild(sec);
-      });
-
-      if (propertyData.special_note) {
-        const sec = document.createElement("section");
-        sec.className =
-          "bg-amber-50 rounded-xl border border-amber-100 px-4 py-3";
-        sec.id = "special_note";
-        sec.innerHTML = `
-          <h2 class="text-base font-semibold text-amber-800 mb-1">特記事項</h2>
-          <div class="text-sm text-amber-900 leading-relaxed">
-            ${propertyData.special_note}
-          </div>
-        `;
-        container.appendChild(sec);
+      const propertyNoEl = document.getElementById("propertyNo");
+      if (propertyNoEl) {
+        propertyNoEl.textContent = `物件No. ${propertyNo}`;
       }
-    }
 
-    async function init() {
-      const slug = getSlug();
-
-      const titleEl = document.getElementById("propertyTitle");
-      const metaEl = document.getElementById("propertyMeta");
-      const noticeEl = document.getElementById("notice");
-      const noticeTextEl = document.getElementById("noticeText");
-      const loadingEl = document.getElementById("loading");
-
-      try {
-        const [propertyData, guidesMaster] = await Promise.all([
-          loadPropertyBySlug(slug),
-          loadGuidesMaster(),
-        ]);
-
-        loadingEl.classList.add("hidden");
-
-        if (!propertyData) {
-          titleEl.textContent = "物件が見つかりません";
-          metaEl.textContent = `指定された物件番号（slug）: ${slug}`;
-          noticeEl.classList.remove("hidden");
-          noticeTextEl.textContent = "URL の物件番号が正しいかご確認ください。";
-          return;
-        }
-
-        titleEl.textContent =
-          propertyData.canonicalName || propertyData.propertyNo || slug;
-        metaEl.textContent =
-          `物件No: ${propertyData.propertyNo || "-"} ／ ${propertyData.address || ""}`;
-
-        if (!flagOn(propertyData.shiori_enabled)) {
-          noticeEl.classList.remove("hidden");
-          noticeTextEl.textContent =
-            "この物件の「入居のしおり」は現在公開されていません。";
-          return;
-        }
-
-        renderSections(propertyData, guidesMaster);
-      } catch (err) {
-        console.error(err);
-        loadingEl.classList.add("hidden");
-        titleEl.textContent = "読み込みエラー";
-        metaEl.textContent = "";
-        noticeEl.classList.remove("hidden");
-        noticeTextEl.textContent =
-          "データの読み込みに失敗しました。時間をおいて再度お試しください。";
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
+      // ここで Firestore や Storyblok から物件情報を取得して
+      // propertyTitle / propertyAddress / バッジなどを書き換える想定です。
+    })();
   </script>
 </body>
 </html>

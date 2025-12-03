@@ -82,31 +82,32 @@
      * Storyblok API（slug揺れ・draft対応の強化版）
      * --------------------------------------------------------- */
     async function fetchGuideStory(propertyNo) {
-      const base = "https://api.storyblok.com/v2/cdn/stories";
+  const base = "https://api.storyblok.com/v2/cdn/stories";
 
-      // ① slug 完全一致（draft読み）
-      const urlDirect =
-        `${base}/${encodeURIComponent(propertyNo)}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=draft`;
+  // ① slug 完全一致（published）
+  const urlDirect =
+    `${base}/${encodeURIComponent(propertyNo)}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published`;
 
-      let res = await fetch(urlDirect);
-      if (res.ok) {
-        const data = await res.json();
-        return data.story;
-      }
+  let res = await fetch(urlDirect);
+  if (res.ok) {
+    const data = await res.json();
+    return data.story;
+  }
 
-      // ② slug 前方一致検索（10100-xxxx のようなケース）
-      const urlList =
-        `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=draft&starts_with=${encodeURIComponent(propertyNo)}`;
+  // ② slug 前方一致検索（10100-◯◯◯ など）
+  const urlList =
+    `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published&starts_with=${encodeURIComponent(propertyNo)}`;
 
-      res = await fetch(urlList);
-      if (!res.ok) throw new Error("Storyblok API Error: " + res.status);
+  res = await fetch(urlList);
+  if (!res.ok) throw new Error("Storyblok API Error: " + res.status);
 
-      const data = await res.json();
-      const stories = data.stories || [];
-      if (!stories.length) throw new Error("Story not found for: " + propertyNo);
+  const data = await res.json();
+  const stories = data.stories || [];
+  if (!stories.length) throw new Error("Story not found for: " + propertyNo);
 
-      return stories[0];
-    }
+  return stories[0];
+}
+
 
     /* ---------------------------------------------------------
      * Richtext 簡易レンダラー

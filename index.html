@@ -22,11 +22,13 @@
   <header class="bg-white shadow-sm sticky top-0 z-20">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">UL</span>
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+          UL
+        </span>
         <div>
-          <p class="text-xs text-slate-500">ユニヴ・ライフ 入居者専用</p>
+          <p class="text-xs text-slate-500">UNIV LIFE 入居者専用</p>
           <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
-            物件名を読み込み中...
+            物件名を読み込み中…
           </h1>
         </div>
       </div>
@@ -55,111 +57,273 @@
   <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
-      <p>© UniLife</p>
-      <p>Storyblok + Firestore Web Guide</p>
+      <p>© UNIV LIFE</p>
+      <p>Storyblok + Firestore Living Guide</p>
     </div>
   </footer>
 
   <!-- ======================================================= -->
-  <!-- Storyblok API ロジック（最新版 / 安定動作版） -->
+  <!-- JS: Storyblok + Firestore 連携（module）                -->
   <!-- ======================================================= -->
-  <script>
-    /* ------------------------------------------
-     * 設定
-     * ------------------------------------------ */
-    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // ← あなたのPublic Token
+  <script type="module">
+    // ==============================
+    // 設定
+    // ==============================
+    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // あなたの Public Token
 
+    // ★ ここをあなたの Firebase 設定に置き換えてください ★
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "univlife-kanri",          // ← プロジェクトID
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID",
+    };
+    // ------------------------------
+
+
+    // Firestore にマッピングする Section キー一覧
+    const SECTION_KEYS = [
+      "key",
+      "mailbox",
+      "delivery_box",
+      "bicycle_space",
+      "room_equipment",
+      "special_note",
+      "moving",
+      "electricity",
+      "gas",
+      "water",
+      "internet",
+      "trash",
+      "common_area",
+      "pets",
+      "toilet",
+      "noise",
+      "drainage",
+      "ventilation",
+      "heater",
+      "bike_parking",
+      "car_parking",
+      "sales",
+      "expenses",
+      "cancellation",
+    ];
+
+    // ==============================
+    // Firebase 初期化
+    // ==============================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      getDocs,
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      console.log("Firestore 初期化 OK");
+    } catch (e) {
+      console.error("Firestore 初期化に失敗:", e);
+      db = null; // Firestore なしで Storyblok のみ動作
+    }
+
+    // ==============================
+    // 共通ユーティリティ
+    // ==============================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get("propertyNo") || "";
     }
 
-    /* ------------------------------------------
-     * Storyblok API（published のみ取得）
-     * ------------------------------------------ */
-    async function fetchGuideStory(propertyNo) {
+    function escapeHtml(str) {
+      return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // ==============================
+    // Storyblok API
+    // ==============================
+    async function fetchGuideStoryBySlug(slug) {
       const base = "https://api.storyblok.com/v2/cdn/stories";
 
-      // ① 完全一致 (published)
-      const urlDirect =
-        `${base}/${encodeURIComponent(propertyNo)}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published`;
+      // ① 完全一致
+      let url = `${base}/${encodeURIComponent(slug)}?token=${encodeURIComponent(
+        STORYBLOK_TOKEN
+      )}&version=published`;
 
-      let res = await fetch(urlDirect);
+      let res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         return data.story;
       }
 
-      // ② 前方一致検索（10100-xxxx など）
-      const urlList =
-        `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published&starts_with=${encodeURIComponent(propertyNo)}`;
+      // ② 前方一致
+      url = `${base}?token=${encodeURIComponent(
+        STORYBLOK_TOKEN
+      )}&version=published&starts_with=${encodeURIComponent(slug)}`;
 
-      res = await fetch(urlList);
-      const data = await res.json();
-
-      if (!data.stories || data.stories.length === 0) {
-        throw new Error("Story not found");
+      res = await fetch(url);
+      if (!res.ok) {
+        throw new Error("Storyblok API Error: " + res.status);
       }
-
+      const data = await res.json();
+      if (!data.stories || data.stories.length === 0) {
+        throw new Error("Story not found for slug=" + slug);
+      }
       return data.stories[0];
     }
 
-    /* ------------------------------------------
-     * Richtext レンダリング
-     * ------------------------------------------ */
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
+    // ==============================
+    // Firestore 読み取り
+    // ==============================
+    async function fetchPropertyConfig(propertyNo) {
+      if (!db) return null;
+      if (!propertyNo) return null;
+
+      const ref = doc(db, "properties_shiori", propertyNo);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        console.warn("properties_shiori 未登録:", propertyNo);
+        return null;
+      }
+      return snap.data();
     }
 
-    function renderTextNode(node) {
-      if (!node) return "";
-      if (node.type === "text") {
-        let text = escapeHtml(node.text || "");
-        if (node.marks) {
-          node.marks.forEach((m) => {
-            if (m.type === "bold") text = `<strong>${text}</strong>`;
-            if (m.type === "italic") text = `<em>${text}</em>`;
-            if (m.type === "link") text = `<a href="${m.attrs.href}" class="text-sky-600 underline" target="_blank">${text}</a>`;
-          });
-        }
-        return text;
-      }
-      if (node.type === "hard_break") return "<br />";
+    async function fetchGuidesMasterRaw() {
+      if (!db) return [];
+      const colRef = collection(db, "guides_master_raw");
+      const snap = await getDocs(colRef);
+      const list = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        list.push({
+          section_key: data.section_key || "",
+          variant_key: data.variant_key || "base",
+          body_text: data.body_text || "",
+        });
+      });
+      return list;
+    }
+
+    // Firestore フラグを boolean に
+    function buildSectionFlags(propData) {
+      if (!propData) return null;
+
+      const flags = {};
+      SECTION_KEYS.forEach((key) => {
+        const v = propData[key];
+        // true / 1 / "TRUE" / "true" を true と判定
+        const b =
+          v === true ||
+          v === 1 ||
+          v === "1" ||
+          (typeof v === "string" && v.toLowerCase() === "true");
+        flags[key] = b;
+      });
+      return flags;
+    }
+
+    // variant に応じて本文を選ぶ
+    function pickBodyText(masterList, sectionKey, variantKey) {
+      if (!masterList || masterList.length === 0) return "";
+
+      // 1. variantKey 指定
+      let hit = masterList.find(
+        (row) =>
+          row.section_key === sectionKey && row.variant_key === variantKey
+      );
+      if (hit && hit.body_text) return hit.body_text;
+
+      // 2. base にフォールバック
+      hit = masterList.find(
+        (row) =>
+          row.section_key === sectionKey && row.variant_key === "base"
+      );
+      if (hit && hit.body_text) return hit.body_text;
+
       return "";
     }
 
-    function renderRichText(node) {
-      if (!node || !node.content) return "";
-      return node.content.map((c) => {
-        switch (c.type) {
-          case "paragraph":
-            return `<p>${(c.content || []).map(renderTextNode).join("")}</p>`;
-          case "bullet_list":
-            return `<ul>${c.content.map(li => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`).join("")}</ul>`;
-          case "ordered_list":
-            return `<ol>${c.content.map(li => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`).join("")}</ol>`;
-          default:
-            return "";
-        }
-      }).join("");
+    // プレーンテキスト（body_text）を簡易HTMLに
+    function renderPlainTextAsHtml(text) {
+      if (!text) return "";
+      const escaped = escapeHtml(text);
+      // URL っぽいところをリンク化（雑に http から空白まで）
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const withLinks = escaped.replace(
+        urlRegex,
+        '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
+      );
+      // 改行 → <br>
+      return withLinks.replace(/\r?\n/g, "<br />");
     }
 
-    /* ------------------------------------------
-     * ページ描画
-     * ------------------------------------------ */
-    function renderGuidePage(story) {
+    // Storyblok Richtext（保険として残す）
+    function renderRichText(node) {
+      if (!node || !node.content) return "";
+      return node.content
+        .map((c) => {
+          switch (c.type) {
+            case "paragraph":
+              return `<p>${(c.content || [])
+                .map((n) => {
+                  if (n.type === "text") {
+                    let t = escapeHtml(n.text || "");
+                    if (n.marks) {
+                      n.marks.forEach((m) => {
+                        if (m.type === "bold") t = `<strong>${t}</strong>`;
+                        if (m.type === "italic") t = `<em>${t}</em>`;
+                      });
+                    }
+                    return t;
+                  }
+                  if (n.type === "hard_break") return "<br />";
+                  return "";
+                })
+                .join("")}</p>`;
+            default:
+              return "";
+          }
+        })
+        .join("");
+    }
+
+    // ==============================
+    // ページ描画
+    // ==============================
+    function renderGuidePage(story, options) {
+      const { propertyData, sectionFlags, masterList, variantKey } = options;
+
       const content = story.content || {};
       const sections = content.sections || [];
 
+      // タイトル
       document.getElementById("propertyTitle").textContent =
-        content.title || story.name;
+        content.title || story.name || "入居のしおり";
 
-      document.getElementById("propertyMeta").textContent =
-        content.propertyNo ? `物件No. ${content.propertyNo}` : "";
+      // Meta
+      const meta = document.getElementById("propertyMeta");
+      if (propertyData) {
+        const parts = [];
+        if (propertyData.propertyNo) parts.push(`物件No. ${propertyData.propertyNo}`);
+        if (propertyData.canonicalName) parts.push(propertyData.canonicalName);
+        if (propertyData.address) parts.push(propertyData.address);
+        meta.textContent = parts.join(" ｜ ");
+      } else {
+        meta.textContent = content.propertyNo
+          ? `物件No. ${content.propertyNo}`
+          : "";
+      }
 
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -167,8 +331,15 @@
       tabNav.innerHTML = "";
       tabPanels.innerHTML = "";
 
-      if (sections.length === 0) {
-        tabPanels.innerHTML = `<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>`;
+      if (propertyData && propertyData.shiori_enabled === false) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
+        return;
+      }
+
+      if (!sections.length) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
         return;
       }
 
@@ -176,79 +347,147 @@
         const key = sec.key || sec._uid || `sec${idx}`;
         const icon = sec.icon || "";
         const title = sec.title || "セクション";
-        const bodyHtml = renderRichText(sec.body);
-        const show = sec.show_tab !== false;
-        const active = idx === 0;
 
-        if (show) {
-          const btn = document.createElement("button");
-          btn.dataset.tab = key;
-          btn.className =
-            "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs " +
-            (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
-          btn.innerHTML = `${icon ? icon + " " : ""}${escapeHtml(title)}`;
-          tabNav.appendChild(btn);
+        // 表示するか？（Firestoreフラグ優先）
+        let show = true;
+        if (sectionFlags && key in sectionFlags) {
+          show = sectionFlags[key];
+        } else if (sec.show_tab === false) {
+          show = false;
+        }
+        if (!show) return; // このセクションは完全非表示
+
+        // 本文は Firestore の guides_master_raw 優先
+        let bodyHtml = "";
+        const textFromMaster = pickBodyText(masterList, key, variantKey);
+        if (textFromMaster) {
+          bodyHtml = renderPlainTextAsHtml(textFromMaster);
+        } else {
+          // master になければ Storyblok の Richtext を使う
+          bodyHtml = renderRichText(sec.body);
         }
 
+        const active = tabNav.children.length === 0; // 最初に追加するタブをアクティブに
+
+        // ▼タブ
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.tab = key;
+        btn.className =
+          "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
+          (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
+        btn.innerHTML =
+          (icon ? `<span>${icon}</span> ` : "") +
+          `<span>${escapeHtml(title)}</span>`;
+        tabNav.appendChild(btn);
+
+        // ▼パネル
         const panel = document.createElement("section");
         panel.dataset.tabPanel = key;
         panel.className =
-          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 " +
+          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 " +
           (active ? "" : "hidden");
 
         panel.innerHTML = `
-          <h3 class="text-lg font-semibold flex items-center gap-2">
-            ${icon ? icon : ""}
-            ${escapeHtml(title)}
+          <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+            ${icon ? `<span>${icon}</span>` : ""}
+            <span>${escapeHtml(title)}</span>
           </h3>
-          <div class="richtext mt-2 text-sm text-slate-700">
+          <div class="richtext mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
             ${bodyHtml}
           </div>
         `;
-
         tabPanels.appendChild(panel);
       });
+
+      if (!tabNav.children.length) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件で公開されている項目はありません。</p>';
+        return;
+      }
 
       setupTabs();
     }
 
-    /* ------------------------------------------
-     * タブ切替
-     * ------------------------------------------ */
     function setupTabs() {
       const tabBtns = document.querySelectorAll(".tab-btn");
       const panels = document.querySelectorAll(".tab-panel");
 
-      tabBtns.forEach(btn => {
+      tabBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
           const target = btn.dataset.tab;
 
-          tabBtns.forEach(b => {
-            b.classList.toggle("bg-slate-900", b === btn);
-            b.classList.toggle("text-white", b === btn);
-            b.classList.toggle("bg-slate-100", b !== btn);
-            b.classList.toggle("text-slate-700", b !== btn);
+          tabBtns.forEach((b) => {
+            const active = b === btn;
+            b.classList.toggle("bg-slate-900", active);
+            b.classList.toggle("text-white", active);
+            b.classList.toggle("bg-slate-100", !active);
+            b.classList.toggle("text-slate-700", !active);
           });
 
-          panels.forEach(p => {
+          panels.forEach((p) => {
             p.classList.toggle("hidden", p.dataset.tabPanel !== target);
           });
+
+          const firstPanel = panels[0];
+          if (firstPanel) {
+            const top =
+              window.scrollY + firstPanel.getBoundingClientRect().top - 80;
+            window.scrollTo({ top, behavior: "smooth" });
+          }
         });
       });
     }
 
-    /* ------------------------------------------
-     * メイン
-     * ------------------------------------------ */
+    // ==============================
+    // メイン
+    // ==============================
     async function main() {
-      const no = getPropertyNoFromUrl();
+      const propertyNo = getPropertyNoFromUrl();
+      const tabPanels = document.getElementById("tabPanels");
+
+      if (!propertyNo) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-rose-600">URL に ?propertyNo=XXXX を指定してください。</p>';
+        return;
+      }
+
+      let propertyData = null;
+      let masterList = [];
+      let sectionFlags = null;
+      let variantKey = "base";
+      let slug = propertyNo;
+
+      // Firestore から設定を取得（失敗しても Storyblok だけで動く）
+      if (db) {
+        try {
+          [propertyData, masterList] = await Promise.all([
+            fetchPropertyConfig(propertyNo),
+            fetchGuidesMasterRaw(),
+          ]);
+
+          if (propertyData) {
+            slug = propertyData.shiori_slug || propertyNo;
+            variantKey = propertyData.variant_key || "base";
+            sectionFlags = buildSectionFlags(propertyData);
+          }
+        } catch (e) {
+          console.error("Firestore 読み取り中にエラー:", e);
+        }
+      }
+
       try {
-        const story = await fetchGuideStory(no);
-        renderGuidePage(story);
-      } catch (err) {
-        console.error(err);
-        document.getElementById("tabPanels").innerHTML =
-          `<p class="text-sm text-rose-600">データの読み込みに失敗しました。</p>`;
+        const story = await fetchGuideStoryBySlug(slug);
+        renderGuidePage(story, {
+          propertyData,
+          sectionFlags,
+          masterList,
+          variantKey,
+        });
+      } catch (e) {
+        console.error(e);
+        tabPanels.innerHTML =
+          '<p class="text-sm text-rose-600">データの読み込みに失敗しました。</p>';
       }
     }
 

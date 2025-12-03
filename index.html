@@ -26,7 +26,7 @@
         <div>
           <p class="text-xs text-slate-500">UniLife 入居者専用</p>
           <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
-            物件名を読み込み中…
+            物件名を読み込み中...
           </h1>
         </div>
       </div>
@@ -40,13 +40,11 @@
       <!-- Property Meta -->
       <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
         <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
-        <p class="text-[11px] text-slate-400">
-          ※ 内容は物件により異なります
-        </p>
+        <p class="text-[11px] text-slate-400">※ 内容は物件により異なります</p>
       </section>
 
       <!-- Tabs -->
-      <section class="mt-2">
+      <section>
         <div id="tabNav" class="flex gap-2 overflow-x-auto pb-1 text-sm"></div>
         <div id="tabPanels" class="mt-3 space-y-4"></div>
       </section>
@@ -62,80 +60,72 @@
     </div>
   </footer>
 
-
-  <!-- ========================================================== -->
-  <!-- Storyblok 連携（Sections のタブ生成） -->
-  <!-- ========================================================== -->
-
+  <!-- ======================================================= -->
+  <!-- Storyblok API ロジック（最新版 / 安定動作版） -->
+  <!-- ======================================================= -->
   <script>
-    /* ---------------------------------------------------------
+    /* ------------------------------------------
      * 設定
-     * --------------------------------------------------------- */
-    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // ←ここを置き換え
+     * ------------------------------------------ */
+    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // ← あなたのPublic Token
 
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("propertyNo") || "demo";
+      return params.get("propertyNo") || "";
     }
 
-    /* ---------------------------------------------------------
-     * Storyblok API（slug揺れ・draft対応の強化版）
-     * --------------------------------------------------------- */
+    /* ------------------------------------------
+     * Storyblok API（published のみ取得）
+     * ------------------------------------------ */
     async function fetchGuideStory(propertyNo) {
-  const base = "https://api.storyblok.com/v2/cdn/stories";
+      const base = "https://api.storyblok.com/v2/cdn/stories";
 
-  // ① slug 完全一致（published）
-  const urlDirect =
-    `${base}/${encodeURIComponent(propertyNo)}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published`;
+      // ① 完全一致 (published)
+      const urlDirect =
+        `${base}/${encodeURIComponent(propertyNo)}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published`;
 
-  let res = await fetch(urlDirect);
-  if (res.ok) {
-    const data = await res.json();
-    return data.story;
-  }
+      let res = await fetch(urlDirect);
+      if (res.ok) {
+        const data = await res.json();
+        return data.story;
+      }
 
-  // ② slug 前方一致検索（10100-◯◯◯ など）
-  const urlList =
-    `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published&starts_with=${encodeURIComponent(propertyNo)}`;
+      // ② 前方一致検索（10100-xxxx など）
+      const urlList =
+        `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}&version=published&starts_with=${encodeURIComponent(propertyNo)}`;
 
-  res = await fetch(urlList);
-  if (!res.ok) throw new Error("Storyblok API Error: " + res.status);
+      res = await fetch(urlList);
+      const data = await res.json();
 
-  const data = await res.json();
-  const stories = data.stories || [];
-  if (!stories.length) throw new Error("Story not found for: " + propertyNo);
+      if (!data.stories || data.stories.length === 0) {
+        throw new Error("Story not found");
+      }
 
-  return stories[0];
-}
+      return data.stories[0];
+    }
 
-
-    /* ---------------------------------------------------------
-     * Richtext 簡易レンダラー
-     * --------------------------------------------------------- */
+    /* ------------------------------------------
+     * Richtext レンダリング
+     * ------------------------------------------ */
     function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
     }
 
     function renderTextNode(node) {
       if (!node) return "";
       if (node.type === "text") {
         let text = escapeHtml(node.text || "");
-
         if (node.marks) {
-          node.marks.forEach((mark) => {
-            if (mark.type === "bold") text = `<strong>${text}</strong>`;
-            if (mark.type === "italic") text = `<em>${text}</em>`;
-            if (mark.type === "link" && mark.attrs?.href) {
-              text = `<a href="${escapeHtml(mark.attrs.href)}" class="text-sky-600 underline" target="_blank" rel="noopener">${text}</a>`;
-            }
+          node.marks.forEach((m) => {
+            if (m.type === "bold") text = `<strong>${text}</strong>`;
+            if (m.type === "italic") text = `<em>${text}</em>`;
+            if (m.type === "link") text = `<a href="${m.attrs.href}" class="text-sky-600 underline" target="_blank">${text}</a>`;
           });
         }
-
         return text;
       }
       if (node.type === "hard_break") return "<br />";
@@ -144,65 +134,41 @@
 
     function renderRichText(node) {
       if (!node || !node.content) return "";
-
-      return node.content
-        .map((child) => {
-          switch (child.type) {
-            case "paragraph":
-              return `<p>${(child.content || []).map(renderTextNode).join("")}</p>`;
-
-            case "bullet_list":
-              return (
-                "<ul>" +
-                (child.content || [])
-                  .map((li) => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`)
-                  .join("") +
-                "</ul>"
-              );
-
-            case "ordered_list":
-              return (
-                "<ol>" +
-                (child.content || [])
-                  .map((li) => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`)
-                  .join("") +
-                "</ol>"
-              );
-
-            default:
-              return "";
-          }
-        })
-        .join("");
+      return node.content.map((c) => {
+        switch (c.type) {
+          case "paragraph":
+            return `<p>${(c.content || []).map(renderTextNode).join("")}</p>`;
+          case "bullet_list":
+            return `<ul>${c.content.map(li => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`).join("")}</ul>`;
+          case "ordered_list":
+            return `<ol>${c.content.map(li => `<li>${(li.content || []).map(renderTextNode).join("")}</li>`).join("")}</ol>`;
+          default:
+            return "";
+        }
+      }).join("");
     }
 
-    /* ---------------------------------------------------------
+    /* ------------------------------------------
      * ページ描画
-     * --------------------------------------------------------- */
+     * ------------------------------------------ */
     function renderGuidePage(story) {
       const content = story.content || {};
       const sections = content.sections || [];
 
-      // タイトル
       document.getElementById("propertyTitle").textContent =
-        content.title || story.name || "入居のしおり";
+        content.title || story.name;
 
-      // 物件No
-      const meta = document.getElementById("propertyMeta");
-      if (meta) {
-        meta.textContent = content.propertyNo
-          ? `物件No. ${content.propertyNo}`
-          : "";
-      }
+      document.getElementById("propertyMeta").textContent =
+        content.propertyNo ? `物件No. ${content.propertyNo}` : "";
 
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
+
       tabNav.innerHTML = "";
       tabPanels.innerHTML = "";
 
-      if (!sections.length) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
+      if (sections.length === 0) {
+        tabPanels.innerHTML = `<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>`;
         return;
       }
 
@@ -210,41 +176,34 @@
         const key = sec.key || sec._uid || `sec${idx}`;
         const icon = sec.icon || "";
         const title = sec.title || "セクション";
+        const bodyHtml = renderRichText(sec.body);
         const show = sec.show_tab !== false;
         const active = idx === 0;
 
-        // ▼タブ生成
         if (show) {
           const btn = document.createElement("button");
-          btn.type = "button";
           btn.dataset.tab = key;
           btn.className =
-            "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
+            "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs " +
             (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
-
-          btn.innerHTML =
-            (icon ? `<span>${icon}</span> ` : "") +
-            `<span>${escapeHtml(title)}</span>`;
-
+          btn.innerHTML = `${icon ? icon + " " : ""}${escapeHtml(title)}`;
           tabNav.appendChild(btn);
         }
 
-        // ▼パネル生成
         const panel = document.createElement("section");
         panel.dataset.tabPanel = key;
         panel.className =
-          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 " +
+          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 " +
           (active ? "" : "hidden");
 
         panel.innerHTML = `
-          <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
-            ${icon ? `<span>${icon}</span>` : ""}
-            <span>${escapeHtml(title)}</span>
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            ${icon ? icon : ""}
+            ${escapeHtml(title)}
           </h3>
-          <div class="richtext mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
-            ${renderRichText(sec.body)}
+          <div class="richtext mt-2 text-sm text-slate-700">
+            ${bodyHtml}
           </div>
-          ${sec.note ? `<p class="mt-2 text-[11px] text-slate-400">${escapeHtml(sec.note)}</p>` : ""}
         `;
 
         tabPanels.appendChild(panel);
@@ -253,51 +212,43 @@
       setupTabs();
     }
 
-    /* ---------------------------------------------------------
-     * タブ切り替え
-     * --------------------------------------------------------- */
+    /* ------------------------------------------
+     * タブ切替
+     * ------------------------------------------ */
     function setupTabs() {
-      const tabs = document.querySelectorAll(".tab-btn");
+      const tabBtns = document.querySelectorAll(".tab-btn");
       const panels = document.querySelectorAll(".tab-panel");
 
-      tabs.forEach((btn) => {
+      tabBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           const target = btn.dataset.tab;
 
-          tabs.forEach((b) => {
-            const act = b === btn;
-            b.classList.toggle("bg-slate-900", act);
-            b.classList.toggle("text-white", act);
-            b.classList.toggle("bg-slate-100", !act);
-            b.classList.toggle("text-slate-700", !act);
+          tabBtns.forEach(b => {
+            b.classList.toggle("bg-slate-900", b === btn);
+            b.classList.toggle("text-white", b === btn);
+            b.classList.toggle("bg-slate-100", b !== btn);
+            b.classList.toggle("text-slate-700", b !== btn);
           });
 
-          panels.forEach((p) => {
+          panels.forEach(p => {
             p.classList.toggle("hidden", p.dataset.tabPanel !== target);
           });
-
-          // スマホでパネルまで自動スクロール（UX改善）
-          const first = panels[0];
-          if (first) {
-            const top = window.scrollY + first.getBoundingClientRect().top - 80;
-            window.scrollTo({ top, behavior: "smooth" });
-          }
         });
       });
     }
 
-    /* ---------------------------------------------------------
-     * メイン処理
-     * --------------------------------------------------------- */
+    /* ------------------------------------------
+     * メイン
+     * ------------------------------------------ */
     async function main() {
       const no = getPropertyNoFromUrl();
       try {
         const story = await fetchGuideStory(no);
         renderGuidePage(story);
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         document.getElementById("tabPanels").innerHTML =
-          '<p class="text-sm text-rose-600">データの読み込みに失敗しました。</p>';
+          `<p class="text-sm text-rose-600">データの読み込みに失敗しました。</p>`;
       }
     }
 

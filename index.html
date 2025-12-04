@@ -84,33 +84,43 @@
     // ------------------------------
 
 
-    // Firestore にマッピングする Section キー一覧
-    const SECTION_KEYS = [
-      "key",
-      "mailbox",
-      "delivery_box",
-      "bicycle_space",
-      "room_equipment",
-      "special_note",
-      "moving",
-      "electricity",
-      "gas",
-      "water",
-      "internet",
-      "trash",
-      "common_area",
-      "pets",
-      "toilet",
-      "noise",
-      "drainage",
-      "ventilation",
-      "heater",
-      "bike_parking",
-      "car_parking",
-      "sales",
-      "expenses",
-      "cancellation",
-    ];
+  // Firestore にマッピングする Section キー一覧（そのままでOK）
+  const SECTION_KEYS = [
+    "key",
+    "mailbox",
+    "delivery_box",
+    "bicycle_space",
+    "room_equipment",
+    "special_note",
+    "moving",
+    "electricity",
+    "gas",
+    "water",
+    "internet",
+    "trash",
+    "common_area",
+    "pets",
+    "toilet",
+    "noise",
+    "drainage",
+    "ventilation",
+    "heater",
+    "bike_parking",
+    "car_parking",
+    "sales",
+    "expenses",
+    "cancellation",
+  ];
+
+  // カテゴリ定義（タブ名とアイコン）
+  const CATEGORY_DEFS = {
+    basic:   { label: "生活の基本",     icon: "🏠" },
+    trouble: { label: "トラブル・設備", icon: "🔧" },
+    contract:{ label: "契約・費用",     icon: "💰" },
+    parking: { label: "駐輪・駐車",     icon: "🚲" },
+    other:   { label: "その他",         icon: "📘" }
+  };
+
 
     // ==============================
     // Firebase 初期化
@@ -332,6 +342,7 @@
       tabNav.innerHTML = "";
       tabPanels.innerHTML = "";
 
+      // しおり全体の公開判定
       if (propertyData && propertyData.shiori_enabled === false) {
         tabPanels.innerHTML =
           '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
@@ -344,71 +355,122 @@
         return;
       }
 
+      // ===== 1) セクションをフィルタ & カテゴリ分け =====
+      const grouped = {}; // {categoryKey: [section, ...]}
       sections.forEach((sec, idx) => {
         const key = sec.key || sec._uid || `sec${idx}`;
-        const icon = sec.icon || "";
-        const title = sec.title || "セクション";
 
-        // 表示するか？（Firestoreフラグ優先）
+        // Firestore フラグで表示/非表示を決定（なければ show_tab を使う）
         let show = true;
         if (sectionFlags && key in sectionFlags) {
           show = sectionFlags[key];
         } else if (sec.show_tab === false) {
           show = false;
         }
-        if (!show) return; // このセクションは完全非表示
+        if (!show) return;
 
-        // 本文は Firestore の guides_master_raw 優先
-        let bodyHtml = "";
-        const textFromMaster = pickBodyText(masterList, key, variantKey);
-        if (textFromMaster) {
-          bodyHtml = renderPlainTextAsHtml(textFromMaster);
-        } else {
-          // master になければ Storyblok の Richtext を使う
-          bodyHtml = renderRichText(sec.body);
-        }
-
-        const active = tabNav.children.length === 0; // 最初に追加するタブをアクティブに
-
-        // ▼タブ
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.dataset.tab = key;
-        btn.className =
-          "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
-          (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
-        btn.innerHTML =
-          (icon ? `<span>${icon}</span> ` : "") +
-          `<span>${escapeHtml(title)}</span>`;
-        tabNav.appendChild(btn);
-
-        // ▼パネル
-        const panel = document.createElement("section");
-        panel.dataset.tabPanel = key;
-        panel.className =
-          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 " +
-          (active ? "" : "hidden");
-
-        panel.innerHTML = `
-          <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
-            ${icon ? `<span>${icon}</span>` : ""}
-            <span>${escapeHtml(title)}</span>
-          </h3>
-          <div class="richtext mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
-            ${bodyHtml}
-          </div>
-        `;
-        tabPanels.appendChild(panel);
+        const cat = sec.category || "basic";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push({ sec, key });
       });
 
-      if (!tabNav.children.length) {
+      const categoryKeys = Object.keys(grouped);
+      if (!categoryKeys.length) {
         tabPanels.innerHTML =
           '<p class="text-sm text-slate-500">この物件で公開されている項目はありません。</p>';
         return;
       }
 
+      // カテゴリ順を揃える（定義順で並べる）
+      const orderedCategoryKeys = Object.keys(CATEGORY_DEFS).filter((k) =>
+        categoryKeys.includes(k)
+      );
+
+      // ===== 2) タブとパネルをカテゴリ単位で作成 =====
+      orderedCategoryKeys.forEach((catKey, idx) => {
+        const def = CATEGORY_DEFS[catKey] || {
+          label: catKey,
+          icon: ""
+        };
+        const catLabel = def.label;
+        const catIcon = def.icon || "";
+
+        const isActive = idx === 0;
+
+        // ▼ カテゴリタブ
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.tab = catKey;
+        btn.className =
+          "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
+          (isActive ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
+        btn.innerHTML =
+          (catIcon ? `<span>${catIcon}</span> ` : "") +
+          `<span>${escapeHtml(catLabel)}</span>`;
+        tabNav.appendChild(btn);
+
+        // ▼ パネル（カテゴリ内のセクションをカード＋アコーディオンで表示）
+        const panel = document.createElement("section");
+        panel.dataset.tabPanel = catKey;
+        panel.className =
+          "tab-panel space-y-3 " + (isActive ? "" : "hidden");
+
+        const sectionsInCat = grouped[catKey];
+
+        const cardsHtml = sectionsInCat
+          .map(({ sec, key }) => {
+            const title = sec.title || "セクション";
+            const icon = sec.icon || "";
+
+            // 本文：Firestore マスタ優先
+            const textFromMaster = pickBodyText(masterList, key, variantKey);
+            const bodyHtml = textFromMaster
+              ? renderPlainTextAsHtml(textFromMaster)
+              : renderRichText(sec.body);
+
+            const summary = sec.summary || "";
+
+            return `
+              <article class="bg-white rounded-2xl shadow-sm border border-slate-100">
+                <details class="group">
+                  <summary class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5 cursor-pointer">
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        ${icon ? `<span class="text-lg">${icon}</span>` : ""}
+                        <h3 class="text-sm sm:text-base font-semibold text-slate-900 truncate">
+                          ${escapeHtml(title)}
+                        </h3>
+                      </div>
+                      ${
+                        summary
+                          ? `<p class="mt-0.5 text-[11px] sm:text-xs text-slate-500 line-clamp-2">${escapeHtml(
+                              summary
+                            )}</p>`
+                          : ""
+                      }
+                    </div>
+                    <span class="ml-2 text-slate-400 group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div class="px-4 pb-4 sm:px-5 sm:pb-5 border-t border-slate-100">
+                    <div class="richtext mt-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                      ${bodyHtml}
+                    </div>
+                  </div>
+                </details>
+              </article>
+            `;
+          })
+          .join("");
+
+        panel.innerHTML = cardsHtml;
+        tabPanels.appendChild(panel);
+      });
+
       setupTabs();
     }
+
 
     function setupTabs() {
       const tabBtns = document.querySelectorAll(".tab-btn");

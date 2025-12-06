@@ -84,7 +84,6 @@
       measurementId: "G-DXMR0VL972"
     };
 
-    // properties_shiori の列と一致
     const SECTION_KEYS = [
       "key",
       "mailbox",
@@ -112,9 +111,6 @@
       "cancellation",
     ];
 
-    // ==============================
-    // Firebase 初期化
-    // ==============================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
       getFirestore,
@@ -128,15 +124,11 @@
     try {
       const app = initializeApp(firebaseConfig);
       db = getFirestore(app);
-      console.log("Firestore 初期化 OK");
     } catch (e) {
       console.error("Firestore 初期化に失敗:", e);
       db = null;
     }
 
-    // ==============================
-    // ユーティリティ
-    // ==============================
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get("propertyNo") || "";
@@ -170,9 +162,6 @@
       box.classList.remove("hidden");
     }
 
-    // ==============================
-    // Firestore 読み込み
-    // ==============================
     async function loadSectionsMaster() {
       const colRef = collection(db, "sections_master");
       const snap = await getDocs(colRef);
@@ -245,9 +234,6 @@
       return withLinks.replace(/\r?\n/g, "<br />");
     }
 
-    // ==============================
-    // sections_master + guides_master_raw をマージ
-    // ==============================
     function mergeSections(masterMap, sectionFlags, masterList, variantKey) {
       const sections = [];
 
@@ -276,9 +262,6 @@
       return sections;
     }
 
-    // ==============================
-    // グループごとにタブ＋カードアコーディオンで描画
-    // ==============================
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -323,18 +306,12 @@
         tabBtn.type = "button";
         tabBtn.dataset.tabGroup = group.name;
         tabBtn.className =
-          "group-tab inline-flex items-center gap-1 px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm border shadow-sm " +
+          "group-tab inline-flex items-center px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm border shadow-sm " +
           (active
             ? "bg-slate-900 text-white border-slate-900"
             : "bg-slate-100 text-slate-700 border-slate-200");
-        tabBtn.innerHTML = `
-          ${
-            group.icon
-              ? `<span class="text-base leading-none">${escapeHtml(group.icon)}</span>`
-              : ""
-          }
-          <span>${escapeHtml(group.name)}</span>
-        `;
+        // ★ タブは日本語だけを表示（icon は使わない）
+        tabBtn.innerHTML = `<span>${escapeHtml(group.name)}</span>`;
         tabNav.appendChild(tabBtn);
 
         const panel = document.createElement("section");
@@ -365,7 +342,7 @@
                 </div>
                 <div>
                   <div class="text-sm font-semibold text-slate-900">
-                    ${sec.icon ? `<span class="mr-1">${escapeHtml(sec.icon)}</span>` : ""}${escapeHtml(sec.label)}
+                    ${escapeHtml(sec.label)}
                   </div>
                   ${
                     sec.summary
@@ -458,9 +435,6 @@
         });
     }
 
-    // ==============================
-    // メイン
-    // ==============================
     async function main() {
       const propertyNo = getPropertyNoFromUrl();
       const tabPanels = document.getElementById("tabPanels");
@@ -483,18 +457,10 @@
           loadGuidesMasterRaw(),
         ]);
 
-        if (results[0].status === "rejected") {
-          console.error("sections_master 読み込みエラー:", results[0].reason);
-          showError("データの読み込みに失敗しました。");
-          return;
-        }
-        if (results[1].status === "rejected") {
-          console.error("properties_shiori 読み込みエラー:", results[1].reason);
-          showError("データの読み込みに失敗しました。");
-          return;
-        }
-        if (results[2].status === "rejected") {
-          console.error("guides_master_raw 読み込みエラー:", results[2].reason);
+        if (results[0].status === "rejected" ||
+            results[1].status === "rejected" ||
+            results[2].status === "rejected") {
+          console.error("読み込みエラー:", results);
           showError("データの読み込みに失敗しました。");
           return;
         }

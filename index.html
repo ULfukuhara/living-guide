@@ -9,7 +9,6 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
-
 </head>
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
@@ -31,13 +30,10 @@
 
   <!-- Main -->
   <main class="flex-1 max-w-3xl mx-auto w-full px-4 py-6">
-
     <!-- Tabs -->
     <div id="tabNav" class="flex gap-2 overflow-x-auto pb-3"></div>
-
     <!-- Panels -->
     <div id="tabPanels" class="mt-4 space-y-4"></div>
-
   </main>
 
   <script>
@@ -51,6 +47,7 @@
       appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
       measurementId: "G-DXMR0VL972"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -139,8 +136,8 @@
           panels.forEach(p => p.classList.add("hidden"));
 
           btn.classList.add("bg-slate-900", "text-white");
-          document.querySelector(`[data-tab-panel='${tab}']`)
-            .classList.remove("hidden");
+          const panel = document.querySelector(`[data-tab-panel='${tab}']`);
+          if (panel) panel.classList.remove("hidden");
         });
       });
     }
@@ -154,6 +151,7 @@
       const content = story.content || {};
       const sections = content.sections || [];
 
+      // タイトル・メタ
       document.getElementById("propertyTitle").textContent =
         content.title || story.name || "入居のしおり";
 
@@ -189,10 +187,11 @@
 
       const grouped = {};
       sections.forEach((sec, idx) => {
-        const key = sec.key || sec._uid || `sec${idx}`;
+        const sectionKey = sec.key || sec._uid || `sec${idx}`;
+
         let show = true;
-        if (sectionFlags && key in sectionFlags) {
-          show = sectionFlags[key];
+        if (sectionFlags && sectionKey in sectionFlags) {
+          show = sectionFlags[sectionKey];
         } else if (sec.show_tab === false) {
           show = false;
         }
@@ -200,7 +199,7 @@
 
         const cat = sec.category || "basic";
         if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push({ sec, key });
+        grouped[cat].push({ sec, sectionKey });
       });
 
       const categoryKeys = Object.keys(grouped);
@@ -217,6 +216,7 @@
         const def = CATEGORY_DEFS[catKey] || { label: catKey, icon: "" };
         const isActive = idx === 0;
 
+        // タブボタン
         const btn = document.createElement("button");
         btn.type = "button";
         btn.dataset.tab = catKey;
@@ -228,22 +228,27 @@
           `<span>${escapeHtml(def.label)}</span>`;
         tabNav.appendChild(btn);
 
+        // パネル
         const panel = document.createElement("section");
         panel.dataset.tabPanel = catKey;
         panel.className = "tab-panel space-y-3 " + (isActive ? "" : "hidden");
 
         const cardsHtml = grouped[catKey]
-          .map(({ sec, key }) => {
+          .map(({ sec, sectionKey }) => {
             const title = sec.title || "セクション";
             const icon = sec.icon || "";
             const summary = sec.summary || "";
 
             const textFromMaster = pickBodyText(
-              masterList, key, variantKey
+              masterList, sectionKey, variantKey
             );
             const bodyHtml = textFromMaster
               ? renderPlainTextAsHtml(textFromMaster)
               : renderRichText(sec.body);
+
+            const summaryHtml = summary
+              ? `<p class="mt-0.5 text-[11px] sm:text-xs text-slate-500 line-clamp-2">${escapeHtml(summary)}</p>`
+              : "";
 
             return `
               <article class="bg-white rounded-2xl shadow-sm border border-slate-100">
@@ -256,13 +261,7 @@
                           ${escapeHtml(title)}
                         </h3>
                       </div>
-                      ${
-                        summary
-                          ? `<p class="mt-0.5 text-[11px] sm:text-xs text-slate-500 line-clamp-2">${escapeHtml(
-                              summary
-                            )}</p>`
-                          : ""
-                      }
+                      ${summaryHtml}
                     </div>
                     <span class="ml-2 text-slate-400 group-open:rotate-180 transition-transform">
                       ▼
@@ -298,10 +297,11 @@
           document.getElementById("propertyTitle").textContent =
             "物件Noが指定されていません";
           document.getElementById("tabPanels").innerHTML =
-            `<p class="text-sm text-slate-600">URL に ?propertyNo=XXXX を付けてください。</p>`;
+            '<p class="text-sm text-slate-600">URL に ?propertyNo=XXXX を付けてください。</p>';
           return;
         }
 
+        // Firestore から物件情報
         const propSnap = await db
           .collection("properties_shiori")
           .doc(propertyNo)
@@ -319,11 +319,15 @@
           sectionFlags = buildSectionFlags(propertyData);
         }
 
-        const sbUrl = `https://api.storyblok.com/v2/cdn/stories/${slug}?version=published&token=${STORYBLOK_TOKEN}`;
+        // Storyblok から本文
+        const sbUrl =
+          `https://api.storyblok.com/v2/cdn/stories/${slug}` +
+          `?version=published&token=${STORYBLOK_TOKEN}`;
         const sbRes = await fetch(sbUrl);
         if (!sbRes.ok) throw new Error("Storyblok API error");
         const sbData = await sbRes.json();
 
+        // guides_master_raw 取得
         const masterSnap = await db.collection("guides_master_raw").get();
         const masterList = [];
         masterSnap.forEach(doc => masterList.push(doc.data()));

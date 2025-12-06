@@ -69,7 +69,7 @@
     // ==============================
     // 設定
     // ==============================
-    const STORYBLOK_TOKEN = "xY7e0oLtHofaU0EwHzh38Att";  // Public Token
+    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // Public Token
 
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
@@ -149,35 +149,24 @@
     }
 
     // ==============================
-    // Storyblok API
+    // Storyblok API（starts_with 専用版）
     // ==============================
     async function fetchGuideStoryBySlug(slug) {
       const base = "https://api.storyblok.com/v2/cdn/stories";
+      const url =
+        `${base}?token=${encodeURIComponent(STORYBLOK_TOKEN)}` +
+        `&version=published&starts_with=${encodeURIComponent(slug)}`;
 
-      // ① 完全一致
-      let url = `${base}/${encodeURIComponent(slug)}?token=${encodeURIComponent(
-        STORYBLOK_TOKEN
-      )}&version=published`;
-
-      let res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        return data.story;
-      }
-
-      // ② 前方一致（フォルダ付きなどを拾う保険）
-      url = `${base}?token=${encodeURIComponent(
-        STORYBLOK_TOKEN
-      )}&version=published&starts_with=${encodeURIComponent(slug)}`;
-
-      res = await fetch(url);
+      const res = await fetch(url);
       if (!res.ok) {
         throw new Error("Storyblok API Error: " + res.status);
       }
+
       const data = await res.json();
       if (!data.stories || data.stories.length === 0) {
-        throw new Error("Story not found for slug=" + slug);
+        throw new Error("Story not found for starts_with=" + slug);
       }
+      // 先頭の1件を利用
       return data.stories[0];
     }
 

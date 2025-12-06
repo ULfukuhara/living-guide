@@ -59,7 +59,7 @@
     </div>
   </main>
 
-  <!-- Footer（テキストだけ前のままにしてあります） -->
+  <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
       <p>© UNIV LIFE</p>
@@ -68,7 +68,7 @@
   </footer>
 
   <!-- ======================================================= -->
-  <!-- JS: Firestore だけで表示（前のUI風：グループタブ＋カード型アコーディオン） -->
+  <!-- JS: Firestore だけで表示（前のUIにかなり寄せた版）     -->
   <!-- ======================================================= -->
   <script type="module">
     // ==============================
@@ -268,7 +268,7 @@
           summary: master.summary || "",
           group: master.group || "その他",
           order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",  // ここは絵文字でもOK
+          icon: master.icon || "",  // emoji 等
           body,
         });
       });
@@ -279,7 +279,7 @@
     }
 
     // ==============================
-    // グループ単位にまとめて「ピル型タブ＋カードアコーディオン」で描画
+    // グループごとに「ピル型タブ＋カードアコーディオン」で描画
     // ==============================
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
@@ -321,7 +321,7 @@
         g.sections.sort((a, b) => a.order - b.order);
       });
 
-      // タブ＋パネル生成（UI は前のデザインに寄せる）
+      // タブ＋パネル生成（スマホでの見た目を前UIに寄せる）
       groups.forEach((group, gIndex) => {
         const active = gIndex === 0;
 
@@ -330,7 +330,7 @@
         tabBtn.type = "button";
         tabBtn.dataset.tabGroup = group.name;
         tabBtn.className =
-          "group-tab inline-flex items-center gap-1 px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm border " +
+          "group-tab inline-flex items-center gap-1 px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm border shadow-sm " +
           (active
             ? "bg-slate-900 text-white border-slate-900"
             : "bg-slate-100 text-slate-700 border-slate-200");
@@ -366,9 +366,9 @@
               data-accordion-toggle="${bodyId}"
             >
               <div class="flex items-center gap-3 text-left">
-                <!-- 左の三角アイコン -->
+                <!-- 左の黒い三角アイコン -->
                 <div class="flex-shrink-0">
-                  <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs">
                     ▶
                   </span>
                 </div>

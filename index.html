@@ -59,16 +59,16 @@
     </div>
   </main>
 
-  <!-- Footer -->
+  <!-- Footer（テキストだけ前のままにしてあります） -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
       <p>© UNIV LIFE</p>
-      <p>Firestore Living Guide</p>
+      <p>Storyblok + Firestore Living Guide</p>
     </div>
   </footer>
 
   <!-- ======================================================= -->
-  <!-- JS: Firestore だけで表示（グループタブ＋アコーディオン） -->
+  <!-- JS: Firestore だけで表示（前のUI風：グループタブ＋カード型アコーディオン） -->
   <!-- ======================================================= -->
   <script type="module">
     // ==============================
@@ -84,7 +84,7 @@
       measurementId: "G-DXMR0VL972"
     };
 
-    // properties_shiori の列と一致させる
+    // properties_shiori の列と一致
     const SECTION_KEYS = [
       "key",
       "mailbox",
@@ -268,7 +268,7 @@
           summary: master.summary || "",
           group: master.group || "その他",
           order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",
+          icon: master.icon || "",  // ここは絵文字でもOK
           body,
         });
       });
@@ -279,7 +279,7 @@
     }
 
     // ==============================
-    // グループ単位にまとめて「タブ＋アコーディオン」で描画
+    // グループ単位にまとめて「ピル型タブ＋カードアコーディオン」で描画
     // ==============================
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
@@ -294,7 +294,7 @@
         return;
       }
 
-      // group ごとにまとめる
+      // group ごとにまとめる（group の icon は最初のセクションの icon を採用）
       const groupMap = new Map();
       sections.forEach((sec) => {
         const gname = sec.group || "その他";
@@ -302,11 +302,13 @@
           groupMap.set(gname, {
             name: gname,
             order: sec.order ?? 9999,
+            icon: sec.icon || "",
             sections: [],
           });
         }
         const g = groupMap.get(gname);
         g.order = Math.min(g.order, sec.order ?? 9999);
+        if (!g.icon && sec.icon) g.icon = sec.icon;
         g.sections.push(sec);
       });
 
@@ -315,26 +317,34 @@
         return a.name.localeCompare(b.name, "ja");
       });
 
-      // 各グループ内のセクションも order でソート
       groups.forEach((g) => {
         g.sections.sort((a, b) => a.order - b.order);
       });
 
-      // タブ＋パネル生成
+      // タブ＋パネル生成（UI は前のデザインに寄せる）
       groups.forEach((group, gIndex) => {
         const active = gIndex === 0;
 
-        // タブボタン（group）
+        // ピル型タブ（左に絵文字アイコン）
         const tabBtn = document.createElement("button");
         tabBtn.type = "button";
         tabBtn.dataset.tabGroup = group.name;
         tabBtn.className =
-          "group-tab px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
-          (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
-        tabBtn.textContent = group.name;
+          "group-tab inline-flex items-center gap-1 px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm border " +
+          (active
+            ? "bg-slate-900 text-white border-slate-900"
+            : "bg-slate-100 text-slate-700 border-slate-200");
+        tabBtn.innerHTML = `
+          ${
+            group.icon
+              ? `<span class="text-base leading-none">${escapeHtml(group.icon)}</span>`
+              : ""
+          }
+          <span>${escapeHtml(group.name)}</span>
+        `;
         tabNav.appendChild(tabBtn);
 
-        // パネル（中身はアコーディオン）
+        // パネル（中身はカード型アコーディオン）
         const panel = document.createElement("section");
         panel.dataset.tabGroupPanel = group.name;
         panel.className =
@@ -342,9 +352,8 @@
           "bg-transparent space-y-3";
 
         group.sections.forEach((sec, sIndex) => {
-          const sectionId = `g${gIndex}-sec-${sec.key}`;
-          const bodyId = `body-${sectionId}`;
-          const expanded = sIndex === 0; // 各グループの最初だけ開けておく
+          const bodyId = `g${gIndex}-sec-${sec.key}`;
+          const expanded = sIndex === 0; // 各グループの最初だけ開く
 
           const card = document.createElement("div");
           card.className =
@@ -357,11 +366,14 @@
               data-accordion-toggle="${bodyId}"
             >
               <div class="flex items-center gap-3 text-left">
-                <div class="flex-shrink-0 rounded-full bg-slate-100 px-3 py-1 text-[11px] text-slate-600">
-                  ${escapeHtml(group.name)}
+                <!-- 左の三角アイコン -->
+                <div class="flex-shrink-0">
+                  <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs">
+                    ▶
+                  </span>
                 </div>
                 <div>
-                  <div class="text-sm font-medium text-slate-800">
+                  <div class="text-sm font-semibold text-slate-900">
                     ${sec.icon ? `<span class="mr-1">${escapeHtml(sec.icon)}</span>` : ""}${escapeHtml(sec.label)}
                   </div>
                   ${
@@ -371,6 +383,7 @@
                   }
                 </div>
               </div>
+              <!-- 右の山形アイコン -->
               <div class="ml-3 flex-shrink-0">
                 <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${
                   expanded ? "rotate-180" : ""
@@ -413,8 +426,10 @@
             const active = t === tab;
             t.classList.toggle("bg-slate-900", active);
             t.classList.toggle("text-white", active);
+            t.classList.toggle("border-slate-900", active);
             t.classList.toggle("bg-slate-100", !active);
             t.classList.toggle("text-slate-700", !active);
+            t.classList.toggle("border-slate-200", !active);
           });
 
           panels.forEach((p) => {

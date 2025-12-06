@@ -4,74 +4,67 @@
   <meta charset="UTF-8" />
   <title>入居のしおり | guide.univ-life.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    .richtext p { margin-bottom: 0.6rem; }
-    .richtext ul { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: disc; }
-    .richtext ol { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: decimal; }
-    .richtext a { text-decoration: underline; }
-  </style>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
-
   <!-- Header -->
-  <header class="bg-white shadow-sm sticky top-0 z-20">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-          UL
-        </span>
-        <div>
-          <p class="text-xs text-slate-500">UNIV LIFE 入居者専用</p>
-          <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
-            物件名を読み込み中…
-          </h1>
-        </div>
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
+          物件名を読み込み中…
+        </h1>
+        <p id="propertyMeta" class="text-xs text-slate-500">
+          物件No / 住所を取得中…
+        </p>
       </div>
+      <span id="statusBadge" class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+        最新のデータを表示しています
+      </span>
     </div>
   </header>
 
   <!-- Main -->
   <main class="flex-1">
-    <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
+    <div class="max-w-3xl mx-auto px-4 py-4 space-y-4">
+      <!-- エラー表示 -->
+      <div id="errorBox" class="hidden rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"></div>
 
-      <!-- Property Meta -->
-      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
-        <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
-        <p class="text-[11px] text-slate-400">※ 内容は物件により異なります</p>
+      <!-- 説明文 -->
+      <section class="text-xs text-slate-500 leading-relaxed">
+        <p>
+          本ページは、この物件で快適にお住まいいただくための「入居のしおり」です。各項目をタップすると詳細な説明が表示されます。
+        </p>
       </section>
 
-      <!-- Tabs -->
-      <section>
-        <div id="tabNav" class="flex gap-2 overflow-x-auto pb-1 text-sm"></div>
-        <div id="tabPanels" class="mt-3 space-y-4"></div>
+      <!-- セクション一覧（アコーディオン） -->
+      <section id="sectionsContainer" class="space-y-3">
+        <!-- JSで挿入 -->
       </section>
 
+      <!-- フッター -->
+      <footer class="pt-6 mt-4 border-t border-slate-200 text-[11px] text-slate-400">
+        <p>※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。</p>
+        <p class="mt-1">ユニヴ・ライフ 管理部</p>
+      </footer>
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
-      <p>© UNIV LIFE</p>
-      <p>Storyblok + Firestore Living Guide</p>
-    </div>
-  </footer>
-
-  <!-- ======================================================= -->
-  <!-- JS: Storyblok + Firestore 連携（module）                -->
-  <!-- ======================================================= -->
+  <!-- Firebase + Firestore (v10) -->
   <script type="module">
-    // ==============================
-    // 設定
-    // ==============================
-    const STORYBLOK_TOKEN = "sdvg2FfGE4TIQ6wTLIJItQtt";  // あなたの Public Token
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ★ ここをあなたの Firebase 設定に置き換えてください ★
+   // ★ ここをあなたの Firebase 設定に置き換えてください ★
   const firebaseConfig = {
     apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
     authDomain: "univlife-kanri.firebaseapp.com",
@@ -83,417 +76,234 @@
   };
     // ------------------------------
 
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // Firestore にマッピングする Section キー一覧
-    const SECTION_KEYS = [
-      "key",
-      "mailbox",
-      "delivery_box",
-      "bicycle_space",
-      "room_equipment",
-      "special_note",
-      "moving",
-      "electricity",
-      "gas",
-      "water",
-      "internet",
-      "trash",
-      "common_area",
-      "pets",
-      "toilet",
-      "noise",
-      "drainage",
-      "ventilation",
-      "heater",
-      "bike_parking",
-      "car_parking",
-      "sales",
-      "expenses",
-      "cancellation",
-    ];
-
-    // ==============================
-    // Firebase 初期化
-    // ==============================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      collection,
-      getDocs,
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    let db = null;
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      console.log("Firestore 初期化 OK");
-    } catch (e) {
-      console.error("Firestore 初期化に失敗:", e);
-      db = null; // Firestore なしで Storyblok のみ動作
-    }
-
-    // ==============================
-    // 共通ユーティリティ
-    // ==============================
+    // ---------- 共通: URL から propertyNo を取得 ----------
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("propertyNo") || "";
+      const raw = params.get("propertyNo");
+      if (!raw) return null;
+      return raw.trim();
     }
 
-    function escapeHtml(str) {
-      return (str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+    // ---------- Firestore 読み込み ----------
+    async function loadSectionsMaster() {
+      const snap = await getDocs(collection(db, "sections_master"));
+      const map = {};
+      snap.forEach((d) => {
+        map[d.id] = d.data();
+      });
+      return map; // { key: {label_ja, summary, order, icon, ...}, ... }
     }
 
-    // ==============================
-    // Storyblok API
-    // ==============================
-    async function fetchGuideStoryBySlug(slug) {
-      const base = "https://api.storyblok.com/v2/cdn/stories";
-
-      // ① 完全一致
-      let url = `${base}/${encodeURIComponent(slug)}?token=${encodeURIComponent(
-        STORYBLOK_TOKEN
-      )}&version=published`;
-
-      let res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        return data.story;
-      }
-
-      // ② 前方一致
-      url = `${base}?token=${encodeURIComponent(
-        STORYBLOK_TOKEN
-      )}&version=published&starts_with=${encodeURIComponent(slug)}`;
-
-      res = await fetch(url);
-      if (!res.ok) {
-        throw new Error("Storyblok API Error: " + res.status);
-      }
-      const data = await res.json();
-      if (!data.stories || data.stories.length === 0) {
-        throw new Error("Story not found for slug=" + slug);
-      }
-      return data.stories[0];
-    }
-
-    // ==============================
-    // Firestore 読み取り
-    // ==============================
-    async function fetchPropertyConfig(propertyNo) {
-      if (!db) return null;
-      if (!propertyNo) return null;
-
+    async function loadPropertyShiori(propertyNo) {
       const ref = doc(db, "properties_shiori", propertyNo);
       const snap = await getDoc(ref);
       if (!snap.exists()) {
-        console.warn("properties_shiori 未登録:", propertyNo);
         return null;
       }
       return snap.data();
     }
 
-    async function fetchGuidesMasterRaw() {
-      if (!db) return [];
-      const colRef = collection(db, "guides_master_raw");
-      const snap = await getDocs(colRef);
-      const list = [];
-      snap.forEach((d) => {
-        const data = d.data();
-        list.push({
-          section_key: data.section_key || "",
-          variant_key: data.variant_key || "base",
-          body_text: data.body_text || "",
+    // 物件マスタ（properties）から物件名など取得（あれば）
+    async function loadPropertyMeta(propertyNo) {
+      try {
+        const ref = doc(db, "properties", propertyNo);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return null;
+        return snap.data(); // { propertyName, address, area, ... } を想定
+      } catch (e) {
+        console.warn("properties 読み込みエラー:", e);
+        return null;
+      }
+    }
+
+    // ---------- sections_master と properties_shiori をマージ ----------
+    function mergeSections(masterMap, shioriData) {
+      const sections = [];
+      const sectionBodies = shioriData?.sections || {};
+
+      for (const key in masterMap) {
+        const master = masterMap[key];
+        const body = sectionBodies[key]?.body || "";
+
+        // 本文が完全に空なら表示しない → 物件ごとに ON/OFF しやすい
+        if (!body) continue;
+
+        sections.push({
+          key,
+          label: master.label_ja || key,
+          summary: master.summary || "",
+          group: master.group || "",
+          order: typeof master.order === "number" ? master.order : 9999,
+          icon: master.icon || "file-text",
+          body
         });
-      });
-      return list;
-    }
-
-    // Firestore フラグを boolean に
-    function buildSectionFlags(propData) {
-      if (!propData) return null;
-
-      const flags = {};
-      SECTION_KEYS.forEach((key) => {
-        const v = propData[key];
-        // true / 1 / "TRUE" / "true" を true と判定
-        const b =
-          v === true ||
-          v === 1 ||
-          v === "1" ||
-          (typeof v === "string" && v.toLowerCase() === "true");
-        flags[key] = b;
-      });
-      return flags;
-    }
-
-    // variant に応じて本文を選ぶ
-    function pickBodyText(masterList, sectionKey, variantKey) {
-      if (!masterList || masterList.length === 0) return "";
-
-      // 1. variantKey 指定
-      let hit = masterList.find(
-        (row) =>
-          row.section_key === sectionKey && row.variant_key === variantKey
-      );
-      if (hit && hit.body_text) return hit.body_text;
-
-      // 2. base にフォールバック
-      hit = masterList.find(
-        (row) =>
-          row.section_key === sectionKey && row.variant_key === "base"
-      );
-      if (hit && hit.body_text) return hit.body_text;
-
-      return "";
-    }
-
-    // プレーンテキスト（body_text）を簡易HTMLに
-    function renderPlainTextAsHtml(text) {
-      if (!text) return "";
-      const escaped = escapeHtml(text);
-      // URL っぽいところをリンク化（雑に http から空白まで）
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const withLinks = escaped.replace(
-        urlRegex,
-        '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
-      );
-      // 改行 → <br>
-      return withLinks.replace(/\r?\n/g, "<br />");
-    }
-
-    // Storyblok Richtext（保険として残す）
-    function renderRichText(node) {
-      if (!node || !node.content) return "";
-      return node.content
-        .map((c) => {
-          switch (c.type) {
-            case "paragraph":
-              return `<p>${(c.content || [])
-                .map((n) => {
-                  if (n.type === "text") {
-                    let t = escapeHtml(n.text || "");
-                    if (n.marks) {
-                      n.marks.forEach((m) => {
-                        if (m.type === "bold") t = `<strong>${t}</strong>`;
-                        if (m.type === "italic") t = `<em>${t}</em>`;
-                      });
-                    }
-                    return t;
-                  }
-                  if (n.type === "hard_break") return "<br />";
-                  return "";
-                })
-                .join("")}</p>`;
-            default:
-              return "";
-          }
-        })
-        .join("");
-    }
-
-    // ==============================
-    // ページ描画
-    // ==============================
-    function renderGuidePage(story, options) {
-      const { propertyData, sectionFlags, masterList, variantKey } = options;
-
-      const content = story.content || {};
-      const sections = content.sections || [];
-
-      // タイトル
-      document.getElementById("propertyTitle").textContent =
-        content.title || story.name || "入居のしおり";
-
-      // Meta
-      const meta = document.getElementById("propertyMeta");
-      if (propertyData) {
-        const parts = [];
-        if (propertyData.propertyNo) parts.push(`物件No. ${propertyData.propertyNo}`);
-        if (propertyData.canonicalName) parts.push(propertyData.canonicalName);
-        if (propertyData.address) parts.push(propertyData.address);
-        meta.textContent = parts.join(" ｜ ");
-      } else {
-        meta.textContent = content.propertyNo
-          ? `物件No. ${content.propertyNo}`
-          : "";
       }
 
-      const tabNav = document.getElementById("tabNav");
-      const tabPanels = document.getElementById("tabPanels");
+      // order 昇順でソート
+      sections.sort((a, b) => a.order - b.order);
 
-      tabNav.innerHTML = "";
-      tabPanels.innerHTML = "";
+      return sections;
+    }
 
-      if (propertyData && propertyData.shiori_enabled === false) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
-        return;
-      }
+    // ---------- DOM ヘルパ ----------
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+      if (!box) return;
+      box.textContent = message;
+      box.classList.remove("hidden");
+    }
+
+    // ---------- アコーディオン描画 ----------
+    function renderSectionsAccordion(sections) {
+      const container = document.getElementById("sectionsContainer");
+      container.innerHTML = "";
 
       if (!sections.length) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
-        return;
-      }
-
-      sections.forEach((sec, idx) => {
-        const key = sec.key || sec._uid || `sec${idx}`;
-        const icon = sec.icon || "";
-        const title = sec.title || "セクション";
-
-        // 表示するか？（Firestoreフラグ優先）
-        let show = true;
-        if (sectionFlags && key in sectionFlags) {
-          show = sectionFlags[key];
-        } else if (sec.show_tab === false) {
-          show = false;
-        }
-        if (!show) return; // このセクションは完全非表示
-
-        // 本文は Firestore の guides_master_raw 優先
-        let bodyHtml = "";
-        const textFromMaster = pickBodyText(masterList, key, variantKey);
-        if (textFromMaster) {
-          bodyHtml = renderPlainTextAsHtml(textFromMaster);
-        } else {
-          // master になければ Storyblok の Richtext を使う
-          bodyHtml = renderRichText(sec.body);
-        }
-
-        const active = tabNav.children.length === 0; // 最初に追加するタブをアクティブに
-
-        // ▼タブ
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.dataset.tab = key;
-        btn.className =
-          "tab-btn px-3 py-1.5 rounded-full whitespace-nowrap text-xs sm:text-sm " +
-          (active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700");
-        btn.innerHTML =
-          (icon ? `<span>${icon}</span> ` : "") +
-          `<span>${escapeHtml(title)}</span>`;
-        tabNav.appendChild(btn);
-
-        // ▼パネル
-        const panel = document.createElement("section");
-        panel.dataset.tabPanel = key;
-        panel.className =
-          "tab-panel bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 " +
-          (active ? "" : "hidden");
-
-        panel.innerHTML = `
-          <h3 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
-            ${icon ? `<span>${icon}</span>` : ""}
-            <span>${escapeHtml(title)}</span>
-          </h3>
-          <div class="richtext mt-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
-            ${bodyHtml}
+        container.innerHTML = `
+          <div class="rounded-md border border-slate-200 bg-white px-3 py-3 text-xs text-slate-600">
+            表示できる項目がありませんでした。本文が登録されている項目のみ表示されます。
           </div>
         `;
-        tabPanels.appendChild(panel);
-      });
-
-      if (!tabNav.children.length) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-slate-500">この物件で公開されている項目はありません。</p>';
         return;
       }
 
-      setupTabs();
-    }
+      sections.forEach((sec, index) => {
+        const sectionId = `section-${sec.key}`;
+        const bodyId = `section-body-${sec.key}`;
+        const expandedByDefault = index === 0; // 最初の1件だけ開いておく
 
-    function setupTabs() {
-      const tabBtns = document.querySelectorAll(".tab-btn");
-      const panels = document.querySelectorAll(".tab-panel");
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden";
 
-      tabBtns.forEach((btn) => {
+        card.innerHTML = `
+          <button
+            type="button"
+            class="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 focus:outline-none"
+            data-accordion-toggle="${bodyId}"
+          >
+            <div class="flex items-center gap-3 text-left">
+              <div class="flex-shrink-0 rounded-full bg-slate-100 p-2">
+                <i data-lucide="${sec.icon}" class="w-4 h-4 text-slate-600"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-slate-800">
+                  ${sec.label}
+                </div>
+                ${
+                  sec.summary
+                    ? `<div class="text-[11px] text-slate-500 mt-0.5">${sec.summary}</div>`
+                    : ""
+                }
+              </div>
+            </div>
+            <div class="ml-3 flex-shrink-0">
+              <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${expandedByDefault ? "rotate-180" : ""}" data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </button>
+          <div
+            id="${bodyId}"
+            class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${expandedByDefault ? "" : "hidden"}"
+          >
+            <div class="border-t border-slate-100 pt-2 whitespace-pre-wrap">
+              ${escapeHtml(sec.body)}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Lucide アイコンを有効化
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+
+      // アコーディオンのクリックイベント付与
+      container.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const target = btn.dataset.tab;
+          const bodyId = btn.getAttribute("data-accordion-toggle");
+          const bodyEl = document.getElementById(bodyId);
+          const chevron = btn.querySelector(`[data-chevron-for="${bodyId}"]`);
 
-          tabBtns.forEach((b) => {
-            const active = b === btn;
-            b.classList.toggle("bg-slate-900", active);
-            b.classList.toggle("text-white", active);
-            b.classList.toggle("bg-slate-100", !active);
-            b.classList.toggle("text-slate-700", !active);
-          });
+          if (!bodyEl) return;
 
-          panels.forEach((p) => {
-            p.classList.toggle("hidden", p.dataset.tabPanel !== target);
-          });
-
-          const firstPanel = panels[0];
-          if (firstPanel) {
-            const top =
-              window.scrollY + firstPanel.getBoundingClientRect().top - 80;
-            window.scrollTo({ top, behavior: "smooth" });
+          const isHidden = bodyEl.classList.contains("hidden");
+          if (isHidden) {
+            bodyEl.classList.remove("hidden");
+            if (chevron) chevron.classList.add("rotate-180");
+          } else {
+            bodyEl.classList.add("hidden");
+            if (chevron) chevron.classList.remove("rotate-180");
           }
         });
       });
     }
 
-    // ==============================
-    // メイン
-    // ==============================
+    // 本文に < > が混ざっていても安全に表示するための escape
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // ---------- メイン処理 ----------
     async function main() {
       const propertyNo = getPropertyNoFromUrl();
-      const tabPanels = document.getElementById("tabPanels");
-
       if (!propertyNo) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-rose-600">URL に ?propertyNo=XXXX を指定してください。</p>';
+        showError("URL に ?propertyNo=XXXX が指定されていません。");
+        setText("propertyTitle", "物件Noが指定されていません");
+        setText("propertyMeta", "");
         return;
       }
 
-      let propertyData = null;
-      let masterList = [];
-      let sectionFlags = null;
-      let variantKey = "base";
-      let slug = propertyNo;
-
-      // Firestore から設定を取得（失敗しても Storyblok だけで動く）
-      if (db) {
-        try {
-          [propertyData, masterList] = await Promise.all([
-            fetchPropertyConfig(propertyNo),
-            fetchGuidesMasterRaw(),
-          ]);
-
-          if (propertyData) {
-            slug = propertyData.shiori_slug || propertyNo;
-            variantKey = propertyData.variant_key || "base";
-            sectionFlags = buildSectionFlags(propertyData);
-          }
-        } catch (e) {
-          console.error("Firestore 読み取り中にエラー:", e);
-        }
-      }
+      setText("propertyTitle", "読み込み中…");
+      setText("propertyMeta", `物件No: ${propertyNo}`);
 
       try {
-        const story = await fetchGuideStoryBySlug(slug);
-        renderGuidePage(story, {
-          propertyData,
-          sectionFlags,
-          masterList,
-          variantKey,
-        });
+        const [masterMap, shioriData, propertyMeta] = await Promise.all([
+          loadSectionsMaster(),
+          loadPropertyShiori(propertyNo),
+          loadPropertyMeta(propertyNo),
+        ]);
+
+        if (propertyMeta && propertyMeta.propertyName) {
+          setText("propertyTitle", propertyMeta.propertyName);
+          const metaParts = [];
+          metaParts.push(`物件No: ${propertyNo}`);
+          if (propertyMeta.address) metaParts.push(propertyMeta.address);
+          setText("propertyMeta", metaParts.join(" ｜ "));
+        } else {
+          setText("propertyTitle", `物件No: ${propertyNo}`);
+          setText("propertyMeta", "");
+        }
+
+        if (!shioriData) {
+          showError("この物件の入居のしおりデータ（properties_shiori）が登録されていません。");
+          renderSectionsAccordion([]);
+          return;
+        }
+
+        const mergedSections = mergeSections(masterMap, shioriData);
+        renderSectionsAccordion(mergedSections);
       } catch (e) {
         console.error(e);
-        tabPanels.innerHTML =
-          '<p class="text-sm text-rose-600">データの読み込みに失敗しました。</p>';
+        showError("データの読み込み中にエラーが発生しました。");
       }
     }
 
-    document.addEventListener("DOMContentLoaded", main);
+    main();
   </script>
-
 </body>
 </html>

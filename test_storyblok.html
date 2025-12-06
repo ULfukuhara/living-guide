@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Storyblok API テスト</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 16px; }
+    label { display: block; margin-top: 8px; font-size: 14px; }
+    input { width: 100%; max-width: 480px; padding: 6px 8px; font-size: 14px; }
+    button { margin-top: 12px; padding: 6px 12px; font-size: 14px; }
+    pre { background: #f5f5f5; padding: 8px; overflow-x: auto; font-size: 12px; }
+    .row { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Storyblok API テスト</h1>
+
+  <p style="font-size:13px;">
+    Public Token と slug を入れて「テスト実行」を押すと、<br>
+    <code>/stories/&lt;slug&gt;</code> と <code>?starts_with=&lt;slug&gt;</code> の両方を叩いた結果を表示します。
+  </p>
+
+  <label>
+    Public Token:
+    <input id="token" type="text" value="xY7e0oLtHofaU0EwHzh38Att">
+  </label>
+
+  <label>
+    Slug（例：10100）:
+    <input id="slug" type="text" value="10100">
+  </label>
+
+  <button id="runBtn">テスト実行</button>
+
+  <div class="row">
+    <h2>/stories/&lt;slug&gt; の結果</h2>
+    <pre id="resultDirect">（まだ実行していません）</pre>
+  </div>
+
+  <div class="row">
+    <h2>?starts_with=&lt;slug&gt; の結果</h2>
+    <pre id="resultStartsWith">（まだ実行していません）</pre>
+  </div>
+
+  <script>
+    async function callApi(url) {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        return `STATUS: ${res.status}\nURL: ${url}\n\n${text}`;
+      } catch (e) {
+        return `ERROR: ${e.message}\nURL: ${url}`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      const token = document.getElementById('token').value.trim();
+      const slug  = document.getElementById('slug').value.trim();
+
+      if (!token || !slug) {
+        alert('Token と Slug を入力してください');
+        return;
+      }
+
+      const base = 'https://api.storyblok.com/v2/cdn/stories';
+
+      // ① 完全一致
+      const urlDirect = `${base}/${encodeURIComponent(slug)}?token=${encodeURIComponent(token)}&version=published`;
+      document.getElementById('resultDirect').textContent = '実行中...';
+      const r1 = await callApi(urlDirect);
+      document.getElementById('resultDirect').textContent = r1;
+
+      // ② starts_with（フォルダ配下にある場合の保険）
+      const urlStarts = `${base}?token=${encodeURIComponent(token)}&version=published&starts_with=${encodeURIComponent(slug)}`;
+      document.getElementById('resultStartsWith').textContent = '実行中...';
+      const r2 = await callApi(urlStarts);
+      document.getElementById('resultStartsWith').textContent = r2;
+    });
+  </script>
+</body>
+</html>

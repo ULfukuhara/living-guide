@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居のしおり | guide.univ-life.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <h1 id="propertyTitle" class="text-lg font-semibold text-slate-800">
+          物件名を読み込み中…
+        </h1>
+        <p id="propertyMeta" class="text-xs text-slate-500">
+          物件No / 住所を取得中…
+        </p>
+      </div>
+      <span id="statusBadge" class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+        最新のデータを表示しています
+      </span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-3xl mx-auto px-4 py-4 space-y-4">
+      <!-- エラー表示 -->
+      <div id="errorBox" class="hidden rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"></div>
+
+      <!-- 説明文 -->
+      <section class="text-xs text-slate-500 leading-relaxed">
+        <p>
+          本ページは、この物件で快適にお住まいいただくための「入居のしおり」です。各項目をタップすると詳細な説明が表示されます。
+        </p>
+      </section>
+
+      <!-- セクション一覧（アコーディオン） -->
+      <section id="sectionsContainer" class="space-y-3">
+        <!-- JSで挿入 -->
+      </section>
+
+      <!-- フッター -->
+      <footer class="pt-6 mt-4 border-t border-slate-200 text-[11px] text-slate-400">
+        <p>※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。</p>
+        <p class="mt-1">ユニヴ・ライフ 管理部</p>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Firebase + Firestore (v10) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ======== ここをあなたの Firebase 設定に置き換え ========
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "XXXXXXXXXXXX",
+      appId: "1:XXXXXXXXXXXX:web:XXXXXXXXXXXX"
+    };
+    // ======================================================
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ---------- 共通: URL から propertyNo を取得 ----------
+    function getPropertyNoFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("propertyNo");
+      if (!raw) return null;
+      return raw.trim();
+    }
+
+    // ---------- Firestore 読み込み ----------
+    async function loadSectionsMaster() {
+      const snap = await getDocs(collection(db, "sections_master"));
+      const map = {};
+      snap.forEach((d) => {
+        map[d.id] = d.data();
+      });
+      return map; // { key: {label_ja, summary, order, icon, ...}, ... }
+    }
+
+    async function loadPropertyShiori(propertyNo) {
+      const ref = doc(db, "properties_shiori", propertyNo);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        return null;
+      }
+      return snap.data();
+    }
+
+    // 物件マスタ（properties）から物件名など取得（あれば）
+    async function loadPropertyMeta(propertyNo) {
+      try {
+        const ref = doc(db, "properties", propertyNo);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return null;
+        return snap.data(); // { propertyName, address, area, ... } を想定
+      } catch (e) {
+        console.warn("properties 読み込みエラー:", e);
+        return null;
+      }
+    }
+
+    // ---------- sections_master と properties_shiori をマージ ----------
+    function mergeSections(masterMap, shioriData) {
+      const sections = [];
+      const sectionBodies = shioriData?.sections || {};
+
+      for (const key in masterMap) {
+        const master = masterMap[key];
+        const body = sectionBodies[key]?.body || "";
+
+        // 本文が完全に空なら表示しない → 物件ごとに ON/OFF しやすい
+        if (!body) continue;
+
+        sections.push({
+          key,
+          label: master.label_ja || key,
+          summary: master.summary || "",
+          group: master.group || "",
+          order: typeof master.order === "number" ? master.order : 9999,
+          icon: master.icon || "file-text",
+          body
+        });
+      }
+
+      // order 昇順でソート
+      sections.sort((a, b) => a.order - b.order);
+
+      return sections;
+    }
+
+    // ---------- DOM ヘルパ ----------
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+      if (!box) return;
+      box.textContent = message;
+      box.classList.remove("hidden");
+    }
+
+    // ---------- アコーディオン描画 ----------
+    function renderSectionsAccordion(sections) {
+      const container = document.getElementById("sectionsContainer");
+      container.innerHTML = "";
+
+      if (!sections.length) {
+        container.innerHTML = `
+          <div class="rounded-md border border-slate-200 bg-white px-3 py-3 text-xs text-slate-600">
+            表示できる項目がありませんでした。本文が登録されている項目のみ表示されます。
+          </div>
+        `;
+        return;
+      }
+
+      sections.forEach((sec, index) => {
+        const sectionId = `section-${sec.key}`;
+        const bodyId = `section-body-${sec.key}`;
+        const expandedByDefault = index === 0; // 最初の1件だけ開いておく
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden";
+
+        card.innerHTML = `
+          <button
+            type="button"
+            class="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 focus:outline-none"
+            data-accordion-toggle="${bodyId}"
+          >
+            <div class="flex items-center gap-3 text-left">
+              <div class="flex-shrink-0 rounded-full bg-slate-100 p-2">
+                <i data-lucide="${sec.icon}" class="w-4 h-4 text-slate-600"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-slate-800">
+                  ${sec.label}
+                </div>
+                ${
+                  sec.summary
+                    ? `<div class="text-[11px] text-slate-500 mt-0.5">${sec.summary}</div>`
+                    : ""
+                }
+              </div>
+            </div>
+            <div class="ml-3 flex-shrink-0">
+              <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${expandedByDefault ? "rotate-180" : ""}" data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </button>
+          <div
+            id="${bodyId}"
+            class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${expandedByDefault ? "" : "hidden"}"
+          >
+            <div class="border-t border-slate-100 pt-2 whitespace-pre-wrap">
+              ${escapeHtml(sec.body)}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Lucide アイコンを有効化
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+
+      // アコーディオンのクリックイベント付与
+      container.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const bodyId = btn.getAttribute("data-accordion-toggle");
+          const bodyEl = document.getElementById(bodyId);
+          const chevron = btn.querySelector(`[data-chevron-for="${bodyId}"]`);
+
+          if (!bodyEl) return;
+
+          const isHidden = bodyEl.classList.contains("hidden");
+          if (isHidden) {
+            bodyEl.classList.remove("hidden");
+            if (chevron) chevron.classList.add("rotate-180");
+          } else {
+            bodyEl.classList.add("hidden");
+            if (chevron) chevron.classList.remove("rotate-180");
+          }
+        });
+      });
+    }
+
+    // 本文に < > が混ざっていても安全に表示するための escape
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // ---------- メイン処理 ----------
+    async function main() {
+      const propertyNo = getPropertyNoFromUrl();
+      if (!propertyNo) {
+        showError("URL に ?propertyNo=XXXX が指定されていません。");
+        setText("propertyTitle", "物件Noが指定されていません");
+        setText("propertyMeta", "");
+        return;
+      }
+
+      setText("propertyTitle", "読み込み中…");
+      setText("propertyMeta", `物件No: ${propertyNo}`);
+
+      try {
+        const [masterMap, shioriData, propertyMeta] = await Promise.all([
+          loadSectionsMaster(),
+          loadPropertyShiori(propertyNo),
+          loadPropertyMeta(propertyNo),
+        ]);
+
+        if (propertyMeta && propertyMeta.propertyName) {
+          setText("propertyTitle", propertyMeta.propertyName);
+          const metaParts = [];
+          metaParts.push(`物件No: ${propertyNo}`);
+          if (propertyMeta.address) metaParts.push(propertyMeta.address);
+          setText("propertyMeta", metaParts.join(" ｜ "));
+        } else {
+          setText("propertyTitle", `物件No: ${propertyNo}`);
+          setText("propertyMeta", "");
+        }
+
+        if (!shioriData) {
+          showError("この物件の入居のしおりデータ（properties_shiori）が登録されていません。");
+          renderSectionsAccordion([]);
+          return;
+        }
+
+        const mergedSections = mergeSections(masterMap, shioriData);
+        renderSectionsAccordion(mergedSections);
+      } catch (e) {
+        console.error(e);
+        showError("データの読み込み中にエラーが発生しました。");
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

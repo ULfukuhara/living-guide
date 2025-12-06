@@ -63,12 +63,12 @@
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
       <p>© UNIV LIFE</p>
-      <p>Storyblok + Firestore Living Guide</p>
+      <p>入居のしおり</p>
     </div>
   </footer>
 
   <!-- ======================================================= -->
-  <!-- JS: Firestore だけで表示（前のUIにかなり寄せた版）     -->
+  <!-- JS: Firestore だけで表示（グループタブ＋カードアコーディオン） -->
   <!-- ======================================================= -->
   <script type="module">
     // ==============================
@@ -180,7 +180,7 @@
       snap.forEach((d) => {
         map[d.id] = d.data();
       });
-      return map; // { key: {label_ja, summary, group, order, icon, ...}, ... }
+      return map;
     }
 
     async function loadPropertyShiori(propertyNo) {
@@ -254,7 +254,6 @@
       Object.keys(masterMap).forEach((key) => {
         const master = masterMap[key] || {};
 
-        // flags が false のものは非表示
         if (sectionFlags && key in sectionFlags) {
           if (!sectionFlags[key]) return;
         }
@@ -268,18 +267,17 @@
           summary: master.summary || "",
           group: master.group || "その他",
           order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",  // emoji 等
+          icon: master.icon || "",
           body,
         });
       });
 
-      // セクション自体は order 昇順でソート
       sections.sort((a, b) => a.order - b.order);
       return sections;
     }
 
     // ==============================
-    // グループごとに「ピル型タブ＋カードアコーディオン」で描画
+    // グループごとにタブ＋カードアコーディオンで描画
     // ==============================
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
@@ -294,7 +292,6 @@
         return;
       }
 
-      // group ごとにまとめる（group の icon は最初のセクションの icon を採用）
       const groupMap = new Map();
       sections.forEach((sec) => {
         const gname = sec.group || "その他";
@@ -317,15 +314,11 @@
         return a.name.localeCompare(b.name, "ja");
       });
 
-      groups.forEach((g) => {
-        g.sections.sort((a, b) => a.order - b.order);
-      });
+      groups.forEach((g) => g.sections.sort((a, b) => a.order - b.order));
 
-      // タブ＋パネル生成（スマホでの見た目を前UIに寄せる）
       groups.forEach((group, gIndex) => {
         const active = gIndex === 0;
 
-        // ピル型タブ（左に絵文字アイコン）
         const tabBtn = document.createElement("button");
         tabBtn.type = "button";
         tabBtn.dataset.tabGroup = group.name;
@@ -344,7 +337,6 @@
         `;
         tabNav.appendChild(tabBtn);
 
-        // パネル（中身はカード型アコーディオン）
         const panel = document.createElement("section");
         panel.dataset.tabGroupPanel = group.name;
         panel.className =
@@ -353,7 +345,7 @@
 
         group.sections.forEach((sec, sIndex) => {
           const bodyId = `g${gIndex}-sec-${sec.key}`;
-          const expanded = sIndex === 0; // 各グループの最初だけ開く
+          const expanded = sIndex === 0;
 
           const card = document.createElement("div");
           card.className =
@@ -366,7 +358,6 @@
               data-accordion-toggle="${bodyId}"
             >
               <div class="flex items-center gap-3 text-left">
-                <!-- 左の黒い三角アイコン -->
                 <div class="flex-shrink-0">
                   <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs">
                     ▶
@@ -383,7 +374,6 @@
                   }
                 </div>
               </div>
-              <!-- 右の山形アイコン -->
               <div class="ml-3 flex-shrink-0">
                 <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${
                   expanded ? "rotate-180" : ""
@@ -482,7 +472,7 @@
       }
 
       if (!db) {
-        showError("Firestore の初期化に失敗したため、データを読み込めませんでした。");
+        showError("データを読み込めませんでした。時間をおいて再度お試しください。");
         return;
       }
 
@@ -495,17 +485,17 @@
 
         if (results[0].status === "rejected") {
           console.error("sections_master 読み込みエラー:", results[0].reason);
-          showError("sections_master の読み込みに失敗しました。");
+          showError("データの読み込みに失敗しました。");
           return;
         }
         if (results[1].status === "rejected") {
           console.error("properties_shiori 読み込みエラー:", results[1].reason);
-          showError("properties_shiori の読み込みに失敗しました。");
+          showError("データの読み込みに失敗しました。");
           return;
         }
         if (results[2].status === "rejected") {
           console.error("guides_master_raw 読み込みエラー:", results[2].reason);
-          showError("guides_master_raw の読み込みに失敗しました。");
+          showError("データの読み込みに失敗しました。");
           return;
         }
 
@@ -514,12 +504,11 @@
         const masterList  = results[2].value || [];
 
         if (!propertyData) {
-          showError("この物件の入居のしおり設定（properties_shiori）が登録されていません。");
+          showError("この物件の入居のしおり設定が登録されていません。");
           tabPanels.innerHTML = "";
           return;
         }
 
-        // タイトル・メタ
         const title =
           propertyData.canonicalName ||
           propertyData.propertyName ||

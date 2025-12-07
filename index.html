@@ -7,7 +7,7 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <!-- ★ 追加：Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -54,6 +54,7 @@
 
       <!-- Tabs (= group) -->
       <section>
+        <!-- ★ ここを flex-wrap に変更＆文字小さめ -->
         <div id="tabNav" class="flex flex-wrap gap-2 pb-1 text-xs"></div>
         <div id="tabPanels" class="mt-3 space-y-4"></div>
       </section>
@@ -239,14 +240,12 @@
       Object.keys(masterMap).forEach((key) => {
         const master = masterMap[key] || {};
 
-        // ON/OFFフラグ（properties_shiori の bool）を見て制御
         if (sectionFlags && key in sectionFlags) {
           if (!sectionFlags[key]) return;
         }
 
-        // 本文取得（guides_master_raw）
         const body = pickBodyText(masterList, key, variantKey);
-        if (!body) return; // 本文が無いものはスキップ
+        if (!body) return;
 
         sections.push({
           key,
@@ -254,12 +253,11 @@
           summary: master.summary || "",
           group: master.group || "その他",
           order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",   // ★ アイコンフィールド
+          icon: master.icon || "",
           body,
         });
       });
 
-      // 並び順
       sections.sort((a, b) => a.order - b.order);
       return sections;
     }
@@ -277,7 +275,6 @@
         return;
       }
 
-      // group ごとにまとめる
       const groupMap = new Map();
       sections.forEach((sec) => {
         const gname = sec.group || "その他";
@@ -302,7 +299,6 @@
 
       groups.forEach((g) => g.sections.sort((a, b) => a.order - b.order));
 
-      // タブとパネルを生成
       groups.forEach((group, gIndex) => {
         const active = gIndex === 0;
 
@@ -325,7 +321,6 @@
           (active ? "" : "hidden ") +
           "bg-transparent space-y-3";
 
-        // 各セクション（アコーディオンカード）
         group.sections.forEach((sec, sIndex) => {
           const bodyId = `g${gIndex}-sec-${sec.key}`;
           const expanded = sIndex === 0;
@@ -386,7 +381,7 @@
       setupGroupTabs();
       setupAccordions();
 
-      // Lucide アイコンを SVG に変換
+      // ★ 追加：Lucide アイコンを SVG に変換
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
@@ -476,9 +471,9 @@
           return;
         }
 
-        const masterMap    = results[0].value || {};
+        const masterMap   = results[0].value || {};
         const propertyData = results[1].value || null;
-        const masterList   = results[2].value || [];
+        const masterList  = results[2].value || [];
 
         if (!propertyData) {
           showError("この物件の入居のしおり設定が登録されていません。");
@@ -486,16 +481,14 @@
           return;
         }
 
-        const propertyNoText = `物件No. ${propertyNo}`;
-
         const title =
           propertyData.canonicalName ||
           propertyData.propertyName ||
-          propertyNoText;
+          `物件No. ${propertyNo}`;
         document.getElementById("propertyTitle").textContent = title;
 
         const metaParts = [];
-        metaParts.push(propertyNoText);
+        metaParts.push(`物件No. ${propertyNo}`);
         if (propertyData.address) metaParts.push(propertyData.address);
         document.getElementById("propertyMeta").textContent =
           metaParts.join(" ｜ ");

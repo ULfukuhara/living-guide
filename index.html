@@ -7,7 +7,7 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ★ 追加：Lucide Icons -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -17,16 +17,15 @@
     .richtext a { text-decoration: underline; }
   </style>
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_MEASUREMENT_ID"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <!-- Google tag (gtag.js) ※元の形に合わせてあります -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-  gtag('config', 'G-LKMYKG189C');
-</script>
-
+    gtag('config', 'G-LKMYKG189C');
+  </script>
 </head>
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
@@ -65,7 +64,6 @@
 
       <!-- Tabs (= group) -->
       <section>
-        <!-- ★ ここを flex-wrap に変更＆文字小さめ -->
         <div id="tabNav" class="flex flex-wrap gap-2 pb-1 text-xs"></div>
         <div id="tabPanels" class="mt-3 space-y-4"></div>
       </section>
@@ -82,7 +80,7 @@
   </footer>
 
   <!-- ======================================================= -->
-  <!-- JS: Firestore だけで表示（グループタブ＋カードアコーディオン＋アイコン） -->
+  <!-- JS: Firestore 表示（グループタブ＋カードアコーディオン＋variant_key対応） -->
   <!-- ======================================================= -->
   <script type="module">
     const firebaseConfig = {
@@ -95,6 +93,7 @@
       measurementId: "G-DXMR0VL972"
     };
 
+    // properties_shiori の列名と対応
     const SECTION_KEYS = [
       "key",
       "mailbox",
@@ -119,7 +118,7 @@
       "car_parking",
       "sales",
       "expenses",
-      "cancellation",
+      "cancellation"
     ];
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -128,7 +127,7 @@
       doc,
       getDoc,
       collection,
-      getDocs,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     let db = null;
@@ -139,6 +138,8 @@
       console.error("Firestore 初期化に失敗:", e);
       db = null;
     }
+
+    // ===== ヘルパー関数群 =====
 
     function getPropertyNoFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -154,6 +155,7 @@
         .replace(/'/g, "&#39;");
     }
 
+    // TRUE/FALSE 判定用（shiori_enabled などで使用）
     function normalizeBool(v) {
       if (v === true) return true;
       if (v === false) return false;
@@ -202,29 +204,79 @@
         list.push({
           section_key: data.section_key || "",
           variant_key: data.variant_key || "base",
-          body_text: data.body_text || "",
+          body_text: data.body_text || ""
         });
       });
       return list;
     }
 
-    function buildSectionFlags(propData) {
+    // ★ セクションごとの ON/OFF ＋ variant_key を解釈する
+    //   properties_shiori の各列に:
+    //   - "", false, 0, "false" → 非表示
+    //   - true, 1, "true", "base" → 表示（物件全体の variant_key を使う）
+    //   - その他の文字列 → 表示 + その文字列を variant_key として使う
+    function buildSectionConfig(propData) {
       if (!propData) return null;
-      const flags = {};
+
+      const config = {};
+
       SECTION_KEYS.forEach((key) => {
-        flags[key] = normalizeBool(propData[key]);
+        const raw = propData[key];
+
+        // 未設定 → 非表示
+        if (raw === undefined || raw === null || raw === "") {
+          config[key] = { enabled: false, variant: null };
+          return;
+        }
+
+        // boolean
+        if (typeof raw === "boolean") {
+          config[key] = { enabled: raw, variant: null };
+          return;
+        }
+
+        // number（0 以外は true）
+        if (typeof raw === "number") {
+          config[key] = { enabled: raw !== 0, variant: null };
+          return;
+        }
+
+        // string
+        const s = String(raw).trim();
+        const lower = s.toLowerCase();
+
+        // OFF 系
+        if (["false", "0", "no", "off"].includes(lower)) {
+          config[key] = { enabled: false, variant: null };
+          return;
+        }
+
+        // ON（base 扱い）
+        if (["true", "1", "yes", "on", "base"].includes(lower)) {
+          config[key] = { enabled: true, variant: null };
+          return;
+        }
+
+        // それ以外は「ON ＋ セクション固有 variant_key」
+        config[key] = { enabled: true, variant: s };
       });
-      return flags;
+
+      return config;
     }
 
+    // guides_master_raw から本文を拾う
     function pickBodyText(masterList, sectionKey, variantKey) {
       if (!masterList || masterList.length === 0) return "";
+      const vKey = variantKey || "base";
+
+      // 1. 完全一致
       let hit = masterList.find(
         (row) =>
-          row.section_key === sectionKey && row.variant_key === variantKey
+          row.section_key === sectionKey && row.variant_key === vKey
       );
       if (hit && hit.body_text) return hit.body_text;
 
+      // 2. base フォールバック
       hit = masterList.find(
         (row) =>
           row.section_key === sectionKey && row.variant_key === "base"
@@ -237,42 +289,67 @@
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
       const escaped = escapeHtml(text);
+
+      // URL 自動リンク
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       const withLinks = escaped.replace(
         urlRegex,
         '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
       );
+
+      // 改行 → <br>
       return withLinks.replace(/\r?\n/g, "<br />");
     }
 
-    function mergeSections(masterMap, sectionFlags, masterList, variantKey) {
+    // sections_master × properties_shiori × guides_master_raw を統合
+    function mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey) {
       const sections = [];
 
       Object.keys(masterMap).forEach((key) => {
         const master = masterMap[key] || {};
 
-        if (sectionFlags && key in sectionFlags) {
-          if (!sectionFlags[key]) return;
+        if (sectionConfig && Object.prototype.hasOwnProperty.call(sectionConfig, key)) {
+          const cfg = sectionConfig[key];
+
+          // 完全 OFF
+          if (!cfg.enabled) return;
+
+          const vKey = cfg.variant || defaultVariantKey || "base";
+          const body = pickBodyText(masterList, key, vKey);
+          if (!body) return;
+
+          sections.push({
+            key: key,
+            label: master.label_ja || key,
+            summary: master.summary || "",
+            group: master.group || "その他",
+            order: typeof master.order === "number" ? master.order : 9999,
+            icon: master.icon || "",
+            body: body
+          });
+        } else {
+          // sectionConfig に無いキー → 物件全体 defaultVariantKey で判定
+          const vKey = defaultVariantKey || "base";
+          const body = pickBodyText(masterList, key, vKey);
+          if (!body) return;
+
+          sections.push({
+            key: key,
+            label: master.label_ja || key,
+            summary: master.summary || "",
+            group: master.group || "その他",
+            order: typeof master.order === "number" ? master.order : 9999,
+            icon: master.icon || "",
+            body: body
+          });
         }
-
-        const body = pickBodyText(masterList, key, variantKey);
-        if (!body) return;
-
-        sections.push({
-          key,
-          label: master.label_ja || key,
-          summary: master.summary || "",
-          group: master.group || "その他",
-          order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",
-          body,
-        });
       });
 
       sections.sort((a, b) => a.order - b.order);
       return sections;
     }
 
+    // グループタブ＋アコーディオン描画
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -286,19 +363,20 @@
         return;
       }
 
+      // group ごとにまとめる
       const groupMap = new Map();
       sections.forEach((sec) => {
         const gname = sec.group || "その他";
         if (!groupMap.has(gname)) {
           groupMap.set(gname, {
             name: gname,
-            order: sec.order ?? 9999,
+            order: sec.order || 9999,
             icon: sec.icon || "",
-            sections: [],
+            sections: []
           });
         }
         const g = groupMap.get(gname);
-        g.order = Math.min(g.order, sec.order ?? 9999);
+        g.order = Math.min(g.order, sec.order || 9999);
         if (!g.icon && sec.icon) g.icon = sec.icon;
         g.sections.push(sec);
       });
@@ -328,9 +406,7 @@
 
         const panel = document.createElement("section");
         panel.dataset.tabGroupPanel = group.name;
-        panel.className =
-          (active ? "" : "hidden ") +
-          "bg-transparent space-y-3";
+        panel.className = (active ? "" : "hidden ") + "bg-transparent space-y-3";
 
         group.sections.forEach((sec, sIndex) => {
           const bodyId = `g${gIndex}-sec-${sec.key}`;
@@ -349,7 +425,7 @@
               <div class="flex items-center gap-3 text-left">
                 <div class="flex-shrink-0">
                   <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-700">
-                    <i data-lucide="${sec.icon || 'file-text'}" class="w-4 h-4"></i>
+                    <i data-lucide="${sec.icon || "file-text"}" class="w-4 h-4"></i>
                   </span>
                 </div>
                 <div>
@@ -392,7 +468,7 @@
       setupGroupTabs();
       setupAccordions();
 
-      // ★ 追加：Lucide アイコンを SVG に変換
+      // Lucide アイコンを SVG に変換
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
@@ -420,38 +496,38 @@
             p.classList.toggle("hidden", p.dataset.tabGroupPanel !== target);
           });
 
-          const rect = panels[0]?.getBoundingClientRect();
-          if (rect) {
+          const firstPanel = panels[0];
+          if (firstPanel) {
+            const rect = firstPanel.getBoundingClientRect();
             const top = window.scrollY + rect.top - 80;
-            window.scrollTo({ top, behavior: "smooth" });
+            window.scrollTo({ top: top, behavior: "smooth" });
           }
         });
       });
     }
 
     function setupAccordions() {
-      document
-        .querySelectorAll("[data-accordion-toggle]")
-        .forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const bodyId = btn.getAttribute("data-accordion-toggle");
-            const bodyEl = document.getElementById(bodyId);
-            const chevron = btn.querySelector(
-              `[data-chevron-for="${bodyId}"]`
-            );
-            if (!bodyEl) return;
-            const isHidden = bodyEl.classList.contains("hidden");
-            if (isHidden) {
-              bodyEl.classList.remove("hidden");
-              if (chevron) chevron.classList.add("rotate-180");
-            } else {
-              bodyEl.classList.add("hidden");
-              if (chevron) chevron.classList.remove("rotate-180");
-            }
-          });
+      document.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const bodyId = btn.getAttribute("data-accordion-toggle");
+          const bodyEl = document.getElementById(bodyId);
+          const chevron = btn.querySelector(
+            '[data-chevron-for="' + bodyId + '"]'
+          );
+          if (!bodyEl) return;
+          const isHidden = bodyEl.classList.contains("hidden");
+          if (isHidden) {
+            bodyEl.classList.remove("hidden");
+            if (chevron) chevron.classList.add("rotate-180");
+          } else {
+            bodyEl.classList.add("hidden");
+            if (chevron) chevron.classList.remove("rotate-180");
+          }
         });
+      });
     }
 
+    // ===== メイン処理 =====
     async function main() {
       const propertyNo = getPropertyNoFromUrl();
       const tabPanels = document.getElementById("tabPanels");
@@ -471,20 +547,22 @@
         const results = await Promise.allSettled([
           loadSectionsMaster(),
           loadPropertyShiori(propertyNo),
-          loadGuidesMasterRaw(),
+          loadGuidesMasterRaw()
         ]);
 
-        if (results[0].status === "rejected" ||
-            results[1].status === "rejected" ||
-            results[2].status === "rejected") {
+        if (
+          results[0].status === "rejected" ||
+          results[1].status === "rejected" ||
+          results[2].status === "rejected"
+        ) {
           console.error("読み込みエラー:", results);
           showError("データの読み込みに失敗しました。");
           return;
         }
 
-        const masterMap   = results[0].value || {};
+        const masterMap = results[0].value || {};
         const propertyData = results[1].value || null;
-        const masterList  = results[2].value || [];
+        const masterList = results[2].value || [];
 
         if (!propertyData) {
           showError("この物件の入居のしおり設定が登録されていません。");
@@ -495,11 +573,11 @@
         const title =
           propertyData.canonicalName ||
           propertyData.propertyName ||
-          `物件No. ${propertyNo}`;
+          "物件No. " + propertyNo;
         document.getElementById("propertyTitle").textContent = title;
 
         const metaParts = [];
-        metaParts.push(`物件No. ${propertyNo}`);
+        metaParts.push("物件No. " + propertyNo);
         if (propertyData.address) metaParts.push(propertyData.address);
         document.getElementById("propertyMeta").textContent =
           metaParts.join(" ｜ ");
@@ -510,14 +588,17 @@
           return;
         }
 
-        const sectionFlags = buildSectionFlags(propertyData);
-        const variantKey = propertyData.variant_key || "base";
+        // 物件全体のデフォルト variant_key（なければ base）
+        const defaultVariantKey = propertyData.variant_key || "base";
+
+        // セクションごとの ON/OFF ＋ 個別 variant_key を構築
+        const sectionConfig = buildSectionConfig(propertyData);
 
         const mergedSections = mergeSections(
           masterMap,
-          sectionFlags,
+          sectionConfig,
           masterList,
-          variantKey
+          defaultVariantKey
         );
 
         renderGroupedTabsWithAccordion(mergedSections);

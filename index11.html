@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居のしおり | guide.univ-life.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ★ 追加：Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .richtext p { margin-bottom: 0.6rem; }
+    .richtext ul { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: disc; }
+    .richtext ol { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: decimal; }
+    .richtext a { text-decoration: underline; }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_MEASUREMENT_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LKMYKG189C');
+</script>
+
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+          UL
+        </span>
+        <div>
+          <p class="text-xs text-slate-500">UNIV LIFE 入居者専用</p>
+          <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
+            物件名を読み込み中…
+          </h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
+
+      <!-- Property Meta -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
+        <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
+        <p class="text-[11px] text-slate-400">
+          ※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。
+        </p>
+      </section>
+
+      <!-- エラー表示 -->
+      <section id="errorBox" class="hidden rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></section>
+
+      <!-- Tabs (= group) -->
+      <section>
+        <!-- ★ ここを flex-wrap に変更＆文字小さめ -->
+        <div id="tabNav" class="flex flex-wrap gap-2 pb-1 text-xs"></div>
+        <div id="tabPanels" class="mt-3 space-y-4"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
+      <p>© UNIV LIFE</p>
+      <p>入居のしおり</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================= -->
+  <!-- JS: Firestore だけで表示（グループタブ＋カードアコーディオン＋アイコン） -->
+  <!-- ======================================================= -->
+  <script type="module">
+    const firebaseConfig = {
+      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+      authDomain: "univlife-kanri.firebaseapp.com",
+      projectId: "univlife-kanri",
+      storageBucket: "univlife-kanri.firebasestorage.app",
+      messagingSenderId: "405011982427",
+      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
+      measurementId: "G-DXMR0VL972"
+    };
+
+    const SECTION_KEYS = [
+      "key",
+      "mailbox",
+      "delivery_box",
+      "bicycle_space",
+      "room_equipment",
+      "special_note",
+      "moving",
+      "electricity",
+      "gas",
+      "water",
+      "internet",
+      "trash",
+      "common_area",
+      "pets",
+      "toilet",
+      "noise",
+      "drainage",
+      "ventilation",
+      "heater",
+      "bike_parking",
+      "car_parking",
+      "sales",
+      "expenses",
+      "cancellation",
+    ];
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      getDocs,
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+    } catch (e) {
+      console.error("Firestore 初期化に失敗:", e);
+      db = null;
+    }
+
+    function getPropertyNoFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("propertyNo") || "";
+    }
+
+    function escapeHtml(str) {
+      return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normalizeBool(v) {
+      if (v === true) return true;
+      if (v === false) return false;
+      if (v === 1) return true;
+      if (v === 0) return false;
+      if (typeof v === "string") {
+        const s = v.trim().toLowerCase();
+        if (s === "true" || s === "1" || s === "yes") return true;
+        if (s === "false" || s === "0" || s === "no") return false;
+      }
+      return false;
+    }
+
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+      box.textContent = message;
+      box.classList.remove("hidden");
+    }
+
+    async function loadSectionsMaster() {
+      const colRef = collection(db, "sections_master");
+      const snap = await getDocs(colRef);
+      const map = {};
+      snap.forEach((d) => {
+        map[d.id] = d.data();
+      });
+      return map;
+    }
+
+    async function loadPropertyShiori(propertyNo) {
+      const ref = doc(db, "properties_shiori", propertyNo);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        console.warn("properties_shiori 未登録:", propertyNo);
+        return null;
+      }
+      return snap.data();
+    }
+
+    async function loadGuidesMasterRaw() {
+      const colRef = collection(db, "guides_master_raw");
+      const snap = await getDocs(colRef);
+      const list = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        list.push({
+          section_key: data.section_key || "",
+          variant_key: data.variant_key || "base",
+          body_text: data.body_text || "",
+        });
+      });
+      return list;
+    }
+
+    function buildSectionFlags(propData) {
+      if (!propData) return null;
+      const flags = {};
+      SECTION_KEYS.forEach((key) => {
+        flags[key] = normalizeBool(propData[key]);
+      });
+      return flags;
+    }
+
+    function pickBodyText(masterList, sectionKey, variantKey) {
+      if (!masterList || masterList.length === 0) return "";
+      let hit = masterList.find(
+        (row) =>
+          row.section_key === sectionKey && row.variant_key === variantKey
+      );
+      if (hit && hit.body_text) return hit.body_text;
+
+      hit = masterList.find(
+        (row) =>
+          row.section_key === sectionKey && row.variant_key === "base"
+      );
+      if (hit && hit.body_text) return hit.body_text;
+
+      return "";
+    }
+
+    function renderPlainTextAsHtml(text) {
+      if (!text) return "";
+      const escaped = escapeHtml(text);
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const withLinks = escaped.replace(
+        urlRegex,
+        '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
+      );
+      return withLinks.replace(/\r?\n/g, "<br />");
+    }
+
+    function mergeSections(masterMap, sectionFlags, masterList, variantKey) {
+      const sections = [];
+
+      Object.keys(masterMap).forEach((key) => {
+        const master = masterMap[key] || {};
+
+        if (sectionFlags && key in sectionFlags) {
+          if (!sectionFlags[key]) return;
+        }
+
+        const body = pickBodyText(masterList, key, variantKey);
+        if (!body) return;
+
+        sections.push({
+          key,
+          label: master.label_ja || key,
+          summary: master.summary || "",
+          group: master.group || "その他",
+          order: typeof master.order === "number" ? master.order : 9999,
+          icon: master.icon || "",
+          body,
+        });
+      });
+
+      sections.sort((a, b) => a.order - b.order);
+      return sections;
+    }
+
+    function renderGroupedTabsWithAccordion(sections) {
+      const tabNav = document.getElementById("tabNav");
+      const tabPanels = document.getElementById("tabPanels");
+
+      tabNav.innerHTML = "";
+      tabPanels.innerHTML = "";
+
+      if (!sections.length) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件で公開されている入居のしおりはまだ登録されていません。</p>';
+        return;
+      }
+
+      const groupMap = new Map();
+      sections.forEach((sec) => {
+        const gname = sec.group || "その他";
+        if (!groupMap.has(gname)) {
+          groupMap.set(gname, {
+            name: gname,
+            order: sec.order ?? 9999,
+            icon: sec.icon || "",
+            sections: [],
+          });
+        }
+        const g = groupMap.get(gname);
+        g.order = Math.min(g.order, sec.order ?? 9999);
+        if (!g.icon && sec.icon) g.icon = sec.icon;
+        g.sections.push(sec);
+      });
+
+      const groups = Array.from(groupMap.values()).sort((a, b) => {
+        if (a.order !== b.order) return a.order - b.order;
+        return a.name.localeCompare(b.name, "ja");
+      });
+
+      groups.forEach((g) => g.sections.sort((a, b) => a.order - b.order));
+
+      groups.forEach((group, gIndex) => {
+        const active = gIndex === 0;
+
+        const tabBtn = document.createElement("button");
+        tabBtn.type = "button";
+        tabBtn.dataset.tabGroup = group.name;
+        tabBtn.className =
+          "group-tab inline-flex items-center justify-center px-3 py-1.5 " +
+          "rounded-full whitespace-normal break-words text-[11px] leading-snug " +
+          "text-center max-w-[48%] border shadow-sm " +
+          (active
+            ? "bg-slate-900 text-white border-slate-900"
+            : "bg-slate-100 text-slate-700 border-slate-200");
+        tabBtn.innerHTML = `<span>${escapeHtml(group.name)}</span>`;
+        tabNav.appendChild(tabBtn);
+
+        const panel = document.createElement("section");
+        panel.dataset.tabGroupPanel = group.name;
+        panel.className =
+          (active ? "" : "hidden ") +
+          "bg-transparent space-y-3";
+
+        group.sections.forEach((sec, sIndex) => {
+          const bodyId = `g${gIndex}-sec-${sec.key}`;
+          const expanded = sIndex === 0;
+
+          const card = document.createElement("div");
+          card.className =
+            "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
+
+          card.innerHTML = `
+            <button
+              type="button"
+              class="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 focus:outline-none"
+              data-accordion-toggle="${bodyId}"
+            >
+              <div class="flex items-center gap-3 text-left">
+                <div class="flex-shrink-0">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-700">
+                    <i data-lucide="${sec.icon || 'file-text'}" class="w-4 h-4"></i>
+                  </span>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-slate-900">
+                    ${escapeHtml(sec.label)}
+                  </div>
+                  ${
+                    sec.summary
+                      ? `<div class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(sec.summary)}</div>`
+                      : ""
+                  }
+                </div>
+              </div>
+              <div class="ml-3 flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${
+                  expanded ? "rotate-180" : ""
+                }" data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </button>
+            <div
+              id="${bodyId}"
+              class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${
+                expanded ? "" : "hidden"
+              }"
+            >
+              <div class="border-t border-slate-100 pt-2 richtext">
+                ${renderPlainTextAsHtml(sec.body)}
+              </div>
+            </div>
+          `;
+
+          panel.appendChild(card);
+        });
+
+        tabPanels.appendChild(panel);
+      });
+
+      setupGroupTabs();
+      setupAccordions();
+
+      // ★ 追加：Lucide アイコンを SVG に変換
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    }
+
+    function setupGroupTabs() {
+      const tabs = document.querySelectorAll(".group-tab");
+      const panels = document.querySelectorAll("[data-tab-group-panel]");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.tabGroup;
+
+          tabs.forEach((t) => {
+            const active = t === tab;
+            t.classList.toggle("bg-slate-900", active);
+            t.classList.toggle("text-white", active);
+            t.classList.toggle("border-slate-900", active);
+            t.classList.toggle("bg-slate-100", !active);
+            t.classList.toggle("text-slate-700", !active);
+            t.classList.toggle("border-slate-200", !active);
+          });
+
+          panels.forEach((p) => {
+            p.classList.toggle("hidden", p.dataset.tabGroupPanel !== target);
+          });
+
+          const rect = panels[0]?.getBoundingClientRect();
+          if (rect) {
+            const top = window.scrollY + rect.top - 80;
+            window.scrollTo({ top, behavior: "smooth" });
+          }
+        });
+      });
+    }
+
+    function setupAccordions() {
+      document
+        .querySelectorAll("[data-accordion-toggle]")
+        .forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const bodyId = btn.getAttribute("data-accordion-toggle");
+            const bodyEl = document.getElementById(bodyId);
+            const chevron = btn.querySelector(
+              `[data-chevron-for="${bodyId}"]`
+            );
+            if (!bodyEl) return;
+            const isHidden = bodyEl.classList.contains("hidden");
+            if (isHidden) {
+              bodyEl.classList.remove("hidden");
+              if (chevron) chevron.classList.add("rotate-180");
+            } else {
+              bodyEl.classList.add("hidden");
+              if (chevron) chevron.classList.remove("rotate-180");
+            }
+          });
+        });
+    }
+
+    async function main() {
+      const propertyNo = getPropertyNoFromUrl();
+      const tabPanels = document.getElementById("tabPanels");
+
+      if (!propertyNo) {
+        showError("URL に ?propertyNo=XXXX を指定してください。");
+        tabPanels.innerHTML = "";
+        return;
+      }
+
+      if (!db) {
+        showError("データを読み込めませんでした。時間をおいて再度お試しください。");
+        return;
+      }
+
+      try {
+        const results = await Promise.allSettled([
+          loadSectionsMaster(),
+          loadPropertyShiori(propertyNo),
+          loadGuidesMasterRaw(),
+        ]);
+
+        if (results[0].status === "rejected" ||
+            results[1].status === "rejected" ||
+            results[2].status === "rejected") {
+          console.error("読み込みエラー:", results);
+          showError("データの読み込みに失敗しました。");
+          return;
+        }
+
+        const masterMap   = results[0].value || {};
+        const propertyData = results[1].value || null;
+        const masterList  = results[2].value || [];
+
+        if (!propertyData) {
+          showError("この物件の入居のしおり設定が登録されていません。");
+          tabPanels.innerHTML = "";
+          return;
+        }
+
+        const title =
+          propertyData.canonicalName ||
+          propertyData.propertyName ||
+          `物件No. ${propertyNo}`;
+        document.getElementById("propertyTitle").textContent = title;
+
+        const metaParts = [];
+        metaParts.push(`物件No. ${propertyNo}`);
+        if (propertyData.address) metaParts.push(propertyData.address);
+        document.getElementById("propertyMeta").textContent =
+          metaParts.join(" ｜ ");
+
+        if (normalizeBool(propertyData.shiori_enabled) === false) {
+          tabPanels.innerHTML =
+            '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
+          return;
+        }
+
+        const sectionFlags = buildSectionFlags(propertyData);
+        const variantKey = propertyData.variant_key || "base";
+
+        const mergedSections = mergeSections(
+          masterMap,
+          sectionFlags,
+          masterList,
+          variantKey
+        );
+
+        renderGroupedTabsWithAccordion(mergedSections);
+      } catch (e) {
+        console.error("main() 内でエラー:", e);
+        showError("データの読み込み中にエラーが発生しました。");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+
+</body>
+</html>

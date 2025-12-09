@@ -121,7 +121,7 @@
   <!-- ======================================================= -->
   <!-- JS: Firestore 表示（グループタブ＋カードアコーディオン＋variant_key対応＋部屋専用情報） -->
   <!-- ======================================================= -->
-  <script type="module">
+    <script type="module">
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
       authDomain: "univlife-kanri.firebaseapp.com",
@@ -132,7 +132,6 @@
       measurementId: "G-DXMR0VL972"
     };
 
-    // properties_shiori の列名と対応
     const SECTION_KEYS = [
       "key",
       "mailbox",
@@ -181,15 +180,18 @@
       db = null;
     }
 
-    // ===== ヘルパー関数群 =====
+    // ===== ヘルパー =====
+    function getSearchParams() {
+      return new URLSearchParams(window.location.search);
+    }
 
     function getPropertyNoFromUrl() {
-      const params = new URLSearchParams(window.location.search);
+      const params = getSearchParams();
       return params.get("propertyNo") || "";
     }
 
     function getTokenFromUrl() {
-      const params = new URLSearchParams(window.location.search);
+      const params = getSearchParams();
       return params.get("token") || "";
     }
 
@@ -202,7 +204,6 @@
         .replace(/'/g, "&#39;");
     }
 
-    // TRUE/FALSE 判定用（shiori_enabled などで使用）
     function normalizeBool(v) {
       if (v === true) return true;
       if (v === false) return false;
@@ -222,8 +223,7 @@
       box.classList.remove("hidden");
     }
 
-    // ===== Firestore ロード関数 =====
-
+    // ===== Firestore ロード =====
     async function loadSectionsMaster() {
       const colRef = collection(db, "sections_master");
       const snap = await getDocs(colRef);
@@ -259,7 +259,7 @@
       return list;
     }
 
-    // ★ postdials から token で部屋情報を取得
+    // ★ token → postdials から部屋情報取得
     async function loadRoomSecretByToken(token) {
       if (!token) return null;
       const colRef = collection(db, "postdials");
@@ -270,7 +270,7 @@
       return { id: docSnap.id, ...docSnap.data() };
     }
 
-    // ★ 部屋専用カードの描画（項目がなければ非表示）
+    // ★ 部屋専用カード描画（値がある項目だけ表示）
     function renderRoomSecretSection(roomData) {
       const section = document.getElementById("roomSecretSection");
       if (!section) return;
@@ -280,142 +280,105 @@
       const titleParts = [];
       if (propertyName) titleParts.push(propertyName);
       if (roomNo) titleParts.push(roomNo + "号室");
-      const titleText = titleParts.join(" ");
+      document.getElementById("roomSecretTitle").textContent =
+        titleParts.join(" ") || "このお部屋";
 
-      const titleEl = document.getElementById("roomSecretTitle");
-      titleEl.textContent = titleText || "このお部屋";
+      let hasAny = false;
 
-      // 各項目ごとに「値があれば表示、なければ非表示」の制御
-
-      // 集合ポスト（開錠番号）
       const mailbox = roomData["開錠番号"];
       if (mailbox && String(mailbox).trim() !== "") {
-        const sec = document.getElementById("roomMailboxSection");
-        const valEl = document.getElementById("roomMailboxValue");
-        if (sec && valEl) {
-          sec.classList.remove("hidden");
-          valEl.textContent = String(mailbox);
-        }
+        document.getElementById("roomMailboxSection").classList.remove("hidden");
+        document.getElementById("roomMailboxValue").textContent = String(mailbox);
+        hasAny = true;
       }
 
-      // 宅配ボックス
       const delivery = roomData["宅配ボックス"];
       if (delivery && String(delivery).trim() !== "") {
-        const sec = document.getElementById("roomDeliverySection");
-        const valEl = document.getElementById("roomDeliveryValue");
-        if (sec && valEl) {
-          sec.classList.remove("hidden");
-          valEl.textContent = String(delivery);
-        }
+        document.getElementById("roomDeliverySection").classList.remove("hidden");
+        document.getElementById("roomDeliveryValue").textContent = String(delivery);
+        hasAny = true;
       }
 
-      // 駐輪場
       const bicycle = roomData["駐輪場"];
       if (bicycle && String(bicycle).trim() !== "") {
-        const sec = document.getElementById("roomBicycleSection");
-        const valEl = document.getElementById("roomBicycleValue");
-        if (sec && valEl) {
-          sec.classList.remove("hidden");
-          valEl.textContent = String(bicycle);
-        }
+        document.getElementById("roomBicycleSection").classList.remove("hidden");
+        document.getElementById("roomBicycleValue").textContent = String(bicycle);
+        hasAny = true;
       }
 
-      // Wi-Fi（フィールド名は将来の拡張用。存在すれば表示）
       const wifiSsid = roomData["Wi-Fi_SSID"] || roomData["wifi_ssid"];
       const wifiPass = roomData["Wi-Fi_PASS"] || roomData["wifi_pass"];
       if (
-        wifiSsid && String(wifiSsid).trim() !== "" ||
-        wifiPass && String(wifiPass).trim() !== ""
-      ) {
-        const sec = document.getElementById("roomWifiSection");
-        const ssidEl = document.getElementById("roomWifiSsid");
-        const passEl = document.getElementById("roomWifiPass");
-        if (sec) {
-          sec.classList.remove("hidden");
-        }
-        if (ssidEl && wifiSsid) {
-          ssidEl.textContent = "SSID: " + String(wifiSsid);
-        }
-        if (passEl && wifiPass) {
-          passEl.textContent = "パスワード: " + String(wifiPass);
-        }
-      }
-
-      // いずれか1つでも表示対象があればカード全体を表示
-      if (
-        (mailbox && String(mailbox).trim() !== "") ||
-        (delivery && String(delivery).trim() !== "") ||
-        (bicycle && String(bicycle).trim() !== "") ||
         (wifiSsid && String(wifiSsid).trim() !== "") ||
         (wifiPass && String(wifiPass).trim() !== "")
       ) {
+        document.getElementById("roomWifiSection").classList.remove("hidden");
+        if (wifiSsid) {
+          document.getElementById("roomWifiSsid").textContent =
+            "SSID: " + String(wifiSsid);
+        }
+        if (wifiPass) {
+          document.getElementById("roomWifiPass").textContent =
+            "パスワード: " + String(wifiPass);
+        }
+        hasAny = true;
+      }
+
+      if (hasAny) {
         section.classList.remove("hidden");
       }
     }
 
-    // ★ セクションごとの ON/OFF ＋ variant_key を解釈する
+    // ===== しおり本文関連 =====
     function buildSectionConfig(propData) {
       if (!propData) return null;
-
       const config = {};
 
       SECTION_KEYS.forEach((key) => {
         const raw = propData[key];
 
-        // 未設定 → 非表示
         if (raw === undefined || raw === null || raw === "") {
           config[key] = { enabled: false, variant: null };
           return;
         }
-
-        // boolean
         if (typeof raw === "boolean") {
           config[key] = { enabled: raw, variant: null };
           return;
         }
-
-        // number（0 以外は true）
         if (typeof raw === "number") {
           config[key] = { enabled: raw !== 0, variant: null };
           return;
         }
 
-        // string
         const s = String(raw).trim();
         const lower = s.toLowerCase();
 
-        // OFF 系
         if (["false", "0", "no", "off"].includes(lower)) {
           config[key] = { enabled: false, variant: null };
           return;
         }
 
-        // ON（base 扱い）
         if (["true", "1", "yes", "on", "base"].includes(lower)) {
           config[key] = { enabled: true, variant: null };
           return;
         }
 
-        // それ以外は「ON ＋ セクション固有 variant_key」
         config[key] = { enabled: true, variant: s };
       });
 
       return config;
     }
 
-    // guides_master_raw から本文を拾う
     function pickBodyText(masterList, sectionKey, variantKey) {
       if (!masterList || masterList.length === 0) return "";
       const vKey = variantKey || "base";
 
-      // 1. 完全一致
       let hit = masterList.find(
         (row) =>
           row.section_key === sectionKey && row.variant_key === vKey
       );
       if (hit && hit.body_text) return hit.body_text;
 
-      // 2. base フォールバック
       hit = masterList.find(
         (row) =>
           row.section_key === sectionKey && row.variant_key === "base"
@@ -428,19 +391,14 @@
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
       const escaped = escapeHtml(text);
-
-      // URL 自動リンク
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       const withLinks = escaped.replace(
         urlRegex,
         '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
       );
-
-      // 改行 → <br>
       return withLinks.replace(/\r?\n/g, "<br />");
     }
 
-    // sections_master × properties_shiori × guides_master_raw を統合
     function mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey) {
       const sections = [];
 
@@ -449,8 +407,6 @@
 
         if (sectionConfig && Object.prototype.hasOwnProperty.call(sectionConfig, key)) {
           const cfg = sectionConfig[key];
-
-          // 完全 OFF
           if (!cfg.enabled) return;
 
           const vKey = cfg.variant || defaultVariantKey || "base";
@@ -467,7 +423,6 @@
             body: body
           });
         } else {
-          // sectionConfig に無いキー → 物件全体 defaultVariantKey で判定
           const vKey = defaultVariantKey || "base";
           const body = pickBodyText(masterList, key, vKey);
           if (!body) return;
@@ -488,7 +443,6 @@
       return sections;
     }
 
-    // グループタブ＋アコーディオン描画
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -502,7 +456,6 @@
         return;
       }
 
-      // group ごとにまとめる
       const groupMap = new Map();
       sections.forEach((sec) => {
         const gname = sec.group || "その他";
@@ -549,7 +502,7 @@
 
         group.sections.forEach((sec, sIndex) => {
           const bodyId = `g${gIndex}-sec-${sec.key}`;
-          const expanded = false;   // すべて閉じた状態で開始
+          const expanded = false;
 
           const card = document.createElement("div");
           card.className =
@@ -607,7 +560,6 @@
       setupGroupTabs();
       setupAccordions();
 
-      // Lucide アイコンを SVG に変換
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
@@ -634,13 +586,6 @@
           panels.forEach((p) => {
             p.classList.toggle("hidden", p.dataset.tabGroupPanel !== target);
           });
-
-          const firstPanel = panels[0];
-          if (firstPanel) {
-            const rect = firstPanel.getBoundingClientRect();
-            const top = window.scrollY + rect.top - 80;
-            window.scrollTo({ top: top, behavior: "smooth" });
-          }
         });
       });
     }
@@ -666,7 +611,7 @@
       });
     }
 
-    // ===== メイン処理 =====
+    // ===== main =====
     async function main() {
       const tabPanels = document.getElementById("tabPanels");
 
@@ -678,13 +623,12 @@
       let propertyNo = getPropertyNoFromUrl();
       const token = getTokenFromUrl();
 
-      // ① token があれば、まず postdials から部屋情報を取得
+      // ① token がある場合は postdials から部屋情報を取得して propertyNo を上書き
       if (token) {
         try {
           const roomData = await loadRoomSecretByToken(token);
           if (roomData) {
             renderRoomSecretSection(roomData);
-            // postdials 側に物件No があれば、それを優先
             const bukkenNo = roomData["物件No"];
             if (bukkenNo && String(bukkenNo).trim() !== "") {
               propertyNo = String(bukkenNo).trim();
@@ -698,7 +642,7 @@
         }
       }
 
-      // ② propertyNo が最終的に決まっていない場合はエラー
+      // ② 最終的に propertyNo が空ならエラー
       if (!propertyNo) {
         showError("URL に ?propertyNo=XXXX を指定してください。");
         tabPanels.innerHTML = "";
@@ -750,12 +694,8 @@
           return;
         }
 
-        // 物件全体のデフォルト variant_key（なければ base）
         const defaultVariantKey = propertyData.variant_key || "base";
-
-        // セクションごとの ON/OFF ＋ 個別 variant_key を構築
         const sectionConfig = buildSectionConfig(propertyData);
-
         const mergedSections = mergeSections(
           masterMap,
           sectionConfig,
@@ -772,6 +712,7 @@
 
     document.addEventListener("DOMContentLoaded", main);
   </script>
+
 
 </body>
 </html>

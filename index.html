@@ -50,45 +50,64 @@
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
-      <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
-      <section id="roomSecretSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+    <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
+    <section
+    id="roomSecretSection"
+    class="hidden bg-white rounded-2xl shadow-sm border border-emerald-100 p-4 sm:p-5 space-y-3"
+    >
+    <div class="flex items-start justify-between gap-3">
         <div>
-          <p class="text-[11px] font-medium text-emerald-600">このお部屋専用のご案内</p>
-          <p id="roomSecretTitle" class="mt-1 text-sm sm:text-base font-semibold text-slate-800"></p>
-          <p class="text-[11px] text-slate-400">
-            集合ポスト・宅配ボックス・駐輪場など、このお部屋に固有の情報です。他の方には見せないようご注意ください。
-          </p>
+        <p class="text-[11px] font-medium text-emerald-600">このお部屋専用のご案内</p>
+        <p id="roomSecretTitle" class="mt-1 text-sm sm:text-base font-semibold text-slate-800"></p>
+        <p class="mt-1 text-[11px] text-slate-400">
+            集合ポスト・宅配ボックス・駐輪場・Wi-Fi など、このお部屋に固有の情報です。
+            周囲に人がいない場所でご確認ください。
+        </p>
         </div>
+        <button
+        id="roomSecretToggleBtn"
+        type="button"
+        class="flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-400 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+        >
+        この部屋の情報を表示
+        </button>
+    </div>
+
+    <!-- ▶ 最初は非表示の本体部分 -->
+    <div id="roomSecretBody" class="mt-3 hidden space-y-3">
 
         <!-- 集合ポスト -->
         <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
-          <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
+        <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
+        <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
         </div>
 
         <!-- 宅配ボックス -->
         <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
-          <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
+        <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
+        <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
         </div>
 
         <!-- 駐輪場 -->
         <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
-          <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
+        <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
+        <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
         </div>
 
         <!-- Wi-Fi -->
         <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
-          <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
-          <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+        <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
+        <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
+        <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
         </div>
-      </section>
-      <!-- ▲ 部屋専用ひみつ情報カード -->
+
+    </div>
+    </section>
+    <!-- ▲ 部屋専用ひみつ情報カード -->
+
 
       <!-- Property Meta -->
-      <section class="bg-white rounded-2xlിപാട-shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
         <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
         <p class="text-[11px] text-slate-400">
           ※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。
@@ -235,6 +254,7 @@
       return list;
     }
 
+    // token から postdials 1件取得
     async function loadRoomSecretByToken(token) {
       if (!token) return null;
       const colRef = collection(db, "postdials");
@@ -245,9 +265,12 @@
       return { id: docSnap.id, ...docSnap.data() };
     }
 
+    // 部屋専用カードを組み立て
     function renderRoomSecretSection(roomData) {
       const section = document.getElementById("roomSecretSection");
-      if (!section) return;
+      const body    = document.getElementById("roomSecretBody");
+      const btn     = document.getElementById("roomSecretToggleBtn");
+      if (!section || !body || !btn) return;
 
       const propertyName = roomData["物件名"] || "";
       const roomNo = roomData["号室"] || "";
@@ -292,7 +315,22 @@
         hasAny = true;
       }
 
-      if (hasAny) section.classList.remove("hidden");
+      if (!hasAny) return;   // 情報ゼロならカード自体出さない
+
+      // カードを表示
+      section.classList.remove("hidden");
+
+      // トグル動作（初期は閉じている）
+      btn.addEventListener("click", () => {
+        const hidden = body.classList.contains("hidden");
+        if (hidden) {
+          body.classList.remove("hidden");
+          btn.textContent = "この部屋の情報を閉じる";
+        } else {
+          body.classList.add("hidden");
+          btn.textContent = "この部屋の情報を表示";
+        }
+      });
     }
 
     function pickBodyText(masterList, sectionKey, variantKey) {
@@ -541,12 +579,11 @@
         return;
       }
 
-      // ★ URL から propertyNo / token を「直に」取得（ここをシンプルに）
       const url = new URL(window.location.href);
       let propertyNo = url.searchParams.get("propertyNo") || "";
       const token = url.searchParams.get("token") || "";
 
-      // token があれば、postdials から物件Noを上書き
+      // token があれば postdials から物件No を決める＆部屋カード表示
       if (token) {
         try {
           const roomData = await loadRoomSecretByToken(token);
@@ -572,7 +609,6 @@
         }
       }
 
-      // 最終的に propertyNo が空ならエラー
       if (!propertyNo) {
         showError("URL に ?propertyNo=XXXX または ?token=XXXX を指定してください。");
         tabPanels.innerHTML = "";

@@ -50,39 +50,56 @@
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
-      <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
+            <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
       <section id="roomSecretSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
-        <div>
-          <p class="text-[11px] font-medium text-emerald-600">お部屋専用のご案内</p>
-          <p id="roomSecretTitle" class="mt-1 text-sm sm:text-base font-semibold text-slate-800"></p>
-          <p class="text-[11px] text-slate-400">
-            このお部屋に固有の情報です。他の方には見せないようご注意ください。
-          </p>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[11px] font-medium text-emerald-600">このお部屋専用のご案内</p>
+            <p id="roomSecretTitle" class="mt-1 text-sm sm:text-base font-semibold text-slate-800">
+              <!-- ソフィア武庫川 305号室 など -->
+            </p>
+            <p class="mt-1 text-[11px] text-slate-400">
+              集合ポスト・宅配ボックス・駐輪場・Wi-Fi など、このお部屋に固有の情報です。
+              周囲の人が見ていない場所でご確認ください。
+            </p>
+          </div>
+          <button
+            id="roomSecretToggleBtn"
+            type="button"
+            class="flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-500 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+          >
+            この部屋の情報を表示
+          </button>
         </div>
 
-        <!-- 集合ポスト -->
-        <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
-          <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
-        </div>
+        <!-- ▶ ここから中身（最初は hidden） -->
+        <div id="roomSecretBody" class="mt-3 hidden space-y-3">
 
-        <!-- 宅配ボックス -->
-        <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
-          <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
-        </div>
+          <!-- 集合ポスト -->
+          <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
+            <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
 
-        <!-- 駐輪場 -->
-        <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
-          <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
-        </div>
+          <!-- 宅配ボックス -->
+          <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
+            <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
 
-        <!-- Wi-Fi -->
-        <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
-          <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
-          <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
-          <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+          <!-- 駐輪場 -->
+          <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
+            <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
+
+          <!-- Wi-Fi -->
+          <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
+            <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
+            <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+          </div>
+
         </div>
       </section>
       <!-- ▲ 部屋専用ひみつ情報カード -->
@@ -259,6 +276,7 @@
 
       let hasAny = false;
 
+      // 集合ポスト
       const mailbox = roomData["開錠番号"];
       if (mailbox && String(mailbox).trim() !== "") {
         document.getElementById("roomMailboxSection").classList.remove("hidden");
@@ -266,6 +284,7 @@
         hasAny = true;
       }
 
+      // 宅配ボックス
       const delivery = roomData["宅配ボックス"];
       if (delivery && String(delivery).trim() !== "") {
         document.getElementById("roomDeliverySection").classList.remove("hidden");
@@ -273,6 +292,7 @@
         hasAny = true;
       }
 
+      // 駐輪場
       const bicycle = roomData["駐輪場"];
       if (bicycle && String(bicycle).trim() !== "") {
         document.getElementById("roomBicycleSection").classList.remove("hidden");
@@ -280,6 +300,7 @@
         hasAny = true;
       }
 
+      // Wi-Fi
       const wifiSsid = roomData["Wi-Fi_SSID"] || roomData["wifi_ssid"];
       const wifiPass = roomData["Wi-Fi_PASS"] || roomData["wifi_pass"];
       if (
@@ -287,13 +308,36 @@
         (wifiPass && String(wifiPass).trim() !== "")
       ) {
         document.getElementById("roomWifiSection").classList.remove("hidden");
-        if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID: " + wifiSsid;
-        if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード: " + wifiPass;
+        if (wifiSsid) {
+          document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
+        }
+        if (wifiPass) {
+          document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+        }
         hasAny = true;
       }
 
-      if (hasAny) section.classList.remove("hidden");
+      // 1つでも項目があればカード表示＆トグル設定
+      if (hasAny) {
+        section.classList.remove("hidden");
+
+        const btn = document.getElementById("roomSecretToggleBtn");
+        const body = document.getElementById("roomSecretBody");
+        if (btn && body) {
+          btn.addEventListener("click", () => {
+            const hidden = body.classList.contains("hidden");
+            if (hidden) {
+              body.classList.remove("hidden");
+              btn.textContent = "この部屋の情報を隠す";
+            } else {
+              body.classList.add("hidden");
+              btn.textContent = "この部屋の情報を表示";
+            }
+          });
+        }
+      }
     }
+
 
     function pickBodyText(masterList, sectionKey, variantKey) {
       if (!masterList || masterList.length === 0) return "";

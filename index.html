@@ -302,8 +302,8 @@
       }
 
       // Wi-Fi
-      const wifiSsid = roomData["Wi-Fi_SSID"] || roomData["wifi_ssid"];
-      const wifiPass = roomData["Wi-Fi_PASS"] || roomData["wifi_pass"];
+      const wifiSsid = roomData["SSID"] || roomData["wifi_ssid"];
+      const wifiPass = roomData["password"] || roomData["wifi_pass"];
 
       const hasWifi =
         (wifiSsid && String(wifiSsid).trim() !== "") ||
@@ -349,6 +349,7 @@
           });
         }
       }
+
 
 
       // 1つでも項目があればカード表示＆トグル設定

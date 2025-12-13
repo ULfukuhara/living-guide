@@ -304,19 +304,52 @@
       // Wi-Fi
       const wifiSsid = roomData["Wi-Fi_SSID"] || roomData["wifi_ssid"];
       const wifiPass = roomData["Wi-Fi_PASS"] || roomData["wifi_pass"];
-      if (
+
+      const hasWifi =
         (wifiSsid && String(wifiSsid).trim() !== "") ||
-        (wifiPass && String(wifiPass).trim() !== "")
-      ) {
+        (wifiPass && String(wifiPass).trim() !== "");
+
+      if (hasWifi) {
         document.getElementById("roomWifiSection").classList.remove("hidden");
         if (wifiSsid) {
-          document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
+          document.getElementById("roomWifiSsid").textContent =
+            "SSID： " + String(wifiSsid);
         }
         if (wifiPass) {
-          document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+          document.getElementById("roomWifiPass").textContent =
+            "パスワード： " + String(wifiPass);
         }
         hasAny = true;
       }
+
+      // 1つでも項目があればカード表示＆トグル設定
+      if (hasAny) {
+        section.classList.remove("hidden");
+
+        const btn = document.getElementById("roomSecretToggleBtn");
+        const body = document.getElementById("roomSecretBody");
+
+        // ★ Wi-Fiがある場合のみ補足文言を付与
+        const labelSuffix = hasWifi ? "（Wi-Fi：SSID・パスワード）" : "";
+
+        if (btn) {
+          btn.textContent = "この部屋の情報を表示" + labelSuffix;
+        }
+
+        if (btn && body) {
+          btn.addEventListener("click", () => {
+            const hidden = body.classList.contains("hidden");
+            if (hidden) {
+              body.classList.remove("hidden");
+              btn.textContent = "この部屋の情報を隠す" + labelSuffix;
+            } else {
+              body.classList.add("hidden");
+              btn.textContent = "この部屋の情報を表示" + labelSuffix;
+            }
+          });
+        }
+      }
+
 
       // 1つでも項目があればカード表示＆トグル設定
       if (hasAny) {

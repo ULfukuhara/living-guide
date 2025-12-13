@@ -65,9 +65,12 @@
           <button
             id="roomSecretToggleBtn"
             type="button"
-            class="flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-500 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+            class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
           >
-            この部屋の情報を表示
+            <span id="roomSecretToggleLabel">このお部屋の情報を表示</span>
+            <span id="roomSecretWifiIconWrap" class="hidden inline-flex items-center">
+              <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+            </span>
           </button>
         </div>
 
@@ -262,116 +265,116 @@
       return { id: docSnap.id, ...docSnap.data() };
     }
 
-    // 部屋専用カードを組み立て
-    function renderRoomSecretSection(roomData) {
-      const section = document.getElementById("roomSecretSection");
-      if (!section) return;
+  // 部屋専用カードを組み立て（修正版：ssid/password に対応 + 押したら必ず表示）
+  function renderRoomSecretSection(roomData) {
+    const section = document.getElementById("roomSecretSection");
+    if (!section) return;
 
-      const propertyName = roomData["物件名"] || "";
-      const roomNo = roomData["号室"] || "";
-      const titleParts = [];
-      if (propertyName) titleParts.push(propertyName);
-      if (roomNo) titleParts.push(roomNo + "号室");
-      document.getElementById("roomSecretTitle").textContent =
-        titleParts.join(" ") || "このお部屋";
+    // タイトル
+    const propertyName = roomData["物件名"] || roomData["propertyName"] || "";
+    const roomNo = roomData["号室"] || roomData["room"] || "";
+    const titleParts = [];
+    if (propertyName) titleParts.push(propertyName);
+    if (roomNo) titleParts.push(roomNo + "号室");
+    const titleEl = document.getElementById("roomSecretTitle");
+    if (titleEl) titleEl.textContent = titleParts.join(" ") || "このお部屋";
 
-      let hasAny = false;
+    let hasAny = false;
 
-      // 集合ポスト
-      const mailbox = roomData["開錠番号"];
-      if (mailbox && String(mailbox).trim() !== "") {
-        document.getElementById("roomMailboxSection").classList.remove("hidden");
-        document.getElementById("roomMailboxValue").textContent = String(mailbox);
-        hasAny = true;
-      }
+    // 集合ポスト
+    const mailbox = roomData["開錠番号"] ?? roomData["mailbox"];
+    if (mailbox && String(mailbox).trim() !== "") {
+      document.getElementById("roomMailboxSection")?.classList.remove("hidden");
+      document.getElementById("roomMailboxValue").textContent = String(mailbox);
+      hasAny = true;
+    }
 
-      // 宅配ボックス
-      const delivery = roomData["宅配ボックス"];
-      if (delivery && String(delivery).trim() !== "") {
-        document.getElementById("roomDeliverySection").classList.remove("hidden");
-        document.getElementById("roomDeliveryValue").textContent = String(delivery);
-        hasAny = true;
-      }
+    // 宅配ボックス
+    const delivery = roomData["宅配ボックス"] ?? roomData["delivery_box"];
+    if (delivery && String(delivery).trim() !== "") {
+      document.getElementById("roomDeliverySection")?.classList.remove("hidden");
+      document.getElementById("roomDeliveryValue").textContent = String(delivery);
+      hasAny = true;
+    }
 
-      // 駐輪場
-      const bicycle = roomData["駐輪場"];
-      if (bicycle && String(bicycle).trim() !== "") {
-        document.getElementById("roomBicycleSection").classList.remove("hidden");
-        document.getElementById("roomBicycleValue").textContent = String(bicycle);
-        hasAny = true;
-      }
+    // 駐輪場
+    const bicycle = roomData["駐輪場"] ?? roomData["bicycle_space"];
+    if (bicycle && String(bicycle).trim() !== "") {
+      document.getElementById("roomBicycleSection")?.classList.remove("hidden");
+      document.getElementById("roomBicycleValue").textContent = String(bicycle);
+      hasAny = true;
+    }
 
-      // Wi-Fi
-      const wifiSsid = roomData["SSID"] || roomData["wifi_ssid"];
-      const wifiPass = roomData["password"] || roomData["wifi_pass"];
+    // ★ Wi-Fi（Firestore新フィールド ssid/password にも対応）
+    const wifiSsid =
+      roomData["ssid"] ||
+      roomData["Wi-Fi_SSID"] ||
+      roomData["wifi_ssid"] ||
+      "";
 
-      const hasWifi =
-        (wifiSsid && String(wifiSsid).trim() !== "") ||
-        (wifiPass && String(wifiPass).trim() !== "");
+    const wifiPass =
+      roomData["password"] ||
+      roomData["Wi-Fi_PASS"] ||
+      roomData["wifi_pass"] ||
+      "";
 
-      if (hasWifi) {
-        document.getElementById("roomWifiSection").classList.remove("hidden");
-        if (wifiSsid) {
-          document.getElementById("roomWifiSsid").textContent =
-            "SSID： " + String(wifiSsid);
-        }
-        if (wifiPass) {
-          document.getElementById("roomWifiPass").textContent =
-            "パスワード： " + String(wifiPass);
-        }
-        hasAny = true;
-      }
+    const hasWifi =
+      (wifiSsid && String(wifiSsid).trim() !== "") ||
+      (wifiPass && String(wifiPass).trim() !== "");
 
-      // 1つでも項目があればカード表示＆トグル設定
-      if (hasAny) {
-        section.classList.remove("hidden");
+    if (hasWifi) {
+      document.getElementById("roomWifiSection")?.classList.remove("hidden");
+      if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID： " + String(wifiSsid);
+      if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード： " + String(wifiPass);
+      hasAny = true;
+    }
 
-        const btn = document.getElementById("roomSecretToggleBtn");
-        const body = document.getElementById("roomSecretBody");
+    // 1つでも項目があればカードを出して、押したら必ず開く
+    if (hasAny) {
+      section.classList.remove("hidden");
 
-        // ★ Wi-Fiがある場合のみ補足文言を付与
-        const labelSuffix = hasWifi ? "（Wi-Fi：SSID・パスワード）" : "";
+      const btn = document.getElementById("roomSecretToggleBtn");
+      const labelEl = document.getElementById("roomSecretToggleLabel");
+      const wifiIconWrap = document.getElementById("roomSecretWifiIconWrap");
+      const body = document.getElementById("roomSecretBody");
 
-        if (btn) {
-          btn.textContent = "この部屋の情報を表示" + labelSuffix;
-        }
+      // Wi-Fiがある時だけアイコン表示
+      if (wifiIconWrap) wifiIconWrap.classList.toggle("hidden", !hasWifi);
 
-        if (btn && body) {
+      // 初期は閉じる（確実に）
+      if (body) body.classList.add("hidden");
+      if (labelEl) labelEl.textContent = "このお部屋の情報を表示";
+
+      // クリックで開閉（確実に）
+      if (btn && body) {
+        // 多重登録防止
+        if (!btn.dataset.bound) {
+          btn.dataset.bound = "1";
           btn.addEventListener("click", () => {
             const hidden = body.classList.contains("hidden");
             if (hidden) {
               body.classList.remove("hidden");
-              btn.textContent = "この部屋の情報を隠す" + labelSuffix;
+              if (labelEl) labelEl.textContent = "このお部屋の情報を隠す";
             } else {
               body.classList.add("hidden");
-              btn.textContent = "この部屋の情報を表示" + labelSuffix;
+              if (labelEl) labelEl.textContent = "このお部屋の情報を表示";
+            }
+
+            // Lucideアイコンの描画（保険）
+            if (window.lucide && typeof window.lucide.createIcons === "function") {
+              window.lucide.createIcons();
             }
           });
         }
       }
 
-
-
-      // 1つでも項目があればカード表示＆トグル設定
-      if (hasAny) {
-        section.classList.remove("hidden");
-
-        const btn = document.getElementById("roomSecretToggleBtn");
-        const body = document.getElementById("roomSecretBody");
-        if (btn && body) {
-          btn.addEventListener("click", () => {
-            const hidden = body.classList.contains("hidden");
-            if (hidden) {
-              body.classList.remove("hidden");
-              btn.textContent = "この部屋の情報を隠す";
-            } else {
-              body.classList.add("hidden");
-              btn.textContent = "この部屋の情報を表示";
-            }
-          });
-        }
+      // 初回描画（アイコン）
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
       }
     }
+  }
+
 
 
     function pickBodyText(masterList, sectionKey, variantKey) {

@@ -1,15 +1,136 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>JS Test</title>
+  <meta charset="UTF-8" />
+  <title>入居直後アンケート | UNIV LIFE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>JS テスト</h1>
 
+<body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 space-y-4">
+    <h1 class="text-base font-semibold">アンケート（動作確認）</h1>
+
+    <div class="rounded-lg border bg-slate-50 p-3 text-xs">
+      <div class="font-semibold text-slate-700 mb-2">実行ログ</div>
+      <pre id="log" class="whitespace-pre-wrap text-slate-700"></pre>
+    </div>
+
+    <div id="msg" class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
+
+    <div class="space-y-2">
+      <label class="flex items-center gap-2 text-sm">
+        <input type="radio" name="room" value="5"> ★★★★★ とても満足
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="radio" name="room" value="3"> ★★★☆☆ ふつう
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="radio" name="room" value="1"> ★☆☆☆☆ 不満
+      </label>
+    </div>
+
+    <textarea id="comment" class="w-full rounded-lg border p-2 text-sm" rows="3" placeholder="任意"></textarea>
+
+    <button id="submitBtn" type="button"
+      class="w-full rounded-lg bg-emerald-600 text-white py-2 text-sm font-semibold">
+      送信テスト
+    </button>
+  </div>
+
+  <!-- Firebase 読み込み（onload / onerror で検知） -->
   <script>
-    alert("JS is running");
-    document.body.insertAdjacentHTML("beforeend", "<p>JS 実行中</p>");
+    const logEl = document.getElementById("log");
+    const msgEl = document.getElementById("msg");
+
+    function log(s) {
+      logEl.textContent += s + "\n";
+    }
+    function showError(s) {
+      msgEl.textContent = s;
+      msgEl.classList.remove("hidden");
+    }
+
+    log("1) inline JS: OK（ここが出ればJS実行OK）");
+
+    // Firebase script を動的に読み込んで成否を表示
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error("failed to load: " + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    (async () => {
+      try {
+        log("2) Loading firebase-app-compat...");
+        await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
+        log("   ✅ firebase-app-compat loaded");
+
+        log("3) Loading firebase-firestore-compat...");
+        await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js");
+        log("   ✅ firebase-firestore-compat loaded");
+
+        if (!window.firebase) {
+          throw new Error("window.firebase is undefined（Firebaseが読み込めていません）");
+        }
+        log("4) window.firebase: OK");
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+          authDomain: "univlife-kanri.firebaseapp.com",
+          projectId: "univlife-kanri"
+        };
+
+        log("5) firebase.initializeApp...");
+        try {
+          firebase.initializeApp(firebaseConfig);
+          log("   ✅ initializeApp OK");
+        } catch (e) {
+          // 既に初期化済みならスルー
+          log("   ⚠ initializeApp skipped: " + e.message);
+        }
+
+        const db = firebase.firestore();
+        log("6) firestore(): OK");
+
+        document.getElementById("submitBtn").addEventListener("click", async () => {
+          msgEl.classList.add("hidden");
+          log("7) click: OK（ボタン反応）");
+
+          const room = document.querySelector('input[name="room"]:checked');
+          if (!room) {
+            showError("評価を選んでください");
+            log("   ❌ room not selected");
+            return;
+          }
+
+          try {
+            log("8) add() to movein_survey...");
+            await db.collection("movein_survey").add({
+              room_score: Number(room.value),
+              comment: document.getElementById("comment").value || "",
+              created_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            log("   ✅ saved");
+            showError("✅ 保存できました（テスト）");
+            msgEl.className = "rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700";
+            msgEl.classList.remove("hidden");
+          } catch (e) {
+            log("   ❌ save failed: " + e.message);
+            showError("送信に失敗しました: " + e.message);
+          }
+        });
+
+        log("✅ Ready: ボタンを押してテストしてください");
+      } catch (e) {
+        log("❌ ERROR: " + e.message);
+        showError("初期化エラー: " + e.message);
+      }
+    })();
   </script>
 </body>
 </html>

@@ -7,7 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    .emoji-radio input { transform: scale(1.2); margin-right: 6px; }
+    .rating label { cursor: pointer; }
+    .rating input { transform: scale(1.15); margin-right: 8px; }
+    .stars { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; letter-spacing: 0.5px; }
   </style>
 </head>
 
@@ -33,25 +35,36 @@
 
     <!-- フォーム -->
     <form id="surveyForm" class="hidden space-y-6">
-      <h1 class="text-base font-semibold text-slate-800">
-        ご入居後のご感想を教えてください 😊
-      </h1>
+      <div class="space-y-1">
+        <h1 class="text-base font-semibold text-slate-800">
+          ご入居後のご感想を教えてください
+        </h1>
+        <p class="text-xs text-slate-500">所要時間：1分程度</p>
+      </div>
 
       <!-- Q1 -->
       <div>
         <p class="text-sm font-medium">① お部屋の状態はいかがでしたか？</p>
-        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="4"> 😄 とても満足
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="3"> 🙂 概ね満足
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="2"> 😐 少し気になる
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="1"> 😟 不満
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
           </label>
         </div>
       </div>
@@ -59,18 +72,26 @@
       <!-- Q2 -->
       <div>
         <p class="text-sm font-medium">② お部屋探し（仲介）はいかがでしたか？</p>
-        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="4"> 😄 とても満足
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="3"> 🙂 概ね満足
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="2"> 😐 少し気になる
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="1"> 😟 不満
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
           </label>
         </div>
       </div>
@@ -78,29 +99,37 @@
       <!-- Q3 -->
       <div>
         <p class="text-sm font-medium">③ 管理会社の対応や入居のしおりは分かりやすかったですか？</p>
-        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="4"> 😄 とても満足
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="3"> 🙂 概ね満足
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="2"> 😐 少し気になる
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
           </label>
-          <label class="emoji-radio flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="1"> 😟 不満
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
           </label>
         </div>
       </div>
 
       <!-- Q4 -->
       <div>
-        <p class="text-sm font-medium">④ 気になったことがあれば教えてください（任意）</p>
+        <p class="text-sm font-medium">④ 気になった点・ご要望があれば教えてください（任意）</p>
         <textarea id="comment"
           class="mt-2 w-full rounded-lg border border-slate-300 p-2 text-sm"
           rows="3"
-          placeholder="例）しおりの○○が分かりにくかった、設備の△△が気になる など"></textarea>
+          placeholder="例）しおりの○○が分かりにくかった／設備の△△が気になる など"></textarea>
       </div>
 
       <button type="button" id="submitBtn"
@@ -179,9 +208,8 @@
     }
 
     async function submitSurvey() {
-      // 必須3問チェック
       if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
-        showError("①〜③は選択してください（絵文字をタップ）。");
+        showError("①〜③は選択してください。");
         return;
       }
 
@@ -204,21 +232,18 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // メタ表示
       const metaParts = [];
       if (token) metaParts.push("tokenあり");
       if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
       metaParts.push(`source: ${source}`);
       document.getElementById("metaLine").textContent = metaParts.join(" / ");
 
-      // 公開用は propertyNo 推奨（あなたは入ってるのでOK）
       if (!token && !propertyNo) {
         showError("URLに ?propertyNo=XXXX を付けてください。");
         showForm();
         return;
       }
 
-      // 回答済み判定
       try {
         if (token) {
           const answered = await checkAnsweredByToken();
@@ -228,7 +253,7 @@
         }
       } catch (e) {
         console.error(e);
-        showForm(); // 判定に失敗しても回答できるようにする
+        showForm();
       }
 
       document.getElementById("retryBtn").addEventListener("click", showForm);

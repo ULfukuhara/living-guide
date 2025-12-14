@@ -4,318 +4,141 @@
   <meta charset="UTF-8" />
   <title>入居直後アンケート | UNIV LIFE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    .rating label { cursor: pointer; }
-    .rating input { transform: scale(1.15); margin-right: 8px; }
-    .stars { letter-spacing: 0.5px; }
-  </style>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
+
   <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 space-y-5">
-    <p id="metaLine" class="text-[10px] text-slate-400"></p>
 
-    <div id="errorLine" class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
+    <h1 class="text-base font-semibold text-slate-800">
+      ご入居直後アンケート（1分）
+    </h1>
 
-    <!-- 回答済み表示 -->
-    <div id="answeredBox" class="hidden space-y-4 text-center">
-      <p class="text-sm text-emerald-700 font-semibold">
-        ✅ 送信が完了しました
-      </p>
-      <p class="text-xs text-slate-500">
-        ご協力ありがとうございました。いただいたご意見はサービス改善に活用いたします。
-      </p>
-
-      <div class="space-y-2">
-        <button id="retryBtn"
-          class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-          もう一度回答する
-        </button>
-        <button id="backBtn"
-          class="w-full rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800">
-          入居のしおりに戻る
-        </button>
-      </div>
+    <div id="msg"
+      class="hidden rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
     </div>
 
     <!-- フォーム -->
-    <form id="surveyForm" class="hidden space-y-6">
-      <div class="space-y-1">
-        <h1 class="text-base font-semibold text-slate-800">
-          ご入居後のご感想を教えてください
-        </h1>
-        <p class="text-xs text-slate-500">所要時間：1分程度（任意）</p>
-      </div>
+    <form id="surveyForm" class="space-y-6">
 
       <!-- Q1 -->
       <div>
         <p class="text-sm font-medium">① お部屋の状態はいかがでしたか？</p>
-        <div class="rating mt-2 space-y-2 text-sm">
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="5">
-            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
+        <div class="mt-2 space-y-2 text-sm">
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="room" value="5" class="mr-2"> ★★★★★ とても満足
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="4">
-            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="room" value="4" class="mr-2"> ★★★★☆ 満足
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="3">
-            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="room" value="3" class="mr-2"> ★★★☆☆ ふつう
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="2">
-            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="room" value="2" class="mr-2"> ★★☆☆☆ やや不満
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="room" value="1">
-            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="room" value="1" class="mr-2"> ★☆☆☆☆ 不満
           </label>
         </div>
       </div>
 
       <!-- Q2 -->
       <div>
-        <p class="text-sm font-medium">② お部屋探し（仲介）はいかがでしたか？</p>
-        <div class="rating mt-2 space-y-2 text-sm">
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="5">
-            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
+        <p class="text-sm font-medium">② 管理会社・入居のしおりはいかがでしたか？</p>
+        <div class="mt-2 space-y-2 text-sm">
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="management" value="5" class="mr-2"> ★★★★★ とても満足
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="4">
-            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="management" value="4" class="mr-2"> ★★★★☆ 満足
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="3">
-            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="management" value="3" class="mr-2"> ★★★☆☆ ふつう
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="2">
-            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="management" value="2" class="mr-2"> ★★☆☆☆ やや不満
           </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="broker" value="1">
-            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
+          <label class="flex items-center border rounded-lg px-3 py-2">
+            <input type="radio" name="management" value="1" class="mr-2"> ★☆☆☆☆ 不満
           </label>
         </div>
       </div>
 
-      <!-- Q3 -->
+      <!-- コメント -->
       <div>
-        <p class="text-sm font-medium">③ 管理会社の対応や入居のしおりは分かりやすかったですか？</p>
-        <div class="rating mt-2 space-y-2 text-sm">
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="5">
-            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
-          </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="4">
-            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
-          </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="3">
-            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
-          </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="2">
-            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
-          </label>
-          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
-            <input type="radio" name="management" value="1">
-            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Q4 -->
-      <div>
-        <p class="text-sm font-medium">④ 気になった点・ご要望があれば教えてください（任意）</p>
+        <p class="text-sm font-medium">③ 気になった点（任意）</p>
         <textarea id="comment"
-          class="mt-2 w-full rounded-lg border border-slate-300 p-2 text-sm"
+          class="mt-2 w-full rounded-lg border p-2 text-sm"
           rows="3"
-          placeholder="例）しおりの○○が分かりにくかった／設備の△△が気になる など"></textarea>
+          placeholder="ご自由にご記入ください"></textarea>
       </div>
 
       <!-- 送信 -->
-      <button type="submit" id="submitBtn"
-        class="w-full rounded-lg bg-emerald-600 text-white py-2 text-sm font-semibold hover:bg-emerald-700">
+      <button type="button" id="submitBtn"
+        class="w-full rounded-lg bg-emerald-600 text-white py-2 text-sm font-semibold">
         送信
       </button>
 
-      <p class="text-[11px] text-slate-400">※ 送信内容はサービス改善の目的で利用します。</p>
     </form>
   </div>
 
-  <script type="module">
+  <!-- ================= Firebase compat（module不使用） ================= -->
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ★ 確認用（これが出なければJS未実行）
     alert("survey.js loaded");
-    console.log("survey.js loaded");
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      query,
-      where,
-      limit,
-      getDocs,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
       authDomain: "univlife-kanri.firebaseapp.com",
-      projectId: "univlife-kanri",
-      storageBucket: "univlife-kanri.firebasestorage.app",
-      messagingSenderId: "405011982427",
-      appId: "1:405011982427:web:cf56a37550ab714bfdb77e"
+      projectId: "univlife-kanri"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    const url = new URL(window.location.href);
-    const token = (url.searchParams.get("token") || "").trim();
-    const propertyNo = (url.searchParams.get("propertyNo") || "").trim();
-    const source = (url.searchParams.get("source") || "unknown").trim();
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("submitBtn");
 
-    function showError(msg) {
-      const el = document.getElementById("errorLine");
-      el.textContent = msg;
-      el.classList.remove("hidden");
-    }
-    function hideError() {
-      const el = document.getElementById("errorLine");
-      el.textContent = "";
-      el.classList.add("hidden");
+    function showMsg(text) {
+      msg.textContent = text;
+      msg.classList.remove("hidden");
     }
 
-    function getScore(name) {
-      const el = document.querySelector(`input[name="${name}"]:checked`);
-      return el ? Number(el.value) : null;
-    }
+    btn.addEventListener("click", async () => {
+      showMsg("送信中…");
 
-    async function checkAnsweredByToken() {
-      const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
-      const snap = await getDocs(q1);
-      return !snap.empty;
-    }
+      const room = document.querySelector('input[name="room"]:checked');
+      const management = document.querySelector('input[name="management"]:checked');
 
-    function localKey() {
-      return `movein_survey_answered_${propertyNo || "unknown"}`;
-    }
-    function checkAnsweredLocal() {
-      try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
-    }
-    function markAnsweredLocal() {
-      try { localStorage.setItem(localKey(), "1"); } catch {}
-    }
-
-    function showAnswered() {
-      document.getElementById("surveyForm").classList.add("hidden");
-      document.getElementById("answeredBox").classList.remove("hidden");
-    }
-    function showForm() {
-      document.getElementById("answeredBox").classList.add("hidden");
-      document.getElementById("surveyForm").classList.remove("hidden");
-    }
-
-    async function submitSurvey() {
-      hideError();
-
-      // 反応確認（押した瞬間に必ず変化）
-      // showError("送信処理を開始しました…"); // ←必要なら一時的にON
-
-      if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
-        showError("①〜③は選択してください。");
+      if (!room || !management) {
+        showMsg("①②は必須です");
         return;
       }
 
-      const btn = document.getElementById("submitBtn");
-      btn.disabled = true;
-      const original = btn.textContent;
-      btn.textContent = "送信中…";
-
       try {
-        const data = {
-          token: token || null,
-          propertyNo: propertyNo || null,
-          source,
-          room_score: getScore("room"),
-          broker_score: getScore("broker"),
-          management_score: getScore("management"),
+        await db.collection("movein_survey").add({
+          room_score: Number(room.value),
+          management_score: Number(management.value),
           comment: document.getElementById("comment").value || "",
-          created_at: serverTimestamp(),
-          user_agent: navigator.userAgent
-        };
-
-        await addDoc(collection(db, "movein_survey"), data);
-
-        if (!token) markAnsweredLocal();
-        showAnswered();
-
-      } catch (e) {
-        console.error("addDoc failed:", e);
-        // 典型：Missing or insufficient permissions（Firestoreルール）
-        showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = original;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      // メタ表示
-      const metaParts = [];
-      if (token) metaParts.push("tokenあり");
-      if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
-      metaParts.push(`source: ${source}`);
-      document.getElementById("metaLine").textContent = metaParts.join(" / ");
-
-      // public は propertyNo 必須（あなたの設計）
-      if (!token && !propertyNo) {
-        showError("URLに ?propertyNo=XXXX を付けてください。");
-        showForm();
-        return;
-      }
-
-      // 回答済み判定（失敗しても回答可能にする）
-      try {
-        if (token) {
-          const answered = await checkAnsweredByToken();
-          answered ? showAnswered() : showForm();
-        } else {
-          checkAnsweredLocal() ? showAnswered() : showForm();
-        }
-      } catch (e) {
-        console.error("answered check failed:", e);
-        showForm();
-      }
-
-      // フォームsubmitで確実に拾う
-      const formEl = document.getElementById("surveyForm");
-      if (formEl) {
-        formEl.addEventListener("submit", (e) => {
-          e.preventDefault();
-          submitSurvey();
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
-      } else {
-        console.error("surveyForm not found");
+
+        showMsg("送信が完了しました。ご協力ありがとうございます。");
+
+      } catch (e) {
+        console.error(e);
+        showMsg("送信に失敗しました：" + e.message);
       }
-
-      document.getElementById("retryBtn").addEventListener("click", showForm);
-
-      // 「戻る」ボタン：来た元に戻す（なければトップへ）
-      document.getElementById("backBtn").addEventListener("click", () => {
-        if (document.referrer) {
-          window.location.href = document.referrer;
-        } else {
-          window.location.href = "https://guide.univ-life.com/";
-        }
-      });
     });
   </script>
+
 </body>
 </html>

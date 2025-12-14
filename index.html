@@ -7,7 +7,7 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons（※タブ側で使用。部屋専用カードでは一切使わない） -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -15,14 +15,7 @@
     .richtext ul { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: disc; }
     .richtext ol { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: decimal; }
     .richtext a { text-decoration: underline; }
-
-    /* ★ 追加：部屋専用カードは一切アイコンを出さない（Lucide含む） */
-    #roomSecretSection i,
-    #roomSecretSection svg {
-      display: none !important;
-    }
   </style>
-
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LKMYKG189C"></script>
@@ -58,7 +51,6 @@
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
       <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
-      <!-- ★ 部屋専用カードは一切アイコンなし（Lucideも触らない） -->
       <section id="roomSecretSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -68,14 +60,12 @@
               集合ポストの開錠番号など、このお部屋に固有の情報です。
             </p>
           </div>
-
-          <!-- ★ ボタンもテキストのみ（アイコンなし） -->
           <button
             id="roomSecretToggleBtn"
             type="button"
             class="flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-500 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
           >
-            このお部屋の情報を表示
+            この部屋の情報を表示
           </button>
         </div>
 
@@ -178,7 +168,7 @@
       "sales",
       "expenses",
       "cancellation",
-      "usac"
+      "management_other" // ★追加：管理＞その他
     ];
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -271,93 +261,77 @@
       return { id: docSnap.id, ...docSnap.data() };
     }
 
-    // 部屋専用カードを組み立て（ssid/password 対応 + 押したら表示）
-    // ★ 重要：この関数内では Lucide を一切呼ばない（アイコンも一切生成しない）
+    // 部屋専用カードを組み立て
     function renderRoomSecretSection(roomData) {
       const section = document.getElementById("roomSecretSection");
       if (!section) return;
 
-      // タイトル
-      const propertyName = roomData["物件名"] || roomData["propertyName"] || "";
-      const roomNo = roomData["号室"] || roomData["room"] || "";
+      const propertyName = roomData["物件名"] || "";
+      const roomNo = roomData["号室"] || "";
       const titleParts = [];
       if (propertyName) titleParts.push(propertyName);
       if (roomNo) titleParts.push(roomNo + "号室");
-      const titleEl = document.getElementById("roomSecretTitle");
-      if (titleEl) titleEl.textContent = titleParts.join(" ") || "このお部屋";
+      document.getElementById("roomSecretTitle").textContent =
+        titleParts.join(" ") || "このお部屋";
 
       let hasAny = false;
 
       // 集合ポスト
-      const mailbox = roomData["開錠番号"] ?? roomData["mailbox"];
+      const mailbox = roomData["開錠番号"];
       if (mailbox && String(mailbox).trim() !== "") {
-        document.getElementById("roomMailboxSection")?.classList.remove("hidden");
+        document.getElementById("roomMailboxSection").classList.remove("hidden");
         document.getElementById("roomMailboxValue").textContent = String(mailbox);
         hasAny = true;
       }
 
       // 宅配ボックス
-      const delivery = roomData["宅配ボックス"] ?? roomData["delivery_box"];
+      const delivery = roomData["宅配ボックス"];
       if (delivery && String(delivery).trim() !== "") {
-        document.getElementById("roomDeliverySection")?.classList.remove("hidden");
+        document.getElementById("roomDeliverySection").classList.remove("hidden");
         document.getElementById("roomDeliveryValue").textContent = String(delivery);
         hasAny = true;
       }
 
       // 駐輪場
-      const bicycle = roomData["駐輪場"] ?? roomData["bicycle_space"];
+      const bicycle = roomData["駐輪場"];
       if (bicycle && String(bicycle).trim() !== "") {
-        document.getElementById("roomBicycleSection")?.classList.remove("hidden");
+        document.getElementById("roomBicycleSection").classList.remove("hidden");
         document.getElementById("roomBicycleValue").textContent = String(bicycle);
         hasAny = true;
       }
 
-      // Wi-Fi（Firestore新フィールド ssid/password に対応）
-      const wifiSsid =
-        roomData["ssid"] ||
-        roomData["Wi-Fi_SSID"] ||
-        roomData["wifi_ssid"] ||
-        "";
-
-      const wifiPass =
-        roomData["password"] ||
-        roomData["Wi-Fi_PASS"] ||
-        roomData["wifi_pass"] ||
-        "";
-
-      const hasWifi =
+      // Wi-Fi
+      const wifiSsid = roomData["Wi-Fi_SSID"] || roomData["wifi_ssid"];
+      const wifiPass = roomData["Wi-Fi_PASS"] || roomData["wifi_pass"];
+      if (
         (wifiSsid && String(wifiSsid).trim() !== "") ||
-        (wifiPass && String(wifiPass).trim() !== "");
-
-      if (hasWifi) {
-        document.getElementById("roomWifiSection")?.classList.remove("hidden");
-        if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID： " + String(wifiSsid);
-        if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード： " + String(wifiPass);
+        (wifiPass && String(wifiPass).trim() !== "")
+      ) {
+        document.getElementById("roomWifiSection").classList.remove("hidden");
+        if (wifiSsid) {
+          document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
+        }
+        if (wifiPass) {
+          document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+        }
         hasAny = true;
       }
 
-      // 1つでも項目があればカードを出して、押したら必ず開く
+      // 1つでも項目があればカード表示＆トグル設定
       if (hasAny) {
         section.classList.remove("hidden");
 
         const btn = document.getElementById("roomSecretToggleBtn");
         const body = document.getElementById("roomSecretBody");
-
-        // 初期は閉じる（確実に）
-        if (body) body.classList.add("hidden");
-        if (btn) btn.textContent = "このお部屋の情報を表示";
-
-        // 多重登録防止
-        if (btn && body && !btn.dataset.bound) {
-          btn.dataset.bound = "1";
+        if (btn && body) {
           btn.addEventListener("click", () => {
             const hidden = body.classList.contains("hidden");
             if (hidden) {
               body.classList.remove("hidden");
-              btn.textContent = "このお部屋の情報を隠す";
+              btn.textContent = "この部屋の情報を隠す";
             } else {
               body.classList.add("hidden");
-              btn.textContent = "このお部屋の情報を表示";
+              btn.textContent = "この部屋の情報を表示";
             }
           });
         }
@@ -374,23 +348,22 @@
       return "";
     }
 
+    // ✅ 本文レンダリング：Markdownリンク（[label](url)）対応＋改行保持
+    // ※ <a> を生成する文字列に改行を入れない（壊れるのを防止）
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
-
-      // まず安全にエスケープ
       let escaped = escapeHtml(text);
 
-      // Markdownリンク [label](url) → <a>（※改行なしで生成するのが重要）
+      // Markdownリンク [label](url)
       escaped = escaped.replace(
         /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
         (m, label, url) =>
-          `<a href="${url}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-blue-700 hover:bg-slate-50">${label}</a>`
+          `<a href="${url}" target="_blank" rel="noopener" class="text-sky-600 underline">${label}</a>`
       );
 
-      // 改行だけ <br> に（<a> に改行が無いので壊れない）
+      // 改行のみ <br>
       return escaped.replace(/\r?\n/g, "<br />");
     }
-
 
     function buildSectionConfig(propData) {
       if (!propData) return null;
@@ -462,6 +435,16 @@
       return sections;
     }
 
+    // ★追加：アンケートURL生成（tokenあり/なし両対応）
+    function buildSurveyUrl({ token = "", propertyNo = "", source = "unknown" } = {}) {
+      const base = "https://guide.univ-life.com/survey.html";
+      const u = new URL(base);
+      if (token) u.searchParams.set("token", token);
+      if (!token && propertyNo) u.searchParams.set("propertyNo", propertyNo);
+      u.searchParams.set("source", source);
+      return u.toString();
+    }
+
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -520,6 +503,14 @@
           card.className =
             "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
 
+          // ★管理＞その他だけ：アンケートボタン（tokenあり/なしでURL分岐）
+          const surveyUrl = (sec.key === "management_other")
+            ? (window.__token
+                ? buildSurveyUrl({ token: window.__token, source: "shiori_room" })
+                : buildSurveyUrl({ propertyNo: window.__propertyNo || "", source: "shiori_public" })
+              )
+            : "";
+
           card.innerHTML = `
             <button
               type="button"
@@ -559,6 +550,20 @@
             >
               <div class="border-t border-slate-100 pt-2 richtext">
                 ${renderPlainTextAsHtml(sec.body)}
+                ${
+                  sec.key === "management_other" && surveyUrl
+                    ? `
+                      <div class="mt-4">
+                        <a href="${surveyUrl}"
+                           target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-blue-700 hover:bg-slate-50">
+                          📝 入居直後アンケート（1分）
+                        </a>
+                        <div class="text-[11px] text-slate-400 mt-1">任意／今後の改善に活用します</div>
+                      </div>
+                    `
+                    : ""
+                }
               </div>
             </div>
           `;
@@ -604,7 +609,6 @@
         });
       });
 
-      // ★ Lucide はタブ側のアイコン描画だけに使う
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
@@ -622,6 +626,9 @@
       let propertyNo = url.searchParams.get("propertyNo") || "";
       const token = url.searchParams.get("token") || "";
 
+      // ★グローバルに保持（アンケートURL生成で使用）
+      window.__token = token || "";
+
       // token があれば postdials から物件No を決める＆部屋カード表示
       if (token) {
         try {
@@ -631,8 +638,6 @@
             tabPanels.innerHTML = "";
             return;
           }
-
-          // ★ 部屋専用カード（アイコン無し・押したら表示）
           renderRoomSecretSection(roomData);
 
           const bukkenNo = roomData["物件No"];
@@ -655,6 +660,9 @@
         tabPanels.innerHTML = "";
         return;
       }
+
+      // ★グローバルに保持（アンケートURL生成で使用）
+      window.__propertyNo = propertyNo;
 
       try {
         const results = await Promise.allSettled([

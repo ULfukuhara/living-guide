@@ -9,7 +9,10 @@
   <style>
     .rating label { cursor: pointer; }
     .rating input { transform: scale(1.15); margin-right: 8px; }
-    .stars { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; letter-spacing: 0.5px; }
+    .stars {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 
@@ -154,6 +157,7 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+    // ===== Firebase =====
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
       authDomain: "univlife-kanri.firebaseapp.com",
@@ -166,11 +170,24 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // ===== URL params =====
     const url = new URL(window.location.href);
     const token = (url.searchParams.get("token") || "").trim();
     const propertyNo = (url.searchParams.get("propertyNo") || "").trim();
     const source = (url.searchParams.get("source") || "unknown").trim();
+    const isTest = url.searchParams.get("test") === "1";
 
+    // ===== localStorage key (公開用のみ) =====
+    function localKey() {
+      return `movein_survey_answered_${propertyNo || "unknown"}`;
+    }
+
+    // ✅ テストモードなら、毎回「未回答」に戻す（公開用のみ）
+    if (isTest && !token) {
+      try { localStorage.removeItem(localKey()); } catch {}
+    }
+
+    // ===== UI helpers =====
     function showError(msg) {
       const el = document.getElementById("errorLine");
       el.textContent = msg;
@@ -182,22 +199,6 @@
       return el ? Number(el.value) : null;
     }
 
-    async function checkAnsweredByToken() {
-      const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
-      const snap = await getDocs(q1);
-      return !snap.empty;
-    }
-
-    function localKey() {
-      return `movein_survey_answered_${propertyNo || "unknown"}`;
-    }
-    function checkAnsweredLocal() {
-      try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
-    }
-    function markAnsweredLocal() {
-      try { localStorage.setItem(localKey(), "1"); } catch {}
-    }
-
     function showAnswered() {
       document.getElementById("surveyForm").classList.add("hidden");
       document.getElementById("answeredBox").classList.remove("hidden");
@@ -207,6 +208,22 @@
       document.getElementById("surveyForm").classList.remove("hidden");
     }
 
+    // ===== Answered check =====
+    async function checkAnsweredByToken() {
+      if (!token) return false;
+      const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
+      const snap = await getDocs(q1);
+      return !snap.empty;
+    }
+
+    function checkAnsweredLocal() {
+      try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
+    }
+    function markAnsweredLocal() {
+      try { localStorage.setItem(localKey(), "1"); } catch {}
+    }
+
+    // ===== Submit =====
     async function submitSurvey() {
       if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
         showError("①〜③は選択してください。");
@@ -227,28 +244,37 @@
 
       await addDoc(collection(db, "movein_survey"), data);
 
+      // 公開URL（tokenなし）だけ localStorage に記録
       if (!token) markAnsweredLocal();
+
       showAnswered();
     }
 
+    // ===== Init =====
     document.addEventListener("DOMContentLoaded", async () => {
+      // meta line
       const metaParts = [];
       if (token) metaParts.push("tokenあり");
       if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
       metaParts.push(`source: ${source}`);
+      if (isTest) metaParts.push("test=1");
       document.getElementById("metaLine").textContent = metaParts.join(" / ");
 
+      // validation
       if (!token && !propertyNo) {
-        showError("URLに ?propertyNo=XXXX を付けてください。");
+        showError("URLに ?propertyNo=XXXX もしくは ?token=XXXX を付けてください。");
         showForm();
         return;
       }
 
+      // show answered / form
       try {
         if (token) {
+          // token運用はFirestoreに回答があるかで判定（test=1でもDBは残るので表示される）
           const answered = await checkAnsweredByToken();
           answered ? showAnswered() : showForm();
         } else {
+          // 公開用はlocalStorageで判定（test=1なら上で消しているので必ずフォームになる）
           checkAnsweredLocal() ? showAnswered() : showForm();
         }
       } catch (e) {

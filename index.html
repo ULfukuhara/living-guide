@@ -350,16 +350,34 @@
       return "";
     }
 
-    function renderPlainTextAsHtml(text) {
-      if (!text) return "";
-      const escaped = escapeHtml(text);
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const withLinks = escaped.replace(
-        urlRegex,
-        '<a href="$1" target="_blank" rel="noopener" class="text-sky-600 underline">$1</a>'
-      );
-      return withLinks.replace(/\r?\n/g, "<br />");
-    }
+  function renderPlainTextAsHtml(text) {
+    if (!text) return "";
+
+    // まず安全にエスケープ（HTML直書きは不可）
+    let escaped = escapeHtml(text);
+
+    // ① Markdownリンク [label](url) を先に <a> に変換
+    //    ※ url は http/https のみ許可
+    escaped = escaped.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      (m, label, url) =>
+        `<a href="${url}" target="_blank" rel="noopener" class="text-sky-600 underline">${label}</a>`
+    );
+
+    // ② 残った生URLもリンク化
+    //    すでに <a href="..."> の中にあるURLを壊さないように簡易的に除外
+    escaped = escaped.replace(
+      /(https?:\/\/[^\s<]+)/g,
+      (url) => {
+        // 直前が href=" の場合はリンク化しない（保険）
+        return `<a href="${url}" target="_blank" rel="noopener" class="text-sky-600 underline">${url}</a>`;
+      }
+    );
+
+    // ③ 改行を <br> に
+    return escaped.replace(/\r?\n/g, "<br />");
+  }
+
 
     function buildSectionConfig(propData) {
       if (!propData) return null;

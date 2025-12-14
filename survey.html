@@ -9,7 +9,7 @@
   <style>
     .rating label { cursor: pointer; }
     .rating input { transform: scale(1.15); margin-right: 8px; }
-    .stars { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; letter-spacing: 0.5px; }
+    .stars { letter-spacing: 0.5px; }
   </style>
 </head>
 
@@ -22,15 +22,22 @@
     <!-- 回答済み表示 -->
     <div id="answeredBox" class="hidden space-y-4 text-center">
       <p class="text-sm text-emerald-700 font-semibold">
-        ✅ このアンケートはすでにご回答いただいています
+        ✅ 送信が完了しました
       </p>
       <p class="text-xs text-slate-500">
-        追加でお気づきの点がありましたら、再度ご回答いただけます。
+        ご協力ありがとうございました。いただいたご意見はサービス改善に活用いたします。
       </p>
-      <button id="retryBtn"
-        class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-        もう一度回答する
-      </button>
+
+      <div class="space-y-2">
+        <button id="retryBtn"
+          class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+          もう一度回答する
+        </button>
+        <button id="backBtn"
+          class="w-full rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800">
+          入居のしおりに戻る
+        </button>
+      </div>
     </div>
 
     <!-- フォーム -->
@@ -39,7 +46,7 @@
         <h1 class="text-base font-semibold text-slate-800">
           ご入居後のご感想を教えてください
         </h1>
-        <p class="text-xs text-slate-500">所要時間：1分程度</p>
+        <p class="text-xs text-slate-500">所要時間：1分程度（任意）</p>
       </div>
 
       <!-- Q1 -->
@@ -132,7 +139,8 @@
           placeholder="例）しおりの○○が分かりにくかった／設備の△△が気になる など"></textarea>
       </div>
 
-      <button type="button" id="submitBtn"
+      <!-- 送信 -->
+      <button type="submit" id="submitBtn"
         class="w-full rounded-lg bg-emerald-600 text-white py-2 text-sm font-semibold hover:bg-emerald-700">
         送信
       </button>
@@ -176,6 +184,11 @@
       el.textContent = msg;
       el.classList.remove("hidden");
     }
+    function hideError() {
+      const el = document.getElementById("errorLine");
+      el.textContent = "";
+      el.classList.add("hidden");
+    }
 
     function getScore(name) {
       const el = document.querySelector(`input[name="${name}"]:checked`);
@@ -208,65 +221,65 @@
     }
 
     async function submitSurvey() {
-        // 必須3問チェック
-        if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
-            showError("①〜③は選択してください。");
-            return;
-        }
+      hideError();
 
-        const btn = document.getElementById("submitBtn");
-        const err = document.getElementById("errorLine");
-        err.classList.add("hidden");
-        err.textContent = "";
+      // 反応確認（押した瞬間に必ず変化）
+      // showError("送信処理を開始しました…"); // ←必要なら一時的にON
 
-        // 送信中UI
-        btn.disabled = true;
-        const original = btn.textContent;
-        btn.textContent = "送信中…";
+      if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
+        showError("①〜③は選択してください。");
+        return;
+      }
 
-        try {
-            const data = {
-            token: token || null,
-            propertyNo: propertyNo || null,
-            source,
-            room_score: getScore("room"),
-            broker_score: getScore("broker"),
-            management_score: getScore("management"),
-            comment: document.getElementById("comment").value || "",
-            created_at: serverTimestamp(),
-            user_agent: navigator.userAgent
-            };
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = "送信中…";
 
-            await addDoc(collection(db, "movein_survey"), data);
+      try {
+        const data = {
+          token: token || null,
+          propertyNo: propertyNo || null,
+          source,
+          room_score: getScore("room"),
+          broker_score: getScore("broker"),
+          management_score: getScore("management"),
+          comment: document.getElementById("comment").value || "",
+          created_at: serverTimestamp(),
+          user_agent: navigator.userAgent
+        };
 
-            if (!token) markAnsweredLocal();
-            showAnswered();
+        await addDoc(collection(db, "movein_survey"), data);
 
-        } catch (e) {
-            console.error("addDoc failed:", e);
-            // よくある原因：Firestoreルールで拒否
-            showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
-            // もしコンソールに Missing or insufficient permissions が出ていたら、Firestoreルールが原因です
-        } finally {
-            btn.disabled = false;
-            btn.textContent = original;
-        }
-     }
+        if (!token) markAnsweredLocal();
+        showAnswered();
 
+      } catch (e) {
+        console.error("addDoc failed:", e);
+        // 典型：Missing or insufficient permissions（Firestoreルール）
+        showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
 
     document.addEventListener("DOMContentLoaded", async () => {
+      // メタ表示
       const metaParts = [];
       if (token) metaParts.push("tokenあり");
       if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
       metaParts.push(`source: ${source}`);
       document.getElementById("metaLine").textContent = metaParts.join(" / ");
 
+      // public は propertyNo 必須（あなたの設計）
       if (!token && !propertyNo) {
         showError("URLに ?propertyNo=XXXX を付けてください。");
         showForm();
         return;
       }
 
+      // 回答済み判定（失敗しても回答可能にする）
       try {
         if (token) {
           const answered = await checkAnsweredByToken();
@@ -275,12 +288,31 @@
           checkAnsweredLocal() ? showAnswered() : showForm();
         }
       } catch (e) {
-        console.error(e);
+        console.error("answered check failed:", e);
         showForm();
       }
 
+      // フォームsubmitで確実に拾う
+      const formEl = document.getElementById("surveyForm");
+      if (formEl) {
+        formEl.addEventListener("submit", (e) => {
+          e.preventDefault();
+          submitSurvey();
+        });
+      } else {
+        console.error("surveyForm not found");
+      }
+
       document.getElementById("retryBtn").addEventListener("click", showForm);
-      document.getElementById("submitBtn").addEventListener("click", submitSurvey);
+
+      // 「戻る」ボタン：来た元に戻す（なければトップへ）
+      document.getElementById("backBtn").addEventListener("click", () => {
+        if (document.referrer) {
+          window.location.href = document.referrer;
+        } else {
+          window.location.href = "https://guide.univ-life.com/";
+        }
+      });
     });
   </script>
 </body>

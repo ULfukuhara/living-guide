@@ -208,28 +208,51 @@
     }
 
     async function submitSurvey() {
-      if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
-        showError("①〜③は選択してください。");
-        return;
-      }
+        // 必須3問チェック
+        if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
+            showError("①〜③は選択してください。");
+            return;
+        }
 
-      const data = {
-        token: token || null,
-        propertyNo: propertyNo || null,
-        source,
-        room_score: getScore("room"),
-        broker_score: getScore("broker"),
-        management_score: getScore("management"),
-        comment: document.getElementById("comment").value || "",
-        created_at: serverTimestamp(),
-        user_agent: navigator.userAgent
-      };
+        const btn = document.getElementById("submitBtn");
+        const err = document.getElementById("errorLine");
+        err.classList.add("hidden");
+        err.textContent = "";
 
-      await addDoc(collection(db, "movein_survey"), data);
+        // 送信中UI
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = "送信中…";
 
-      if (!token) markAnsweredLocal();
-      showAnswered();
-    }
+        try {
+            const data = {
+            token: token || null,
+            propertyNo: propertyNo || null,
+            source,
+            room_score: getScore("room"),
+            broker_score: getScore("broker"),
+            management_score: getScore("management"),
+            comment: document.getElementById("comment").value || "",
+            created_at: serverTimestamp(),
+            user_agent: navigator.userAgent
+            };
+
+            await addDoc(collection(db, "movein_survey"), data);
+
+            if (!token) markAnsweredLocal();
+            showAnswered();
+
+        } catch (e) {
+            console.error("addDoc failed:", e);
+            // よくある原因：Firestoreルールで拒否
+            showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
+            // もしコンソールに Missing or insufficient permissions が出ていたら、Firestoreルールが原因です
+        } finally {
+            btn.disabled = false;
+            btn.textContent = original;
+        }
+     }
+
 
     document.addEventListener("DOMContentLoaded", async () => {
       const metaParts = [];

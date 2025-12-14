@@ -376,25 +376,20 @@
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
 
-      // HTMLエスケープ（安全対策）
+      // まず安全にエスケープ
       let escaped = escapeHtml(text);
 
-      // Markdownリンク [label](url) → <a>
+      // Markdownリンク [label](url) → <a>（※改行なしで生成するのが重要）
       escaped = escaped.replace(
         /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
         (m, label, url) =>
-          `<a href="${url}" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-2 mt-2
-                  rounded-lg border border-slate-200
-                  px-3 py-2 text-sm text-blue-700
-                  hover:bg-slate-50">
-            ${label}
-          </a>`
+          `<a href="${url}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-blue-700 hover:bg-slate-50">${label}</a>`
       );
 
-      // 改行を <br>
+      // 改行だけ <br> に（<a> に改行が無いので壊れない）
       return escaped.replace(/\r?\n/g, "<br />");
     }
+
 
     function buildSectionConfig(propData) {
       if (!propData) return null;

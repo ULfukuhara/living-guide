@@ -1,45 +1,287 @@
-async function submitSurvey() {
-  // 必須3問チェック
-  if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
-    showError("①〜③は選択してください。");
-    return;
-  }
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>入居直後アンケート | UNIV LIFE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  const btn = document.getElementById("submitBtn");
-  const err = document.getElementById("errorLine");
-  err.classList.add("hidden");
-  err.textContent = "";
+  <style>
+    .rating label { cursor: pointer; }
+    .rating input { transform: scale(1.15); margin-right: 8px; }
+    .stars { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; letter-spacing: 0.5px; }
+  </style>
+</head>
 
-  // 送信中UI
-  btn.disabled = true;
-  const original = btn.textContent;
-  btn.textContent = "送信中…";
+<body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 space-y-5">
+    <p id="metaLine" class="text-[10px] text-slate-400"></p>
 
-  try {
-    const data = {
-      token: token || null,
-      propertyNo: propertyNo || null,
-      source,
-      room_score: getScore("room"),
-      broker_score: getScore("broker"),
-      management_score: getScore("management"),
-      comment: document.getElementById("comment").value || "",
-      created_at: serverTimestamp(),
-      user_agent: navigator.userAgent
+    <div id="errorLine" class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
+
+    <!-- 回答済み表示 -->
+    <div id="answeredBox" class="hidden space-y-4 text-center">
+      <p class="text-sm text-emerald-700 font-semibold">
+        ✅ このアンケートはすでにご回答いただいています
+      </p>
+      <p class="text-xs text-slate-500">
+        追加でお気づきの点がありましたら、再度ご回答いただけます。
+      </p>
+      <button id="retryBtn"
+        class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+        もう一度回答する
+      </button>
+    </div>
+
+    <!-- フォーム -->
+    <form id="surveyForm" class="hidden space-y-6">
+      <div class="space-y-1">
+        <h1 class="text-base font-semibold text-slate-800">
+          ご入居後のご感想を教えてください
+        </h1>
+        <p class="text-xs text-slate-500">所要時間：1分程度</p>
+      </div>
+
+      <!-- Q1 -->
+      <div>
+        <p class="text-sm font-medium">① お部屋の状態はいかがでしたか？</p>
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="room" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div>
+        <p class="text-sm font-medium">② お部屋探し（仲介）はいかがでしたか？</p>
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="broker" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div>
+        <p class="text-sm font-medium">③ 管理会社の対応や入居のしおりは分かりやすかったですか？</p>
+        <div class="rating mt-2 space-y-2 text-sm">
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="5">
+            <span class="stars">★★★★★</span><span class="ml-2">とても満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="4">
+            <span class="stars">★★★★☆</span><span class="ml-2">満足</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="3">
+            <span class="stars">★★★☆☆</span><span class="ml-2">ふつう</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="2">
+            <span class="stars">★★☆☆☆</span><span class="ml-2">やや不満</span>
+          </label>
+          <label class="flex items-center rounded-lg border px-3 py-2 hover:bg-slate-50">
+            <input type="radio" name="management" value="1">
+            <span class="stars">★☆☆☆☆</span><span class="ml-2">不満</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div>
+        <p class="text-sm font-medium">④ 気になった点・ご要望があれば教えてください（任意）</p>
+        <textarea id="comment"
+          class="mt-2 w-full rounded-lg border border-slate-300 p-2 text-sm"
+          rows="3"
+          placeholder="例）しおりの○○が分かりにくかった／設備の△△が気になる など"></textarea>
+      </div>
+
+      <button type="button" id="submitBtn"
+        class="w-full rounded-lg bg-emerald-600 text-white py-2 text-sm font-semibold hover:bg-emerald-700">
+        送信
+      </button>
+
+      <p class="text-[11px] text-slate-400">※ 送信内容はサービス改善の目的で利用します。</p>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      where,
+      limit,
+      getDocs,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+      authDomain: "univlife-kanri.firebaseapp.com",
+      projectId: "univlife-kanri",
+      storageBucket: "univlife-kanri.firebasestorage.app",
+      messagingSenderId: "405011982427",
+      appId: "1:405011982427:web:cf56a37550ab714bfdb77e"
     };
 
-    await addDoc(collection(db, "movein_survey"), data);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    if (!token) markAnsweredLocal();
-    showAnswered();
+    const url = new URL(window.location.href);
+    const token = (url.searchParams.get("token") || "").trim();
+    const propertyNo = (url.searchParams.get("propertyNo") || "").trim();
+    const source = (url.searchParams.get("source") || "unknown").trim();
 
-  } catch (e) {
-    console.error("addDoc failed:", e);
-    // よくある原因：Firestoreルールで拒否
-    showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
-    // もしコンソールに Missing or insufficient permissions が出ていたら、Firestoreルールが原因です
-  } finally {
-    btn.disabled = false;
-    btn.textContent = original;
-  }
-}
+    function showError(msg) {
+      const el = document.getElementById("errorLine");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+
+    function getScore(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? Number(el.value) : null;
+    }
+
+    async function checkAnsweredByToken() {
+      const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
+      const snap = await getDocs(q1);
+      return !snap.empty;
+    }
+
+    function localKey() {
+      return `movein_survey_answered_${propertyNo || "unknown"}`;
+    }
+    function checkAnsweredLocal() {
+      try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
+    }
+    function markAnsweredLocal() {
+      try { localStorage.setItem(localKey(), "1"); } catch {}
+    }
+
+    function showAnswered() {
+      document.getElementById("surveyForm").classList.add("hidden");
+      document.getElementById("answeredBox").classList.remove("hidden");
+    }
+    function showForm() {
+      document.getElementById("answeredBox").classList.add("hidden");
+      document.getElementById("surveyForm").classList.remove("hidden");
+    }
+
+    async function submitSurvey() {
+    // 必須3問チェック
+    if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
+        showError("①〜③は選択してください。");
+        return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    const err = document.getElementById("errorLine");
+    err.classList.add("hidden");
+    err.textContent = "";
+
+    // 送信中UI
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = "送信中…";
+
+    try {
+        const data = {
+        token: token || null,
+        propertyNo: propertyNo || null,
+        source,
+        room_score: getScore("room"),
+        broker_score: getScore("broker"),
+        management_score: getScore("management"),
+        comment: document.getElementById("comment").value || "",
+        created_at: serverTimestamp(),
+        user_agent: navigator.userAgent
+        };
+
+        await addDoc(collection(db, "movein_survey"), data);
+
+        if (!token) markAnsweredLocal();
+        showAnswered();
+
+    } catch (e) {
+        console.error("addDoc failed:", e);
+        // よくある原因：Firestoreルールで拒否
+        showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
+        // もしコンソールに Missing or insufficient permissions が出ていたら、Firestoreルールが原因です
+    } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+    }
+    }
+
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const metaParts = [];
+      if (token) metaParts.push("tokenあり");
+      if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
+      metaParts.push(`source: ${source}`);
+      document.getElementById("metaLine").textContent = metaParts.join(" / ");
+
+      if (!token && !propertyNo) {
+        showError("URLに ?propertyNo=XXXX を付けてください。");
+        showForm();
+        return;
+      }
+
+      try {
+        if (token) {
+          const answered = await checkAnsweredByToken();
+          answered ? showAnswered() : showForm();
+        } else {
+          checkAnsweredLocal() ? showAnswered() : showForm();
+        }
+      } catch (e) {
+        console.error(e);
+        showForm();
+      }
+
+      document.getElementById("retryBtn").addEventListener("click", showForm);
+      document.getElementById("submitBtn").addEventListener("click", submitSurvey);
+    });
+  </script>
+</body>
+</html>

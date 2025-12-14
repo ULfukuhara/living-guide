@@ -22,17 +22,38 @@
 
     <div id="errorLine" class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
 
-    <!-- 回答済み表示 -->
+    <!-- ✅ 送信完了（初回/再送共通） -->
+    <div id="thanksBox" class="hidden space-y-3 text-center">
+      <p class="text-sm text-emerald-700 font-semibold" id="thanksTitle">
+        ✅ アンケートを受け付けました
+      </p>
+      <p class="text-xs text-slate-500" id="thanksBody">
+        ご協力ありがとうございます。内容はサービス改善に活用します。
+      </p>
+
+      <div class="rounded-lg border bg-slate-50 px-3 py-2 text-left">
+        <div class="text-[11px] text-slate-500">受付日時</div>
+        <div id="thanksAt" class="text-sm font-semibold text-slate-800"></div>
+      </div>
+
+      <button id="againBtn"
+        class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+        もう一度入力する
+      </button>
+    </div>
+
+    <!-- 回答済み表示（再送可能を明確化） -->
     <div id="answeredBox" class="hidden space-y-4 text-center">
       <p class="text-sm text-emerald-700 font-semibold">
         ✅ このアンケートはすでにご回答いただいています
       </p>
       <p class="text-xs text-slate-500">
-        追加でお気づきの点がありましたら、再度ご回答いただけます。
+        再度入力しても送信できます。<br/>
+        送信後に「受付完了（日時）」を表示します。
       </p>
       <button id="retryBtn"
         class="w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-        もう一度回答する
+        追加で回答する
       </button>
     </div>
 
@@ -157,7 +178,6 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // ===== Firebase =====
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
       authDomain: "univlife-kanri.firebaseapp.com",
@@ -170,28 +190,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ===== URL params =====
     const url = new URL(window.location.href);
     const token = (url.searchParams.get("token") || "").trim();
     const propertyNo = (url.searchParams.get("propertyNo") || "").trim();
     const source = (url.searchParams.get("source") || "unknown").trim();
-    const isTest = url.searchParams.get("test") === "1";
 
-    // ===== localStorage key (公開用のみ) =====
-    function localKey() {
-      return `movein_survey_answered_${propertyNo || "unknown"}`;
-    }
-
-    // ✅ テストモードなら、毎回「未回答」に戻す（公開用のみ）
-    if (isTest && !token) {
-      try { localStorage.removeItem(localKey()); } catch {}
-    }
-
-    // ===== UI helpers =====
     function showError(msg) {
       const el = document.getElementById("errorLine");
       el.textContent = msg;
       el.classList.remove("hidden");
+    }
+    function clearError() {
+      const el = document.getElementById("errorLine");
+      el.classList.add("hidden");
+      el.textContent = "";
     }
 
     function getScore(name) {
@@ -199,23 +211,15 @@
       return el ? Number(el.value) : null;
     }
 
-    function showAnswered() {
-      document.getElementById("surveyForm").classList.add("hidden");
-      document.getElementById("answeredBox").classList.remove("hidden");
-    }
-    function showForm() {
-      document.getElementById("answeredBox").classList.add("hidden");
-      document.getElementById("surveyForm").classList.remove("hidden");
-    }
-
-    // ===== Answered check =====
     async function checkAnsweredByToken() {
-      if (!token) return false;
       const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
       const snap = await getDocs(q1);
       return !snap.empty;
     }
 
+    function localKey() {
+      return `movein_survey_answered_${propertyNo || "unknown"}`;
+    }
     function checkAnsweredLocal() {
       try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
     }
@@ -223,12 +227,64 @@
       try { localStorage.setItem(localKey(), "1"); } catch {}
     }
 
-    // ===== Submit =====
+    function showAnswered() {
+      document.getElementById("surveyForm").classList.add("hidden");
+      document.getElementById("thanksBox").classList.add("hidden");
+      document.getElementById("answeredBox").classList.remove("hidden");
+    }
+    function showForm() {
+      document.getElementById("answeredBox").classList.add("hidden");
+      document.getElementById("thanksBox").classList.add("hidden");
+      document.getElementById("surveyForm").classList.remove("hidden");
+      clearError();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showThanks({ isResubmit }) {
+      document.getElementById("surveyForm").classList.add("hidden");
+      document.getElementById("answeredBox").classList.add("hidden");
+      document.getElementById("thanksBox").classList.remove("hidden");
+
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+
+      document.getElementById("thanksAt").textContent = `${y}/${m}/${d} ${hh}:${mm}`;
+
+      // ✅ 再送であることが明確に分かる表示
+      if (isResubmit) {
+        document.getElementById("thanksTitle").textContent = "✅ 追加の回答（再送信）を受け付けました";
+        document.getElementById("thanksBody").textContent =
+          "再度のご協力ありがとうございます。内容はサービス改善に活用します。";
+      } else {
+        document.getElementById("thanksTitle").textContent = "✅ アンケートを受け付けました";
+        document.getElementById("thanksBody").textContent =
+          "ご協力ありがとうございます。内容はサービス改善に活用します。";
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     async function submitSurvey() {
+      clearError();
+
       if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
         showError("①〜③は選択してください。");
         return;
       }
+
+      // 「すでに回答済み」だったか（再送かどうか）を送信前に判定
+      let wasAnswered = false;
+      try {
+        if (token) {
+          wasAnswered = await checkAnsweredByToken();
+        } else {
+          wasAnswered = checkAnsweredLocal();
+        }
+      } catch {}
 
       const data = {
         token: token || null,
@@ -239,42 +295,51 @@
         management_score: getScore("management"),
         comment: document.getElementById("comment").value || "",
         created_at: serverTimestamp(),
-        user_agent: navigator.userAgent
+        user_agent: navigator.userAgent,
+        resubmitted: wasAnswered ? true : false // ★再送フラグ（分析に便利）
       };
 
-      await addDoc(collection(db, "movein_survey"), data);
+      // 送信中の二重押し防止
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      const prevText = btn.textContent;
+      btn.textContent = "送信中…";
 
-      // 公開URL（tokenなし）だけ localStorage に記録
-      if (!token) markAnsweredLocal();
+      try {
+        await addDoc(collection(db, "movein_survey"), data);
 
-      showAnswered();
+        // 公開URL（tokenなし）だけ localStorage に記録
+        if (!token) markAnsweredLocal();
+
+        // ✅ ここで「再送できた」ことを明確に表示
+        showThanks({ isResubmit: wasAnswered });
+      } catch (e) {
+        console.error(e);
+        showError("送信に失敗しました。時間をおいて再度お試しください。");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = prevText;
+      }
     }
 
-    // ===== Init =====
     document.addEventListener("DOMContentLoaded", async () => {
-      // meta line
       const metaParts = [];
       if (token) metaParts.push("tokenあり");
       if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
       metaParts.push(`source: ${source}`);
-      if (isTest) metaParts.push("test=1");
       document.getElementById("metaLine").textContent = metaParts.join(" / ");
 
-      // validation
       if (!token && !propertyNo) {
         showError("URLに ?propertyNo=XXXX もしくは ?token=XXXX を付けてください。");
         showForm();
         return;
       }
 
-      // show answered / form
       try {
         if (token) {
-          // token運用はFirestoreに回答があるかで判定（test=1でもDBは残るので表示される）
           const answered = await checkAnsweredByToken();
           answered ? showAnswered() : showForm();
         } else {
-          // 公開用はlocalStorageで判定（test=1なら上で消しているので必ずフォームになる）
           checkAnsweredLocal() ? showAnswered() : showForm();
         }
       } catch (e) {
@@ -283,6 +348,7 @@
       }
 
       document.getElementById("retryBtn").addEventListener("click", showForm);
+      document.getElementById("againBtn").addEventListener("click", showForm);
       document.getElementById("submitBtn").addEventListener("click", submitSurvey);
     });
   </script>

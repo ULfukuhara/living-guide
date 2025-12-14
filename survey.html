@@ -208,24 +208,12 @@
     }
 
     async function submitSurvey() {
-    // 必須3問チェック
-    if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
+      if (getScore("room") === null || getScore("broker") === null || getScore("management") === null) {
         showError("①〜③は選択してください。");
         return;
-    }
+      }
 
-    const btn = document.getElementById("submitBtn");
-    const err = document.getElementById("errorLine");
-    err.classList.add("hidden");
-    err.textContent = "";
-
-    // 送信中UI
-    btn.disabled = true;
-    const original = btn.textContent;
-    btn.textContent = "送信中…";
-
-    try {
-        const data = {
+      const data = {
         token: token || null,
         propertyNo: propertyNo || null,
         source,
@@ -235,24 +223,13 @@
         comment: document.getElementById("comment").value || "",
         created_at: serverTimestamp(),
         user_agent: navigator.userAgent
-        };
+      };
 
-        await addDoc(collection(db, "movein_survey"), data);
+      await addDoc(collection(db, "movein_survey"), data);
 
-        if (!token) markAnsweredLocal();
-        showAnswered();
-
-    } catch (e) {
-        console.error("addDoc failed:", e);
-        // よくある原因：Firestoreルールで拒否
-        showError("送信に失敗しました。通信状況をご確認のうえ、再度お試しください。");
-        // もしコンソールに Missing or insufficient permissions が出ていたら、Firestoreルールが原因です
-    } finally {
-        btn.disabled = false;
-        btn.textContent = original;
+      if (!token) markAnsweredLocal();
+      showAnswered();
     }
-    }
-
 
     document.addEventListener("DOMContentLoaded", async () => {
       const metaParts = [];

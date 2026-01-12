@@ -720,10 +720,19 @@
           "物件No. " + propertyNo;
         document.getElementById("propertyTitle").textContent = title;
 
-        const metaParts = [];
-        metaParts.push("物件No. " + propertyNo);
-        if (propertyData.address) metaParts.push(propertyData.address);
-        document.getElementById("propertyMeta").textContent = metaParts.join(" ｜ ");
+        const zip = pickFirst(propertyData, ["zip_code", "postal_code", "郵便番号"]);
+        const address = pickFirst(propertyData, ["address", "住所"]);
+
+        const metaEl = document.getElementById("propertyMeta");
+
+        if (zip && address) {
+          metaEl.textContent = `〒${zip}　${address}`;
+        } else if (address) {
+          metaEl.textContent = address;
+        } else {
+          metaEl.textContent = "所在地情報は現在準備中です";
+        }
+
 
         if (normalizeBool(propertyData.shiori_enabled) === false) {
           tabPanels.innerHTML =

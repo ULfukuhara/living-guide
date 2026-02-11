@@ -724,6 +724,8 @@
           "物件No. " + propertyNo;
 
         document.getElementById("propertyTitle").textContent = title;
+        document.title = `${title}｜入居のしおり｜ユニヴ・ライフ株式会社`;
+
 
         // ★追加：部屋カードの物件名表記を canonicalName（=title）に統一
         // postdials には canonicalName が無い前提で、properties を読んだ後に上書きする

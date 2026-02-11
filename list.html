@@ -147,9 +147,11 @@
     }
 
     function cityLabel(cityKey) {
-      const k = (cityKey || "other").toLowerCase();
-      return CITY_MAP[k] || k;
+        if (!cityKey) return "その他";
+        const k = cityKey.toLowerCase().trim();
+        return CITY_MAP[k] || k; // ← マップになくても表示
     }
+
 
     function sortCityKeys(keys) {
       const inOrder = [];

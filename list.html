@@ -242,42 +242,47 @@
       render(filtered);
     }
 
-    async function loadProperties() {
-      const container = document.getElementById("propertyList");
+     async function loadProperties() {
 
-      if (!db) {
-        container.innerHTML = `<p class="text-sm text-rose-700">データを読み込めませんでした。</p>`;
-        return;
-      }
+        const container = document.getElementById("propertyList");
 
-      try {
-        const q = query(
-          collection(db, "properties_shiori"),
-          where("shiori_enabled", "==", true)
-        );
+        try {
 
-        const snap = await getDocs(q);
-        const list = [];
+            const q = query(
+            collection(db, "properties_shiori"),
+            where("shiori_enabled", "==", true)
+            );
 
-        snap.forEach(docSnap => {
-          const data = docSnap.data() || {};
-          list.push({
-            propertyNo: docSnap.id,
-            name: data.canonicalName || data.propertyName || docSnap.id,
-            cityKey: (data.variant_key || "other").toLowerCase(), // ★市別キーは variant_key
-            address: data.address || data["住所"] || ""
-          });
-        });
+            const snap = await getDocs(q);
 
-        ALL = list;
-        render(ALL);
-      } catch (e) {
-        console.error("list load error:", e);
-        container.innerHTML = `<p class="text-sm text-rose-700">読み込みに失敗しました。</p>`;
-      }
-      console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
+            const list = [];   // ← ここで定義
 
-    }
+            snap.forEach(docSnap => {
+            const data = docSnap.data() || {};
+
+            list.push({
+                propertyNo: docSnap.id,
+                name: data.canonicalName || data.propertyName || docSnap.id,
+                cityKey: (data.variant_key || "other")
+                .toString()
+                .toLowerCase()
+                .trim(),
+                address: data.address || ""
+            });
+            });
+
+            // ✅ ここなら list は存在する
+            console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
+
+            ALL = list;
+            render(ALL);
+
+        } catch (e) {
+            console.error("読み込みエラー:", e);
+            container.innerHTML = `<p>読み込みに失敗しました。</p>`;
+        }
+        }
+
 
     document.addEventListener("DOMContentLoaded", () => {
       loadProperties();

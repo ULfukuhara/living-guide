@@ -736,6 +736,84 @@
         const zip = pickFirst(propertyData, ["zip_code", "postal_code", "郵便番号"]);
         const address = pickFirst(propertyData, ["address", "住所"]);
 
+        // ===============================
+        // SEO（共通ページだけ index 対象）
+        // - tokenページ: noindex
+        // - propertyNoページ: index + canonical
+        // - title/description 動的
+        // - 構造化データ（JSON-LD）
+        // ===============================
+        (function applySeo() {
+          const url = new URL(window.location.href);
+          const tokenParam = url.searchParams.get("token") || "";
+
+          // 1) tokenページは noindex（必須）
+          if (tokenParam) {
+            let robots = document.querySelector('meta[name="robots"]');
+            if (!robots) {
+              robots = document.createElement("meta");
+              robots.name = "robots";
+              document.head.appendChild(robots);
+            }
+            robots.content = "noindex,nofollow";
+            return; // tokenページはここで終了
+          }
+
+          // 2) propertyNoページは canonical を固定
+          if (propertyNo) {
+            let canonical = document.querySelector('link[rel="canonical"]');
+            if (!canonical) {
+              canonical = document.createElement("link");
+              canonical.rel = "canonical";
+              document.head.appendChild(canonical);
+            }
+            canonical.href = `https://guide.univ-life.com/?propertyNo=${propertyNo}`;
+          }
+
+          // 3) title / description を物件ごとに動的化
+          const safeTitle = title || ("物件No. " + propertyNo);
+
+          document.title = `${safeTitle}｜入居のしおり｜ユニヴ・ライフ株式会社`;
+
+          let metaDesc = document.querySelector('meta[name="description"]');
+          if (!metaDesc) {
+            metaDesc = document.createElement("meta");
+            metaDesc.name = "description";
+            document.head.appendChild(metaDesc);
+          }
+
+          // 住所が取れるなら入れる（検索結果の安心感UP）
+          const addrText = [zip ? `〒${zip}` : "", address || ""].filter(Boolean).join(" ");
+          metaDesc.content =
+            `${safeTitle}の入居のしおり（入居者向け案内）です。` +
+            `ゴミ出し、インターネット、設備、注意事項などを掲載しています。` +
+            (addrText ? `所在地：${addrText}` : "");
+
+          // 4) 構造化データ（簡易版）
+          const ld = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": `${safeTitle}｜入居のしおり`,
+            "description": metaDesc.content,
+            "url": `https://guide.univ-life.com/?propertyNo=${propertyNo}`,
+            "publisher": {
+              "@type": "Organization",
+              "name": "ユニヴ・ライフ株式会社"
+            }
+          };
+
+          // 既存があれば入れ替え
+          const existing = document.getElementById("ldjson-shiori");
+          if (existing) existing.remove();
+
+          const script = document.createElement("script");
+          script.type = "application/ld+json";
+          script.id = "ldjson-shiori";
+          script.textContent = JSON.stringify(ld);
+          document.head.appendChild(script);
+        })();
+
+
         const metaEl = document.getElementById("propertyMeta");
 
         if (zip && address) {

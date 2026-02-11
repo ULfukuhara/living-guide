@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>入居のしおり一覧｜ユニヴ・ライフ株式会社</title>
+  <meta name="description" content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居のしおり一覧ページです。" />
+  <link rel="canonical" href="https://guide.univ-life.com/list.html" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="canonical" href="https://guide.univ-life.com/">
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold mb-2">入居のしおり一覧</h1>
+    <p class="text-sm text-slate-600 mb-6">公開中（shiori_enabled が有効）の物件のみ表示します。</p>
+
+    <!-- エラー表示 -->
+    <div id="errorBox" class="hidden mb-6 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
+
+    <!-- ステータス -->
+    <div id="status" class="text-sm text-slate-600 mb-6">読み込み中…</div>
+
+    <!-- 一覧 -->
+    <div id="propertyList" class="space-y-8"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+      authDomain: "univlife-kanri.firebaseapp.com",
+      projectId: "univlife-kanri",
+      storageBucket: "univlife-kanri.firebasestorage.app",
+      messagingSenderId: "405011982427",
+      appId: "1:405011982427:web:cf56a37550ab714bfdb77e"
+    };
+
+    function showError(msg) {
+      const box = document.getElementById("errorBox");
+      box.textContent = msg;
+      box.classList.remove("hidden");
+    }
+
+    function normalizeBool(v) {
+      // Firestore側が boolean / number / string "TRUE" 等でも拾う
+      if (v === true) return true;
+      if (v === false) return false;
+      if (v === 1) return true;
+      if (v === 0) return false;
+      if (typeof v === "string") {
+        const s = v.trim().toLowerCase();
+        if (["true", "t", "1", "yes", "y", "on", "enable", "enabled", "有効", "公開", "公開中", "true()", "TRUE".toLowerCase()].includes(s)) return true;
+        if (["false", "f", "0", "no", "n", "off", "disable", "disabled", "無効", "非公開"].includes(s)) return false;
+      }
+      return false;
+    }
+
+    function pickFirst(obj, keys) {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+      }
+      return "";
+    }
+
+    async function loadList() {
+      const statusEl = document.getElementById("status");
+      const container = document.getElementById("propertyList");
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ★ where を使わず全件取得 → JSでフィルタ（TRUE文字列や型揺れ対策）
+        const colRef = collection(db, "properties_shiori");
+        const snap = await getDocs(colRef);
+
+        const byCity = {};
+        let total = 0;
+        let enabledCount = 0;
+
+        snap.forEach(d => {
+          total += 1;
+          const data = d.data();
+
+          // shiori_enabled は boolean / "TRUE" などに対応
+          const enabled = normalizeBool(data.shiori_enabled);
+
+          if (!enabled) return;
+          enabledCount += 1;
+
+          const city = pickFirst(data, ["area", "エリア"]) || "その他";
+
+          // 表示名（優先順位）
+          const name =
+            pickFirst(data, ["canonicalName", "canonical_name", "property_name", "propertyName", "物件名"]) ||
+            `物件No. ${d.id}`;
+
+          if (!byCity[city]) byCity[city] = [];
+          byCity[city].push({
+            name,
+            propertyNo: d.id
+          });
+        });
+
+        // 表示
+        container.innerHTML = "";
+
+        if (enabledCount === 0) {
+          statusEl.textContent = `取得: ${total} 件（公開中: 0 件）`;
+          showError("公開中（shiori_enabled）が1件も見つかりませんでした。Firestore上の値が boolean true か、文字列 'TRUE' 等になっているか確認してください。");
+          return;
+        }
+
+        statusEl.textContent = `取得: ${total} 件（公開中: ${enabledCount} 件）`;
+
+        const cities = Object.keys(byCity).sort((a,b)=>a.localeCompare(b,"ja"));
+        for (const city of cities) {
+          const section = document.createElement("div");
+          const list = byCity[city].sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+
+          section.innerHTML = `
+            <h2 class="text-lg font-semibold mb-3">${city}</h2>
+            <div class="space-y-2">
+              ${list.map(p => `
+                <a href="https://guide.univ-life.com/?propertyNo=${encodeURIComponent(p.propertyNo)}"
+                   class="block bg-white border border-slate-200 rounded-lg px-4 py-3 hover:bg-slate-100">
+                  ${p.name}
+                </a>
+              `).join("")}
+            </div>
+          `;
+          container.appendChild(section);
+        }
+
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = "読み込みに失敗しました。";
+        showError(
+          "Firestoreの読み込みに失敗しました。主な原因：①Firestoreルールでread不可 ②ネットワーク/CORS ③Firebase設定不一致。\n" +
+          "コンソール(F12)のエラーも併せて確認してください。"
+        );
+      }
+    }
+
+    loadList();
+  </script>
+</body>
+</html>

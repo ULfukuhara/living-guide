@@ -2,71 +2,87 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>入居のしおり一覧｜ユニヴ・ライフ株式会社</title>
-  <meta name="description" content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向けWeb入居のしおり一覧です。大阪府内を中心に公開中の物件のみ掲載しています。" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>入居のしおり一覧｜ユニヴ・ライフ株式会社</title>
+  <meta name="description" content="ユニヴ・ライフ株式会社の管理物件における、公開中（入居のしおりWebが有効）の物件一覧です。" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- canonical（評価をトップへ寄せる） -->
-  <link rel="canonical" href="https://guide.univ-life.com/">
-
-  <!-- Google tag (gtag.js)（必要なら） -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LKMYKG189C"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-LKMYKG189C');
-  </script>
+  <style>
+    .richtext a { text-decoration: underline; }
+  </style>
 </head>
 
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 py-10 space-y-6">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-    <header class="space-y-1">
-      <h1 class="text-xl font-bold">入居のしおり一覧</h1>
-      <p class="text-sm text-slate-600">
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-5xl mx-auto px-4 py-4 space-y-1">
+      <h1 class="text-lg sm:text-xl font-bold">入居のしおり一覧</h1>
+      <p class="text-xs text-slate-500">
         公開中（入居のしおりWebが有効）の物件のみ表示しています。
       </p>
-      <p class="text-xs text-slate-400">
+      <p class="text-[11px] text-slate-400">
         ※ 物件ページは「共通ページ（propertyNo）」で表示されます。tokenページは一覧に出しません。
       </p>
-    </header>
+    </div>
+  </header>
 
-    <!-- 検索 -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-      <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-        <label class="text-xs font-semibold text-slate-600" for="q">物件名／住所で検索</label>
-        <div class="flex gap-2 w-full sm:w-auto">
-          <input id="q" type="text" placeholder="例：YousCourt / 城東区 / 40100"
-                 class="w-full sm:w-80 rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-          <button id="clearBtn"
-                  class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-            クリア
-          </button>
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-5xl mx-auto px-4 py-6 space-y-5">
+
+      <!-- Search -->
+      <section class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+        <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <div class="flex-1">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">物件名 / 住所 で検索</label>
+            <input id="q"
+              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              placeholder="例：YousCourt / 城東区 / 40100"
+              autocomplete="off"
+            />
+            <p class="text-[11px] text-slate-400 mt-1">
+              検索はこのページ内で絞り込み（Firestore再検索はしません）
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button id="clearBtn"
+              class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+              クリア
+            </button>
+            <a href="/"
+              class="rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold hover:bg-slate-800">
+              トップへ
+            </a>
+          </div>
         </div>
-      </div>
-      <div class="mt-2 text-[11px] text-slate-400">
-        検索はこのページ内で絞り込み（Firestore再検索はしません）
-      </div>
-    </section>
+      </section>
 
-    <!-- リスト -->
-    <main id="propertyList" class="space-y-10">
-      <p class="text-sm text-slate-500">読み込み中...</p>
-    </main>
+      <!-- List -->
+      <section id="propertyList" class="space-y-6">
+        <p class="text-sm text-slate-500">読み込み中...</p>
+      </section>
 
-    <footer class="pt-4 text-[11px] text-slate-400 flex justify-between">
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-5xl mx-auto px-4 py-4 text-[11px] text-slate-400 flex justify-between">
       <p>© ユニヴ・ライフ株式会社</p>
-      <a href="https://guide.univ-life.com/" class="hover:underline">トップへ</a>
-    </footer>
-  </div>
+      <a href="/" class="hover:text-slate-600">トップへ</a>
+    </div>
+  </footer>
 
+  <!-- ======================================================= -->
+  <!-- JS -->
+  <!-- ======================================================= -->
   <script type="module">
     // =========================
-    // Firebase（index.htmlと同じ）
+    // Firebase Config（index.html と同じ）
     // =========================
     const firebaseConfig = {
       apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
@@ -78,6 +94,34 @@
       measurementId: "G-DXMR0VL972"
     };
 
+    // =========================
+    // 市コード → 表示名
+    // （variant_key に入っているローマ字想定）
+    // =========================
+    const CITY_MAP = {
+      suita: "吹田市",
+      takatsuki: "高槻市",
+      ibaraki: "茨木市",
+      amagasaki: "尼崎市",
+      ashiya: "芦屋市",
+      chuouku: "大阪市中央区",
+      fukushimaku: "大阪市福島区",
+      higashisumiyoshiku: "大阪市東住吉区",
+      higashiyodogawaku: "大阪市東淀川区",
+      hiranoku: "大阪市平野区",
+      ikedashi: "池田市",
+      kitaku: "大阪市北区",
+      minoo: "箕面市",
+      nisinomiya: "西宮市",
+      sakaiku: "堺市堺区",
+      settsu: "摂津市",
+      suminoeku: "大阪市住之江区",
+      toyonaka: "豊中市",
+      yodogawaku: "大阪市淀川区",
+      sumiyoshiku: "大阪市住吉区",
+      other: "その他"
+    };
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
       getFirestore,
@@ -87,52 +131,9 @@
       where
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    let db = null;
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-    } catch (e) {
-      console.error("Firestore 初期化に失敗:", e);
-      db = null;
-    }
-
     // =========================
-    // 市キー（variant_key）→ 表示名
-    // ★ここは必要に応じて増やしてください
+    // Util
     // =========================
-     const CITY_MAP = {
-        amagasaki: "尼崎市",
-        ashiya: "芦屋市",
-        chuouku: "大阪市中央区",
-        fukushimaku: "大阪市福島区",
-        higashisumiyoshiku: "大阪市東住吉区",
-        higashiyodogawaku: "大阪市東淀川区",
-        hiranoku: "大阪市平野区",
-        ibaraki: "茨木市",
-        ikedashi: "池田市",
-        jotoku: "大阪市城東区",
-        kitaku: "大阪市北区",
-        minoo: "箕面市",
-        nishiku: "大阪市西区",
-        nisinomiya: "西宮市",
-        sakaiku: "堺市堺区",
-        settsu: "摂津市",
-        suita: "吹田市",
-        suminoeku: "大阪市住之江区",
-        sumiyoshiku: "大阪市住吉区",
-        takatsuki: "高槻市",
-        toyonaka: "豊中市",
-        yodogawaku: "大阪市淀川区",
-        other: "その他"
-     };
-
-
-    // 表示順を固定したい場合（大阪市→吹田→高槻…）
-    // const CITY_ORDER = ["osakashi", "suita", "takatsuki", "ibaraki"];
-
-    // 取得した全件（検索で使う）
-    let ALL = [];
-
     function escapeHtml(str) {
       return (str || "")
         .replace(/&/g, "&amp;")
@@ -142,161 +143,197 @@
         .replace(/'/g, "&#39;");
     }
 
-    function normalizeText(str) {
-      return (str || "").toString().trim().toLowerCase();
+    function normStr(v) {
+      return (v ?? "").toString().trim();
     }
 
     function cityLabel(cityKey) {
-        if (!cityKey) return "その他";
-        const k = cityKey.toLowerCase().trim();
-        return CITY_MAP[k] || k; // ← マップになくても表示
+      const k = (cityKey || "").toLowerCase().trim();
+      return CITY_MAP[k] || CITY_MAP.other;
     }
 
+    // =========================
+    // State
+    // =========================
+    let db = null;
+    let ALL = [];        // 全件
+    let FILTERED = [];   // 絞り込み後
 
-    function sortCityKeys(keys) {
-      const inOrder = [];
-      const others = [];
+    // =========================
+    // Load
+    // =========================
+    async function loadProperties() {
+      const colRef = collection(db, "properties_shiori");
 
-      keys.forEach(k => {
-        if (CITY_ORDER.includes(k)) inOrder.push(k);
-        else others.push(k);
+      // ✅ 公開中のみ（boolean TRUE）
+      const q = query(colRef, where("shiori_enabled", "==", true));
+
+      const snap = await getDocs(q);
+
+      const list = []; // ← ここが重要（list未定義を防ぐ）
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+
+        const propertyNo = docSnap.id; // ドキュメントIDが物件No想定
+        const name =
+          normStr(data.canonicalName) ||
+          normStr(data.propertyName) ||
+          propertyNo;
+
+        const address = normStr(data.address || data["住所"]);
+        const cityKey = normStr(data.variant_key).toLowerCase() || "other";
+
+        list.push({
+          propertyNo,
+          name,
+          address,
+          cityKey,
+          cityName: cityLabel(cityKey),
+          url: `/?propertyNo=${encodeURIComponent(propertyNo)}`
+        });
       });
 
-      inOrder.sort((a,b) => CITY_ORDER.indexOf(a) - CITY_ORDER.indexOf(b));
-      others.sort((a,b) => a.localeCompare(b, "en"));
-      return [...inOrder, ...others];
-    }
-
-    function groupByCity(list) {
-      const grouped = {};
-      list.forEach(p => {
-        const key = (p.cityKey || "other").toLowerCase();
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(p);
+      // 並び：市名 → 物件名
+      list.sort((a, b) => {
+        const c = a.cityName.localeCompare(b.cityName, "ja");
+        if (c !== 0) return c;
+        return a.name.localeCompare(b.name, "ja");
       });
-      return grouped;
+
+      console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
+
+      ALL = list;
+      FILTERED = list;
     }
 
+    // =========================
+    // Render
+    // =========================
     function render(list) {
-      const container = document.getElementById("propertyList");
-      container.innerHTML = "";
+      const root = document.getElementById("propertyList");
+      root.innerHTML = "";
 
-      if (!list.length) {
-        container.innerHTML = `<p class="text-sm text-slate-500">該当する公開物件がありません。</p>`;
+      if (!list || list.length === 0) {
+        root.innerHTML = `<p class="text-sm text-slate-500">該当する公開物件がありません。</p>`;
         return;
       }
 
-      const grouped = groupByCity(list);
-      const keys = sortCityKeys(Object.keys(grouped));
+      // cityName でグループ化
+      const map = new Map();
+      for (const p of list) {
+        const key = p.cityName || "その他";
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(p);
+      }
 
-      keys.forEach(key => {
-        const cityName = cityLabel(key);
-        const items = grouped[key]
-          .slice()
-          .sort((a,b) => a.name.localeCompare(b.name, "ja"));
+      // 市名の順序（CITY_MAP順を優先、無ければ文字順）
+      const cityOrder = Object.values(CITY_MAP);
+      const cities = Array.from(map.keys()).sort((a, b) => {
+        const ia = cityOrder.indexOf(a);
+        const ib = cityOrder.indexOf(b);
+        if (ia !== -1 || ib !== -1) {
+          return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
+        }
+        return a.localeCompare(b, "ja");
+      });
+
+      for (const city of cities) {
+        const items = map.get(city);
 
         const section = document.createElement("section");
-        section.className = "bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5";
+        section.className = "bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden";
 
         section.innerHTML = `
-          <div class="flex items-baseline justify-between border-b border-slate-100 pb-2 mb-3">
-            <h2 class="text-base font-semibold text-slate-900">${escapeHtml(cityName)}</h2>
-            <div class="text-xs text-slate-400">${items.length}件</div>
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900">${escapeHtml(city)}</h2>
+            <span class="text-[11px] text-slate-400">${items.length}件</span>
           </div>
-
-          <ul class="space-y-3">
+          <div class="divide-y divide-slate-100">
             ${items.map(p => `
-              <li class="flex flex-col gap-0.5">
-                <a class="text-sky-700 hover:underline"
-                   href="/?propertyNo=${encodeURIComponent(p.propertyNo)}">
-                  ${escapeHtml(p.name)}
-                </a>
-                <div class="text-xs text-slate-400">
-                  ${escapeHtml(p.address || "")}
-                  ${p.propertyNo ? ` <span class="text-slate-300">（${escapeHtml(p.propertyNo)}）</span>` : ""}
+              <a href="${p.url}"
+                 class="block px-4 py-3 hover:bg-slate-50">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-slate-900 truncate">
+                      ${escapeHtml(p.name)}
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 truncate">
+                      物件No: ${escapeHtml(p.propertyNo)}${p.address ? `　/　${escapeHtml(p.address)}` : ""}
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0 text-[11px] text-slate-400">
+                    開く →
+                  </div>
                 </div>
-              </li>
+              </a>
             `).join("")}
-          </ul>
+          </div>
         `;
 
-        container.appendChild(section);
-      });
+        root.appendChild(section);
+      }
     }
 
+    // =========================
+    // Filter
+    // =========================
     function applyFilter() {
-      const q = normalizeText(document.getElementById("q")?.value || "");
+      const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
       if (!q) {
-        render(ALL);
+        FILTERED = ALL;
+        render(FILTERED);
         return;
       }
-      const filtered = ALL.filter(p => {
+
+      FILTERED = ALL.filter(p => {
         const hay = [
-          p.propertyNo,
           p.name,
           p.address,
-          cityLabel(p.cityKey)
-        ].map(normalizeText).join(" ");
+          p.propertyNo,
+          p.cityName,
+          p.cityKey
+        ].join(" ").toLowerCase();
         return hay.includes(q);
       });
-      render(filtered);
+
+      render(FILTERED);
     }
 
-     async function loadProperties() {
+    // =========================
+    // Main
+    // =========================
+    async function main() {
+      const root = document.getElementById("propertyList");
 
-        const container = document.getElementById("propertyList");
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+      } catch (e) {
+        console.error("Firestore 初期化に失敗:", e);
+        root.innerHTML = `<p class="text-sm text-rose-600">データを読み込めませんでした。</p>`;
+        return;
+      }
 
-        try {
+      try {
+        await loadProperties();
+        render(ALL);
+      } catch (e) {
+        console.error("読み込みエラー:", e);
+        root.innerHTML = `<p class="text-sm text-rose-600">読み込みに失敗しました。</p>`;
+        return;
+      }
 
-            const q = query(
-            collection(db, "properties_shiori"),
-            where("shiori_enabled", "==", true)
-            );
-
-            const snap = await getDocs(q);
-
-            const list = [];   // ← ここで定義
-
-            snap.forEach(docSnap => {
-            const data = docSnap.data() || {};
-
-            list.push({
-                propertyNo: docSnap.id,
-                name: data.canonicalName || data.propertyName || docSnap.id,
-                cityKey: (data.variant_key || "other")
-                .toString()
-                .toLowerCase()
-                .trim(),
-                address: data.address || ""
-            });
-            });
-
-            // ✅ ここなら list は存在する
-            console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
-
-            ALL = list;
-            render(ALL);
-
-        } catch (e) {
-            console.error("読み込みエラー:", e);
-            container.innerHTML = `<p>読み込みに失敗しました。</p>`;
-        }
-        }
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-      loadProperties();
-
-      const qEl = document.getElementById("q");
-      const clearBtn = document.getElementById("clearBtn");
-
-      qEl?.addEventListener("input", applyFilter);
-      clearBtn?.addEventListener("click", () => {
-        qEl.value = "";
+      // UI events
+      document.getElementById("q")?.addEventListener("input", applyFilter);
+      document.getElementById("clearBtn")?.addEventListener("click", () => {
+        const qEl = document.getElementById("q");
+        if (qEl) qEl.value = "";
         applyFilter();
-        qEl.focus();
       });
-    });
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
   </script>
 </body>
 </html>

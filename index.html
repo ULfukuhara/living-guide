@@ -715,35 +715,38 @@
                 物件Noが不明な場合は、鍵渡し書類をご確認ください。
               </p>
             </div>
+
+            <!-- ✅ SEO/導線：一覧リンク -->
+            <div class="border-t border-slate-100 pt-4">
+              <a href="/list.html"
+                class="inline-flex items-center gap-2 text-sm text-sky-700 underline hover:text-sky-900">
+                入居のしおり一覧はこちら
+              </a>
+              <p class="text-[11px] text-slate-400 mt-1">
+                ユニヴ・ライフ管理物件の入居のしおり一覧ページです。
+              </p>
+            </div>
           </section>
         `;
 
-        // クリックで物件ページへ
-        const btn = document.getElementById("openPropertyBtn");
-        const input = document.getElementById("propertyNoInput");
-        const go = () => {
-          const v = (input?.value || "").trim();
-          if (!v) return;
-          window.location.href = `/?propertyNo=${encodeURIComponent(v)}`;
-        };
-        btn?.addEventListener("click", go);
-        input?.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") go();
-        });
+  // クリックで物件ページへ
+  const btn = document.getElementById("openPropertyBtn");
+  const input = document.getElementById("propertyNoInput");
+  const go = () => {
+    const v = (input?.value || "").trim();
+    if (!v) return;
+    window.location.href = `/?propertyNo=${encodeURIComponent(v)}`;
+  };
+  btn?.addEventListener("click", go);
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") go();
+  });
 
-        // タイトルも入口用に
-        document.title = "入居のしおり（Web）｜ユニヴ・ライフ株式会社";
-        return;
-      }
-      <div class="border-t border-slate-100 pt-4">
-        <a href="/list.html"
-          class="inline-flex items-center gap-2 text-sm text-sky-700 underline hover:text-sky-900">
-          入居のしおり一覧はこちら
-        </a>
-        <p class="text-[11px] text-slate-400 mt-1">
-          ユニヴ・ライフ管理物件の入居のしおり一覧ページです。
-        </p>
-      </div>
+  // タイトルも入口用に
+  document.title = "入居のしおり（Web）｜ユニヴ・ライフ株式会社";
+  return;
+}
+
 
 
 

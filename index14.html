@@ -270,6 +270,7 @@
       return "";
     }
 
+
     // 部屋専用カードを組み立て
     function renderRoomSecretSection(roomData) {
       const section = document.getElementById("roomSecretSection");
@@ -277,10 +278,6 @@
 
       const propertyName = roomData["物件名"] || "";
       const roomNo = roomData["号室"] || "";
-
-      // ★追加：号室を保持（properties読んだ後に canonicalName で上書きするため）
-      window.__roomNo = roomNo ? String(roomNo).trim() : "";
-
       const titleParts = [];
       if (propertyName) titleParts.push(propertyName);
       if (roomNo) titleParts.push(roomNo + "号室");
@@ -313,35 +310,36 @@
         hasAny = true;
       }
 
-      // Wi-Fi（postdials のキー揺れに対応）
-      const wifiSsid = pickFirst(roomData, [
-        "Wi-Fi_SSID",
-        "Wi-Fi SSID",
-        "WiFi_SSID",
-        "wifi_ssid",
-        "wifiSsid",
-        "ssid",
-        "SSID"
-      ]);
+    // Wi-Fi（postdials のキー揺れに対応）
+    const wifiSsid = pickFirst(roomData, [
+      "Wi-Fi_SSID",
+      "Wi-Fi SSID",
+      "WiFi_SSID",
+      "wifi_ssid",
+      "wifiSsid",
+      "ssid",
+      "SSID"
+    ]);
 
-      const wifiPass = pickFirst(roomData, [
-        "Wi-Fi_PASS",
-        "Wi-Fi PASS",
-        "WiFi_PASS",
-        "wifi_pass",
-        "wifiPass",
-        "password",
-        "PASS",
-        "Password",
-        "パスワード"
-      ]);
+    const wifiPass = pickFirst(roomData, [
+      "Wi-Fi_PASS",
+      "Wi-Fi PASS",
+      "WiFi_PASS",
+      "wifi_pass",
+      "wifiPass",
+      "password",
+      "PASS",
+      "Password",
+      "パスワード"
+    ]);
 
-      if (wifiSsid || wifiPass) {
-        document.getElementById("roomWifiSection").classList.remove("hidden");
-        if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
-        if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
-        hasAny = true;
-      }
+    if (wifiSsid || wifiPass) {
+      document.getElementById("roomWifiSection").classList.remove("hidden");
+      if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
+      if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+      hasAny = true;
+    }
+
 
       // 1つでも項目があればカード表示＆トグル設定
       if (hasAny) {
@@ -721,17 +719,7 @@
           propertyData.canonicalName ||
           propertyData.propertyName ||
           "物件No. " + propertyNo;
-
         document.getElementById("propertyTitle").textContent = title;
-
-        // ★追加：部屋カードの物件名表記を canonicalName（=title）に統一
-        // postdials には canonicalName が無い前提で、properties を読んだ後に上書きする
-        const roomTitleEl = document.getElementById("roomSecretTitle");
-        const roomSectionEl = document.getElementById("roomSecretSection");
-        if (roomTitleEl && roomSectionEl && !roomSectionEl.classList.contains("hidden")) {
-          const rn = (window.__roomNo || "").replace(/号室$/, "").trim();
-          roomTitleEl.textContent = rn ? `${title} ${rn}号室` : title;
-        }
 
         const zip = pickFirst(propertyData, ["zip_code", "postal_code", "郵便番号"]);
         const address = pickFirst(propertyData, ["address", "住所"]);
@@ -745,6 +733,7 @@
         } else {
           metaEl.textContent = "所在地情報は現在準備中です";
         }
+
 
         if (normalizeBool(propertyData.shiori_enabled) === false) {
           tabPanels.innerHTML =

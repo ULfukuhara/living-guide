@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>入居のしおり一覧｜ユニヴ・ライフ株式会社</title>
 
-<meta name="description" content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居のしおり一覧ページです。各物件の入居案内をご確認いただけます。">
-
-<link rel="canonical" href="https://guide.univ-life.com/list.html" />
+<meta name="description" content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居のしおり一覧ページです。">
 
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -16,36 +14,86 @@
 
 <div class="max-w-4xl mx-auto px-4 py-10">
 
-  <h1 class="text-2xl font-bold mb-4">
+  <h1 class="text-2xl font-bold mb-6">
     入居のしおり一覧
   </h1>
 
-  <p class="text-sm text-slate-600 mb-8">
-    ユニヴ・ライフ株式会社が管理する賃貸物件の入居のしおりページ一覧です。
-  </p>
-
-  <div class="space-y-3">
-
-    <!-- 物件リンク例 -->
-    <a href="https://guide.univ-life.com/?propertyNo=53300"
-       class="block bg-white border border-slate-200 rounded-lg px-4 py-3 hover:bg-slate-100">
-       ディアス山手3
-    </a>
-
-    <a href="https://guide.univ-life.com/?propertyNo=10100"
-       class="block bg-white border border-slate-200 rounded-lg px-4 py-3 hover:bg-slate-100">
-       尚志ハウス
-    </a>
-
-    <!-- ここに物件を追加 -->
-
-  </div>
-
-  <div class="mt-12 text-xs text-slate-400">
-    © ユニヴ・ライフ株式会社
+  <div id="propertyList" class="space-y-8">
+    <p>読み込み中...</p>
   </div>
 
 </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+  authDomain: "univlife-kanri.firebaseapp.com",
+  projectId: "univlife-kanri",
+  storageBucket: "univlife-kanri.firebasestorage.app",
+  messagingSenderId: "405011982427",
+  appId: "1:405011982427:web:cf56a37550ab714bfdb77e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function loadList() {
+
+  const colRef = collection(db, "properties_shiori");
+  const q = query(colRef, where("shiori_enabled", "==", true));
+  const snap = await getDocs(q);
+
+  const byCity = {};
+
+  snap.forEach(doc => {
+    const data = doc.data();
+
+    const city = data.area || data.エリア || "その他";
+    const name = data.canonicalName || data.property_name || doc.id;
+
+    if (!byCity[city]) byCity[city] = [];
+    byCity[city].push({
+      name,
+      propertyNo: doc.id
+    });
+  });
+
+  const container = document.getElementById("propertyList");
+  container.innerHTML = "";
+
+  Object.keys(byCity).sort().forEach(city => {
+
+    const section = document.createElement("div");
+
+    section.innerHTML = `
+      <h2 class="text-lg font-semibold mb-3">${city}</h2>
+      <div class="space-y-2">
+        ${byCity[city]
+          .sort((a,b)=>a.name.localeCompare(b.name,"ja"))
+          .map(p=>`
+            <a href="https://guide.univ-life.com/?propertyNo=${p.propertyNo}"
+               class="block bg-white border border-slate-200 rounded-lg px-4 py-3 hover:bg-slate-100">
+              ${p.name}
+            </a>
+          `).join("")}
+      </div>
+    `;
+
+    container.appendChild(section);
+  });
+}
+
+loadList();
+</script>
 
 </body>
 </html>

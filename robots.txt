@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# token付きURLはクロールさせない
+Disallow: /*?token=
+
+# 管理用検索ページはクロール不要なら
+Disallow: /*?propertyNo=
+
+Sitemap: https://guide.univ-life.com/sitemap.xml

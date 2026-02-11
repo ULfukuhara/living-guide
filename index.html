@@ -683,10 +683,69 @@
       }
 
       if (!propertyNo) {
-        showError("URL に ?propertyNo=XXXX または ?token=XXXX を指定してください。");
-        tabPanels.innerHTML = "";
+        // ✅ ルート（/）は「入口ページ」にする
+        tabPanels.innerHTML = `
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+            <h2 class="text-base font-semibold text-slate-900">入居のしおり（Web）</h2>
+
+            <div class="text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>このページは「入居のしおりWeb」の入口です。</p>
+              <p class="text-slate-500 text-xs">
+                ※ 物件別ページは、鍵渡し書類のQRコード／URLからアクセスしてください。
+              </p>
+            </div>
+
+            <div class="border-t border-slate-100 pt-4 space-y-3">
+              <label class="text-xs font-semibold text-slate-600">物件Noで開く（管理会社向け）</label>
+              <div class="flex gap-2">
+                <input
+                  id="propertyNoInput"
+                  inputmode="numeric"
+                  placeholder="例：40100"
+                  class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+                <button
+                  id="openPropertyBtn"
+                  class="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800"
+                >
+                  開く
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-400">
+                物件Noが不明な場合は、鍵渡し書類をご確認ください。
+              </p>
+            </div>
+          </section>
+        `;
+
+        // クリックで物件ページへ
+        const btn = document.getElementById("openPropertyBtn");
+        const input = document.getElementById("propertyNoInput");
+        const go = () => {
+          const v = (input?.value || "").trim();
+          if (!v) return;
+          window.location.href = `/?propertyNo=${encodeURIComponent(v)}`;
+        };
+        btn?.addEventListener("click", go);
+        input?.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") go();
+        });
+
+        // タイトルも入口用に
+        document.title = "入居のしおり（Web）｜ユニヴ・ライフ株式会社";
         return;
       }
+      <div class="border-t border-slate-100 pt-4">
+        <a href="/list.html"
+          class="inline-flex items-center gap-2 text-sm text-sky-700 underline hover:text-sky-900">
+          入居のしおり一覧はこちら
+        </a>
+        <p class="text-[11px] text-slate-400 mt-1">
+          ユニヴ・ライフ管理物件の入居のしおり一覧ページです。
+        </p>
+      </div>
+
+
 
       // ★グローバルに保持（アンケートURL生成で使用）
       window.__propertyNo = propertyNo;

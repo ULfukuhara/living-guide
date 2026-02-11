@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
   <title>入居のしおり｜ユニヴ・ライフ株式会社</title>
-  <meta name="description" content="ユニヴ・ライフ株式会社 管理物件の入居者向けWeb入居のしおりです。" />
-
+  <meta name="description"
+  content="ユニヴ・ライフ株式会社 管理物件の入居者向けWeb入居のしおりです。ゴミ出しルール、設備案内、生活マナーなど入居中に必要な情報を掲載しています。">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -482,8 +481,58 @@
       tabPanels.innerHTML = "";
 
       if (!sections.length) {
-        tabPanels.innerHTML =
-          '<p class="text-sm text-slate-500">この物件で公開されている入居のしおりはまだ登録されていません。</p>';
+        tabPanels.innerHTML = `
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
+
+            <div class="space-y-3">
+              <h2 class="text-lg font-semibold text-slate-900">
+                入居のしおり（Web）
+              </h2>
+
+              <p class="text-sm text-slate-700 leading-relaxed">
+                本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件に
+                ご入居いただいている方向けの「入居のしおり（Web版）」です。
+              </p>
+
+              <p class="text-sm text-slate-700 leading-relaxed">
+                ゴミ出しルール、インターネットの利用方法、設備の使い方、
+                生活マナー、契約内容に関するご案内など、
+                入居中に必要となる情報をまとめています。
+              </p>
+
+              <p class="text-xs text-slate-500">
+                ※ 物件ごとの詳細ページは、鍵渡し書類記載のURLまたはQRコードからアクセスしてください。
+              </p>
+            </div>
+
+            <div class="border-t border-slate-100 pt-5 space-y-3">
+              <label class="text-xs font-semibold text-slate-600">
+                物件Noで開く（管理会社向け）
+              </label>
+
+              <div class="flex gap-2">
+                <input
+                  id="propertyNoInput"
+                  inputmode="numeric"
+                  placeholder=""
+                  class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+                <button
+                  id="openPropertyBtn"
+                  class="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800"
+                >
+                  開く
+                </button>
+              </div>
+
+              <p class="text-[11px] text-slate-400">
+                物件Noが不明な場合は、鍵渡し書類をご確認ください。
+              </p>
+            </div>
+
+          </section>
+          `;
+
         return;
       }
 

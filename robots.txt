@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /*?token=
+Disallow: /*?propertyNo=
+
+Sitemap: https://guide.univ-life.com/sitemap.xml

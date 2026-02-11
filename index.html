@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <meta charset="UTF-8" />
   <title>入居のしおり｜ユニヴ・ライフ株式会社</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ✅ TOP用：description（入口ページのSEO） -->
   <meta name="description"
-  content="ユニヴ・ライフ株式会社 管理物件の入居者向けWeb入居のしおりです。ゴミ出しルール、設備案内、生活マナーなど入居中に必要な情報を掲載しています。">
+    content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者向けWeb入居のしおりです。ゴミ出し方法、設備案内、インターネット利用方法、生活ルールなどを物件ごとに掲載しています。" />
+  <link rel="canonical" href="https://guide.univ-life.com/" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -102,6 +107,7 @@
       <!-- ▲ 部屋専用ひみつ情報カード -->
 
       <!-- Property Meta -->
+      <!-- ✅ 入口では非表示にするので id を付与 -->
       <section id="propertyMetaSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
         <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
         <p class="text-[11px] text-slate-400">
@@ -125,12 +131,9 @@
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
       <p>© ユニヴ・ライフ株式会社</p>
-      <a href="/list.html" class="text-slate-300 hover:text-slate-400">
-        入居のしおり一覧
-      </a>
+      <p>入居のしおり</p>
     </div>
   </footer>
-
 
   <!-- ======================================================= -->
   <!-- JS -->
@@ -172,7 +175,7 @@
       "sales",
       "expenses",
       "cancellation",
-      "management_other" // ★追加：管理＞その他
+      "management_other"
     ];
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -281,7 +284,7 @@
       const propertyName = roomData["物件名"] || "";
       const roomNo = roomData["号室"] || "";
 
-      // ★追加：号室を保持（properties読んだ後に canonicalName で上書きするため）
+      // 号室保持（properties読後に canonicalName で上書きする）
       window.__roomNo = roomNo ? String(roomNo).trim() : "";
 
       const titleParts = [];
@@ -316,7 +319,7 @@
         hasAny = true;
       }
 
-      // Wi-Fi（postdials のキー揺れに対応）
+      // Wi-Fi（キー揺れ対応）
       const wifiSsid = pickFirst(roomData, [
         "Wi-Fi_SSID",
         "Wi-Fi SSID",
@@ -346,7 +349,6 @@
         hasAny = true;
       }
 
-      // 1つでも項目があればカード表示＆トグル設定
       if (hasAny) {
         section.classList.remove("hidden");
 
@@ -377,8 +379,7 @@
       return "";
     }
 
-    // ✅ 本文レンダリング：Markdownリンク（[label](url)）対応＋改行保持
-    // ※ <a> を生成する文字列に改行を入れない（壊れるのを防止）
+    // 本文レンダリング：Markdownリンク + 改行保持
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
       let escaped = escapeHtml(text);
@@ -390,7 +391,6 @@
           `<a href="${url}" target="_blank" rel="noopener" class="text-sky-600 underline">${label}</a>`
       );
 
-      // 改行のみ <br>
       return escaped.replace(/\r?\n/g, "<br />");
     }
 
@@ -464,7 +464,7 @@
       return sections;
     }
 
-    // ★追加：アンケートURL生成（tokenあり/なし両対応）
+    // アンケートURL生成（tokenあり/なし両対応）
     function buildSurveyUrl({ token = "", propertyNo = "", source = "unknown" } = {}) {
       const base = "https://guide.univ-life.com/survey.html";
       const u = new URL(base);
@@ -481,58 +481,8 @@
       tabPanels.innerHTML = "";
 
       if (!sections.length) {
-        tabPanels.innerHTML = `
-          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
-
-            <div class="space-y-3">
-              <h2 class="text-lg font-semibold text-slate-900">
-                入居のしおり（Web）
-              </h2>
-
-              <p class="text-sm text-slate-700 leading-relaxed">
-                本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件に
-                ご入居いただいている方向けの「入居のしおり（Web版）」です。
-              </p>
-
-              <p class="text-sm text-slate-700 leading-relaxed">
-                ゴミ出しルール、インターネットの利用方法、設備の使い方、
-                生活マナー、契約内容に関するご案内など、
-                入居中に必要となる情報をまとめています。
-              </p>
-
-              <p class="text-xs text-slate-500">
-                ※ 物件ごとの詳細ページは、鍵渡し書類記載のURLまたはQRコードからアクセスしてください。
-              </p>
-            </div>
-
-            <div class="border-t border-slate-100 pt-5 space-y-3">
-              <label class="text-xs font-semibold text-slate-600">
-                物件Noで開く（管理会社向け）
-              </label>
-
-              <div class="flex gap-2">
-                <input
-                  id="propertyNoInput"
-                  inputmode="numeric"
-                  placeholder=""
-                  class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                />
-                <button
-                  id="openPropertyBtn"
-                  class="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800"
-                >
-                  開く
-                </button>
-              </div>
-
-              <p class="text-[11px] text-slate-400">
-                物件Noが不明な場合は、鍵渡し書類をご確認ください。
-              </p>
-            </div>
-
-          </section>
-          `;
-
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件で公開されている入居のしおりはまだ登録されていません。</p>';
         return;
       }
 
@@ -582,7 +532,7 @@
           card.className =
             "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
 
-          // ★管理＞その他だけ：アンケートボタン（tokenあり/なしでURL分岐）
+          // 管理＞その他だけ：アンケートボタン
           const surveyUrl = (sec.key === "management_other")
             ? (window.__token
                 ? buildSurveyUrl({ token: window.__token, source: "shiori_room" })
@@ -695,6 +645,7 @@
 
     async function main() {
       const tabPanels = document.getElementById("tabPanels");
+      const tabNav = document.getElementById("tabNav");
 
       if (!db) {
         showError("データを読み込めませんでした。時間をおいて再度お試しください。");
@@ -705,8 +656,42 @@
       let propertyNo = url.searchParams.get("propertyNo") || "";
       const token = url.searchParams.get("token") || "";
 
-      // ★グローバルに保持（アンケートURL生成で使用）
+      // グローバル保持
       window.__token = token || "";
+
+      // ===============================
+      // ✅ TOP（/）は「説明ページ」（propertyNo/token 無し）
+      // ===============================
+      if (!propertyNo && !token) {
+        // 入口は meta を隠す
+        document.getElementById("propertyMetaSection")?.classList.add("hidden");
+
+        // タイトル固定
+        document.getElementById("propertyTitle").textContent = "入居のしおり（Web）";
+        document.title = "入居のしおり｜ユニヴ・ライフ株式会社";
+
+        // タブは不要
+        if (tabNav) tabNav.innerHTML = "";
+
+        tabPanels.innerHTML = `
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+            <h2 class="text-lg font-semibold text-slate-900">入居のしおり（Web）</h2>
+
+            <div class="text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け「入居のしおり（Web版）」です。</p>
+              <p>ゴミ出し方法、インターネット利用方法、設備の使い方、生活ルールなどを物件ごとに掲載しています。</p>
+              <p class="text-slate-500 text-xs">※ 物件別ページは、鍵渡し書類のQRコード／URLからアクセスしてください。</p>
+            </div>
+
+            <div class="pt-2">
+              <a href="/list.html" class="text-slate-300 hover:text-slate-400 text-xs underline">
+                入居のしおり一覧
+              </a>
+            </div>
+          </section>
+        `;
+        return;
+      }
 
       // token があれば postdials から物件No を決める＆部屋カード表示
       if (token) {
@@ -735,71 +720,13 @@
       }
 
       if (!propertyNo) {
-        // ✅ ルート（/）は「入口ページ」にする
-        // ✅ 入口では Property Meta を非表示
-        document.getElementById("propertyMetaSection")?.classList.add("hidden");
+        showError("URL に ?propertyNo=XXXX または ?token=XXXX を指定してください。");
+        tabPanels.innerHTML = "";
+        return;
+      }
 
-        tabPanels.innerHTML = `
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
-
-          <div class="text-sm text-slate-700 leading-relaxed space-y-2">
-            <p>このページは入居者専用ページです。</p>
-            <p class="text-slate-500 text-xs">
-              ※ 物件別ページは、鍵渡し書類のQRコード／URLからアクセスしてください。
-            </p>
-          </div>
-
-          <div class="border-t border-slate-100 pt-4 space-y-3">
-            <label class="text-xs font-semibold text-slate-600">物件Noで開く（管理会社向け）</label>
-            <div class="flex gap-2">
-              <input
-                id="propertyNoInput"
-                inputmode="numeric"
-                placeholder=""
-                class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-              <button
-                id="openPropertyBtn"
-                class="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800"
-              >
-                開く
-              </button>
-            </div>
-            <p class="text-[11px] text-slate-400">
-              物件Noが不明な場合は、鍵渡し書類をご確認ください。
-            </p>
-          </div>
-
-        </section>
-
-        `;
-
-  // クリックで物件ページへ
-  const btn = document.getElementById("openPropertyBtn");
-  const input = document.getElementById("propertyNoInput");
-  const go = () => {
-    const v = (input?.value || "").trim();
-    if (!v) return;
-    window.location.href = `/?propertyNo=${encodeURIComponent(v)}`;
-  };
-  btn?.addEventListener("click", go);
-  input?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") go();
-  });
-
-  // タイトルも入口用に
-  document.title = "入居のしおり（Web）｜ユニヴ・ライフ株式会社";
-  return;
-}
-
-
-
-
-      // ★グローバルに保持（アンケートURL生成で使用）
+      // グローバル保持（アンケートURL生成で使用）
       window.__propertyNo = propertyNo;
-
-      // ✅ 物件ページでは Property Meta を表示
-      document.getElementById("propertyMetaSection")?.classList.remove("hidden");
 
       try {
         const results = await Promise.allSettled([
@@ -836,9 +763,7 @@
         document.getElementById("propertyTitle").textContent = title;
         document.title = `${title}｜入居のしおり｜ユニヴ・ライフ株式会社`;
 
-
-        // ★追加：部屋カードの物件名表記を canonicalName（=title）に統一
-        // postdials には canonicalName が無い前提で、properties を読んだ後に上書きする
+        // 部屋カードの物件名表記を canonicalName に統一
         const roomTitleEl = document.getElementById("roomSecretTitle");
         const roomSectionEl = document.getElementById("roomSecretSection");
         if (roomTitleEl && roomSectionEl && !roomSectionEl.classList.contains("hidden")) {
@@ -860,7 +785,7 @@
           const url = new URL(window.location.href);
           const tokenParam = url.searchParams.get("token") || "";
 
-          // 1) tokenページは noindex（必須）
+          // tokenページは noindex（必須）
           if (tokenParam) {
             let robots = document.querySelector('meta[name="robots"]');
             if (!robots) {
@@ -869,10 +794,10 @@
               document.head.appendChild(robots);
             }
             robots.content = "noindex,nofollow";
-            return; // tokenページはここで終了
+            return;
           }
 
-          // 2) propertyNoページは canonical を固定
+          // propertyNoページは canonical を固定
           if (propertyNo) {
             let canonical = document.querySelector('link[rel="canonical"]');
             if (!canonical) {
@@ -883,9 +808,8 @@
             canonical.href = `https://guide.univ-life.com/?propertyNo=${propertyNo}`;
           }
 
-          // 3) title / description を物件ごとに動的化
+          // title / description を物件ごとに動的化
           const safeTitle = title || ("物件No. " + propertyNo);
-
           document.title = `${safeTitle}｜入居のしおり｜ユニヴ・ライフ株式会社`;
 
           let metaDesc = document.querySelector('meta[name="description"]');
@@ -895,14 +819,12 @@
             document.head.appendChild(metaDesc);
           }
 
-          // 住所が取れるなら入れる（検索結果の安心感UP）
           const addrText = [zip ? `〒${zip}` : "", address || ""].filter(Boolean).join(" ");
           metaDesc.content =
             `${safeTitle}の入居のしおり（入居者向け案内）です。` +
             `ゴミ出し、インターネット、設備、注意事項などを掲載しています。` +
             (addrText ? `所在地：${addrText}` : "");
 
-          // 4) 構造化データ（簡易版）
           const ld = {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -915,7 +837,6 @@
             }
           };
 
-          // 既存があれば入れ替え
           const existing = document.getElementById("ldjson-shiori");
           if (existing) existing.remove();
 
@@ -926,9 +847,7 @@
           document.head.appendChild(script);
         })();
 
-
         const metaEl = document.getElementById("propertyMeta");
-
         if (zip && address) {
           metaEl.textContent = `〒${zip}　${address}`;
         } else if (address) {

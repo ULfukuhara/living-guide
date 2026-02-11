@@ -663,35 +663,68 @@
       // ✅ TOP（/）は「説明ページ」（propertyNo/token 無し）
       // ===============================
       if (!propertyNo && !token) {
-        // 入口は meta を隠す
+
+        // タイトル固定（SEO）
+        document.title = "入居のしおり｜ユニヴ・ライフ株式会社";
+        document.getElementById("propertyTitle").textContent = "入居のしおり（Web）";
+
+        // 物件メタ非表示
         document.getElementById("propertyMetaSection")?.classList.add("hidden");
 
-        // タイトル固定
-        document.getElementById("propertyTitle").textContent = "入居のしおり（Web）";
-        document.title = "入居のしおり｜ユニヴ・ライフ株式会社";
-
-        // タブは不要
-        if (tabNav) tabNav.innerHTML = "";
+        // タブ削除
+        document.getElementById("tabNav").innerHTML = "";
 
         tabPanels.innerHTML = `
-          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-            <h2 class="text-lg font-semibold text-slate-900">入居のしおり（Web）</h2>
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
 
-            <div class="text-sm text-slate-700 leading-relaxed space-y-2">
-              <p>本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け「入居のしおり（Web版）」です。</p>
-              <p>ゴミ出し方法、インターネット利用方法、設備の使い方、生活ルールなどを物件ごとに掲載しています。</p>
-              <p class="text-slate-500 text-xs">※ 物件別ページは、鍵渡し書類のQRコード／URLからアクセスしてください。</p>
+            <h1 class="text-xl font-bold text-slate-900">
+              入居のしおり（Web）｜ユニヴ・ライフ株式会社
+            </h1>
+
+            <div class="text-sm text-slate-700 leading-relaxed space-y-3">
+
+              <p>
+                本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件の
+                入居者様向けWeb入居のしおりです。
+              </p>
+
+              <p>
+                入居時にお渡ししている「入居のしおり」を
+                Web版として公開しています。
+              </p>
+
+              <p>
+                物件ごとに、以下の内容をご確認いただけます。
+              </p>
+
+              <ul class="list-disc pl-5 space-y-1">
+                <li>ゴミ出し方法・分別ルール</li>
+                <li>インターネット利用方法</li>
+                <li>設備の使用方法</li>
+                <li>生活マナー・注意事項</li>
+                <li>契約・費用に関するご案内</li>
+              </ul>
+
+              <p class="text-slate-500 text-xs">
+                ※ 物件別ページは、鍵渡し書類のQRコードまたはURLよりアクセスしてください。
+              </p>
+
             </div>
 
-            <div class="pt-2">
-              <a href="/list.html" class="text-slate-300 hover:text-slate-400 text-xs underline">
-                入居のしおり一覧
+            <!-- 内部リンク（SEO強化用） -->
+            <div class="pt-4 border-t border-slate-100">
+              <a href="/list.html"
+                class="text-xs text-slate-400 underline hover:text-slate-600">
+                管理物件 入居のしおり一覧
               </a>
             </div>
+
           </section>
         `;
+
         return;
       }
+
 
       // token があれば postdials から物件No を決める＆部屋カード表示
       if (token) {

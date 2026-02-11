@@ -275,6 +275,8 @@
         console.error("list load error:", e);
         container.innerHTML = `<p class="text-sm text-rose-700">読み込みに失敗しました。</p>`;
       }
+      console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
+
     }
 
     document.addEventListener("DOMContentLoaded", () => {

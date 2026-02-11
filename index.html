@@ -39,7 +39,7 @@
         <div>
           <p class="text-xs text-slate-500">UNIV LIFE 入居者専用</p>
           <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
-            物件名を読み込み中…
+            入居のしおり（Web）
           </h1>
         </div>
       </div>
@@ -102,12 +102,11 @@
       <!-- ▲ 部屋専用ひみつ情報カード -->
 
       <!-- Property Meta -->
-      <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
+      <section id="propertyMetaSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
         <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
         <p class="text-[11px] text-slate-400">
           ※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。
         </p>
-
       </section>
 
       <!-- エラー表示 -->
@@ -684,6 +683,9 @@
 
       if (!propertyNo) {
         // ✅ ルート（/）は「入口ページ」にする
+        // ✅ 入口では Property Meta を非表示
+        document.getElementById("propertyMetaSection")?.classList.add("hidden");
+
         tabPanels.innerHTML = `
           <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
             <h2 class="text-base font-semibold text-slate-900">入居のしおり（Web）</h2>
@@ -752,6 +754,9 @@
 
       // ★グローバルに保持（アンケートURL生成で使用）
       window.__propertyNo = propertyNo;
+      
+      // ✅ 物件ページでは Property Meta を表示
+      document.getElementById("propertyMetaSection")?.classList.remove("hidden");
 
       try {
         const results = await Promise.allSettled([

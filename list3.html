@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>入居のしおり一覧｜ユニヴ・ライフ株式会社</title>
+  <meta name="description" content="ユニヴ・ライフ株式会社の管理物件における、公開中（入居のしおりWebが有効）の物件一覧です。" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .richtext a { text-decoration: underline; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-5xl mx-auto px-4 py-4 space-y-1">
+      <h1 class="text-lg sm:text-xl font-bold">入居のしおり一覧</h1>
+      <p class="text-xs text-slate-500">
+        公開中（入居のしおりWebが有効）の物件のみ表示しています。
+      </p>
+      <p class="text-[11px] text-slate-400">
+        ※ 物件ページは「共通ページ（propertyNo）」で表示されます。tokenページは一覧に出しません。
+      </p>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-5xl mx-auto px-4 py-6 space-y-5">
+
+      <!-- Search -->
+      <section class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+        <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <div class="flex-1">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">物件名 / 住所 で検索</label>
+            <input id="q"
+              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              placeholder="例：YousCourt / 城東区 / 40100"
+              autocomplete="off"
+            />
+            <p class="text-[11px] text-slate-400 mt-1">
+              検索はこのページ内で絞り込み（Firestore再検索はしません）
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button id="clearBtn"
+              class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
+              クリア
+            </button>
+            <a href="/"
+              class="rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold hover:bg-slate-800">
+              トップへ
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- List -->
+      <section id="propertyList" class="space-y-6">
+        <p class="text-sm text-slate-500">読み込み中...</p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-5xl mx-auto px-4 py-4 text-[11px] text-slate-400 flex justify-between">
+      <p>© ユニヴ・ライフ株式会社</p>
+      <a href="/" class="hover:text-slate-600">トップへ</a>
+    </div>
+  </footer>
+
+  <!-- ======================================================= -->
+  <!-- JS -->
+  <!-- ======================================================= -->
+  <script type="module">
+    // =========================
+    // Firebase Config（index.html と同じ）
+    // =========================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+      authDomain: "univlife-kanri.firebaseapp.com",
+      projectId: "univlife-kanri",
+      storageBucket: "univlife-kanri.firebasestorage.app",
+      messagingSenderId: "405011982427",
+      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
+      measurementId: "G-DXMR0VL972"
+    };
+
+    // =========================
+    // 市コード → 表示名
+    // （variant_key に入っているローマ字想定）
+    // =========================
+    const CITY_MAP = {
+      suita: "吹田市",
+      takatsuki: "高槻市",
+      ibaraki: "茨木市",
+      amagasaki: "尼崎市",
+      ashiya: "芦屋市",
+      chuouku: "大阪市中央区",
+      fukushimaku: "大阪市福島区",
+      higashisumiyoshiku: "大阪市東住吉区",
+      higashiyodogawaku: "大阪市東淀川区",
+      hiranoku: "大阪市平野区",
+      ikedashi: "池田市",
+      kitaku: "大阪市北区",
+      minoo: "箕面市",
+      nisinomiya: "西宮市",
+      sakaiku: "堺市堺区",
+      settsu: "摂津市",
+      suminoeku: "大阪市住之江区",
+      toyonaka: "豊中市",
+      yodogawaku: "大阪市淀川区",
+      sumiyoshiku: "大阪市住吉区",
+      jotoku: "大阪市城東区",
+      other: "その他"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // =========================
+    // Util
+    // =========================
+    function escapeHtml(str) {
+      return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normStr(v) {
+      return (v ?? "").toString().trim();
+    }
+
+    function cityLabel(cityKey) {
+      const k = (cityKey || "").toLowerCase().trim();
+      return CITY_MAP[k] || CITY_MAP.other;
+    }
+
+    // =========================
+    // State
+    // =========================
+    let db = null;
+    let ALL = [];        // 全件
+    let FILTERED = [];   // 絞り込み後
+
+    // =========================
+    // Load
+    // =========================
+    async function loadProperties() {
+      const colRef = collection(db, "properties_shiori");
+
+      // ✅ 公開中のみ（boolean TRUE）
+      const q = query(colRef, where("shiori_enabled", "==", true));
+
+      const snap = await getDocs(q);
+
+      const list = []; // ← ここが重要（list未定義を防ぐ）
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+
+        const propertyNo = docSnap.id; // ドキュメントIDが物件No想定
+        const name =
+          normStr(data.canonicalName) ||
+          normStr(data.propertyName) ||
+          propertyNo;
+
+        const address = normStr(data.address || data["住所"]);
+        const cityKey = normStr(data.variant_key).toLowerCase() || "other";
+
+        list.push({
+          propertyNo,
+          name,
+          address,
+          cityKey,
+          cityName: cityLabel(cityKey),
+          url: `/?propertyNo=${encodeURIComponent(propertyNo)}`
+        });
+      });
+
+      // 並び：市名 → 物件名
+      list.sort((a, b) => {
+        const c = a.cityName.localeCompare(b.cityName, "ja");
+        if (c !== 0) return c;
+        return a.name.localeCompare(b.name, "ja");
+      });
+
+      console.log("DEBUG cityKey一覧:", list.map(p => p.cityKey));
+
+      ALL = list;
+      FILTERED = list;
+    }
+
+    // =========================
+    // Render
+    // =========================
+    function render(list) {
+      const root = document.getElementById("propertyList");
+      root.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        root.innerHTML = `<p class="text-sm text-slate-500">該当する公開物件がありません。</p>`;
+        return;
+      }
+
+      // cityName でグループ化
+      const map = new Map();
+      for (const p of list) {
+        const key = p.cityName || "その他";
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(p);
+      }
+
+      // 市名の順序（CITY_MAP順を優先、無ければ文字順）
+      const cityOrder = Object.values(CITY_MAP);
+      const cities = Array.from(map.keys()).sort((a, b) => {
+        const ia = cityOrder.indexOf(a);
+        const ib = cityOrder.indexOf(b);
+        if (ia !== -1 || ib !== -1) {
+          return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
+        }
+        return a.localeCompare(b, "ja");
+      });
+
+      for (const city of cities) {
+        const items = map.get(city);
+
+        const section = document.createElement("section");
+        section.className = "bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden";
+
+        section.innerHTML = `
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900">${escapeHtml(city)}</h2>
+            <span class="text-[11px] text-slate-400">${items.length}件</span>
+          </div>
+          <div class="divide-y divide-slate-100">
+            ${items.map(p => `
+              <a href="${p.url}"
+                 class="block px-4 py-3 hover:bg-slate-50">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-slate-900 truncate">
+                      ${escapeHtml(p.name)}
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 truncate">
+                      物件No: ${escapeHtml(p.propertyNo)}${p.address ? `　/　${escapeHtml(p.address)}` : ""}
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0 text-[11px] text-slate-400">
+                    開く →
+                  </div>
+                </div>
+              </a>
+            `).join("")}
+          </div>
+        `;
+
+        root.appendChild(section);
+      }
+    }
+
+    // =========================
+    // Filter
+    // =========================
+    function applyFilter() {
+      const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
+      if (!q) {
+        FILTERED = ALL;
+        render(FILTERED);
+        return;
+      }
+
+      FILTERED = ALL.filter(p => {
+        const hay = [
+          p.name,
+          p.address,
+          p.propertyNo,
+          p.cityName,
+          p.cityKey
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+
+      render(FILTERED);
+    }
+
+    // =========================
+    // Main
+    // =========================
+    async function main() {
+      const root = document.getElementById("propertyList");
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+      } catch (e) {
+        console.error("Firestore 初期化に失敗:", e);
+        root.innerHTML = `<p class="text-sm text-rose-600">データを読み込めませんでした。</p>`;
+        return;
+      }
+
+      try {
+        await loadProperties();
+        render(ALL);
+      } catch (e) {
+        console.error("読み込みエラー:", e);
+        root.innerHTML = `<p class="text-sm text-rose-600">読み込みに失敗しました。</p>`;
+        return;
+      }
+
+      // UI events
+      document.getElementById("q")?.addEventListener("input", applyFilter);
+      document.getElementById("clearBtn")?.addEventListener("click", () => {
+        const qEl = document.getElementById("q");
+        if (qEl) qEl.value = "";
+        applyFilter();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+</body>
+</html>

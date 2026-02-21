@@ -1,264 +1,929 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>入居のしおり｜ユニヴ・ライフ株式会社</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description"
-content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。" />
-<link rel="canonical" href="https://guide.univ-life.com/" />
+  <meta charset="UTF-8" />
+  <title>ユニヴ・ライフ株式会社｜入居のしおり（Web）公式サイト</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+  <!-- ✅ TOP用：description（入口ページのSEO） -->
+  <meta name="description"
+    content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。大阪市・吹田市・茨木市・高槻市ほか管理物件のご案内を掲載しています。" />
+  <link rel="canonical" href="https://guide.univ-life.com/" />
 
-<style>
-.richtext p{margin-bottom:.6rem;}
-.richtext a{text-decoration:underline;}
-</style>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .richtext p { margin-bottom: 0.6rem; }
+    .richtext ul { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: disc; }
+    .richtext ol { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: decimal; }
+    .richtext a { text-decoration: underline; }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LKMYKG189C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LKMYKG189C');
+  </script>
+
+  <!-- Organization JSON-LD（TOP用） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ユニヴ・ライフ株式会社",
+    "url": "https://guide.univ-life.com/",
+    "sameAs": [
+      "https://univ-life.com/"
+    ]
+  }
+  </script>
 </head>
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-<header class="bg-white shadow-sm sticky top-0 z-20">
-<div class="max-w-4xl mx-auto px-4 py-3">
-<h1 id="propertyTitle" class="text-base font-semibold">
-入居のしおり
-</h1>
-</div>
-</header>
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+          UL
+        </span>
+        <div>
+          <p class="text-xs text-slate-500">UNIV LIFE 入居者専用</p>
+          <h1 class="text-base sm:text-lg font-semibold text-slate-800" id="propertyTitle">
+            ユニヴ・ライフ株式会社 入居のしおり（Web）
+          </h1>
+        </div>
+      </div>
+    </div>
+  </header>
 
-<main class="flex-1">
-<div class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
-<section id="propertyMetaSection"
-class="bg-white rounded-2xl shadow-sm border p-4">
-<p id="propertyMeta" class="text-xs text-slate-400">
-情報を取得中
-</p>
-</section>
+      <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
+      <section id="roomSecretSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[11px] font-medium text-emerald-600">このお部屋専用のご案内</p>
+            <p id="roomSecretTitle" class="mt-1 text-sm sm:text-base font-semibold text-slate-800"></p>
+            <p class="mt-1 text-[11px] text-slate-400">
+              集合ポストの開錠番号など、このお部屋に固有の情報です。
+            </p>
+          </div>
+          <button
+            id="roomSecretToggleBtn"
+            type="button"
+            class="flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-500 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+          >
+            この部屋の情報を表示
+          </button>
+        </div>
 
-<section>
-<div id="tabNav" class="flex flex-wrap gap-2 text-xs"></div>
-<div id="tabPanels" class="mt-3 space-y-4"></div>
-</section>
+        <div id="roomSecretBody" class="mt-3 hidden space-y-3">
+          <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
+            <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
 
-</div>
-</main>
+          <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
+            <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
 
-<!-- Lightbox -->
-<div id="lightbox"
-class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+          <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
+            <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
+          </div>
 
-<button id="lightboxClose"
-class="absolute top-4 right-4 text-white text-2xl">
-✕
-</button>
+          <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
+            <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
+            <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
+            <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+          </div>
+        </div>
+      </section>
+      <!-- ▲ 部屋専用ひみつ情報カード -->
 
-<img id="lightboxImage"
-class="max-h-[90vh] max-w-[95vw] object-contain select-none" />
-</div>
+      <!-- Property Meta -->
+      <section id="propertyMetaSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
+        <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
+        <p class="text-[11px] text-slate-400">
+          ※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。
+        </p>
+      </section>
 
-<footer class="border-t bg-white text-xs text-slate-400">
-<div class="max-w-4xl mx-auto px-4 py-3">
-© ユニヴ・ライフ株式会社
-</div>
-</footer>
+      <!-- エラー表示 -->
+      <section id="errorBox" class="hidden rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></section>
 
-<script type="module">
+      <!-- Tabs -->
+      <section>
+        <div id="tabNav" class="flex flex-wrap gap-2 pb-1 text-xs"></div>
+        <div id="tabPanels" class="mt-3 space-y-4"></div>
+      </section>
 
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    </div>
+  </main>
 
-import {
-getFirestore,
-doc,
-getDoc,
-collection,
-getDocs
-} from
-"https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <!-- ✅ Lightbox（1つだけ） -->
+  <div id="lightbox" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+    <button id="lightboxClose" class="absolute top-4 right-4 text-white text-2xl z-50">✕</button>
+    <img id="lightboxImage" src="" class="max-h-[90vh] max-w-[95vw] object-contain select-none" />
+    <div class="absolute bottom-4 left-0 right-0 text-center text-white/70 text-xs" id="lightboxCounter"></div>
+  </div>
 
-const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "univlife-kanri.firebaseapp.com",
-projectId: "univlife-kanri"
-};
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
+      <p>© ユニヴ・ライフ株式会社</p>
+      <p>入居のしおり</p>
+    </div>
+  </footer>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  <!-- ======================================================= -->
+  <!-- JS（本体） -->
+  <!-- ======================================================= -->
+  <script type="module">
+    const firebaseConfig = {
+      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
+      authDomain: "univlife-kanri.firebaseapp.com",
+      projectId: "univlife-kanri",
+      storageBucket: "univlife-kanri.firebasestorage.app",
+      messagingSenderId: "405011982427",
+      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
+      measurementId: "G-DXMR0VL972"
+    };
 
-function escapeHtml(str){
-return (str||"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;");
-}
+    const SECTION_KEYS = [
+      "key","mailbox","delivery_box","bicycle_space","room_equipment","special_note",
+      "moving","electricity","gas","water","internet","trash","common_area","pets",
+      "toilet","noise","drainage","ventilation","heater","air_conditioner",
+      "bike_parking","car_parking","sales","expenses","cancellation","management_other"
+    ];
 
-function renderText(text){
-if(!text) return "";
-let t = escapeHtml(text);
-t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-`<a href="$2" target="_blank">$1</a>`);
-return t.replace(/\n/g,"<br>");
-}
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore, doc, getDoc, collection, getDocs, query, where, limit
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-async function loadSections(){
-const snap = await getDocs(collection(db,"sections_master"));
-const map = {};
-snap.forEach(d=>map[d.id]=d.data());
-return map;
-}
+    let db = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+    } catch (e) {
+      console.error("Firestore 初期化に失敗:", e);
+      db = null;
+    }
 
-async function loadGuides(){
-const snap = await getDocs(collection(db,"guides_master_raw"));
-const list=[];
-snap.forEach(d=>{
-const data=d.data();
-list.push({
-section_key:data.section_key,
-variant_key:data.variant_key||"base",
-body_text:data.body_text||"",
-image_urls:Array.isArray(data.image_urls)?data.image_urls:[]
-});
-});
-return list;
-}
+    function escapeHtml(str) {
+      return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
 
-function pickContent(list,key){
-return list.find(x=>x.section_key===key);
-}
+    function normalizeBool(v) {
+      if (v === true) return true;
+      if (v === false) return false;
+      if (v === 1) return true;
+      if (v === 0) return false;
+      if (typeof v === "string") {
+        const s = v.trim().toLowerCase();
+        if (["true", "1", "yes", "on"].includes(s)) return true;
+        if (["false", "0", "no", "off"].includes(s)) return false;
+      }
+      return false;
+    }
 
-function renderSections(masterMap,guides){
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+      box.textContent = message;
+      box.classList.remove("hidden");
+    }
 
-const nav=document.getElementById("tabNav");
-const panels=document.getElementById("tabPanels");
+    function pickFirst(obj, keys) {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+      }
+      return "";
+    }
 
-nav.innerHTML="";
-panels.innerHTML="";
+    async function loadSectionsMaster() {
+      const colRef = collection(db, "sections_master");
+      const snap = await getDocs(colRef);
+      const map = {};
+      snap.forEach((d) => { map[d.id] = d.data(); });
+      return map;
+    }
 
-Object.keys(masterMap).forEach((key,i)=>{
+    async function loadPropertyShiori(propertyNo) {
+      const ref = doc(db, "properties_shiori", propertyNo);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return null;
+      return snap.data();
+    }
 
-const master=masterMap[key];
-const content=pickContent(guides,key);
-if(!content||!content.body_text) return;
+    async function loadGuidesMasterRaw() {
+      const colRef = collection(db, "guides_master_raw");
+      const snap = await getDocs(colRef);
+      const list = [];
+      snap.forEach((d) => {
+        const data = d.data() || {};
+        list.push({
+          section_key: data.section_key || "",
+          variant_key: data.variant_key || "base",
+          body_text: data.body_text || "",
+          image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
+        });
+      });
+      return list;
+    }
 
-const btn=document.createElement("button");
-btn.className="px-3 py-1 rounded-full border bg-slate-100";
-btn.textContent=master.label_ja||key;
-btn.onclick=()=>{
-document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));
-document.getElementById("panel-"+key).classList.remove("hidden");
-};
-nav.appendChild(btn);
+    async function loadRoomSecretByToken(token) {
+      if (!token) return null;
+      const colRef = collection(db, "postdials");
+      const q = query(colRef, where("token", "==", token), limit(1));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const docSnap = snap.docs[0];
+      return { id: docSnap.id, ...docSnap.data() };
+    }
 
-const panel=document.createElement("div");
-panel.id="panel-"+key;
-panel.className="panel hidden bg-white p-4 rounded-2xl shadow-sm";
+    function renderRoomSecretSection(roomData) {
+      const section = document.getElementById("roomSecretSection");
+      if (!section) return;
 
-panel.innerHTML=`
-<div class="richtext text-sm">
-${renderText(content.body_text)}
-</div>
+      const propertyName = roomData["物件名"] || "";
+      const roomNo = roomData["号室"] || "";
 
-${
-content.image_urls.length
-?`
-<div class="mt-4 grid gap-3">
-${content.image_urls.map((url,i)=>`
-<img src="${url}"
-data-lightbox-group="${key}"
-data-lightbox-index="${i}"
-class="rounded-lg cursor-zoom-in"/>
-`).join("")}
-</div>
-`
-:""
-}
-`;
+      window.__roomNo = roomNo ? String(roomNo).trim() : "";
 
-panels.appendChild(panel);
+      const titleParts = [];
+      if (propertyName) titleParts.push(propertyName);
+      if (roomNo) titleParts.push(roomNo + "号室");
+      document.getElementById("roomSecretTitle").textContent = titleParts.join(" ") || "このお部屋";
 
-if(i===0) panel.classList.remove("hidden");
+      let hasAny = false;
 
-});
+      const mailbox = roomData["開錠番号"];
+      if (mailbox && String(mailbox).trim() !== "") {
+        document.getElementById("roomMailboxSection").classList.remove("hidden");
+        document.getElementById("roomMailboxValue").textContent = String(mailbox);
+        hasAny = true;
+      }
 
-}
+      const delivery = roomData["宅配ボックス"];
+      if (delivery && String(delivery).trim() !== "") {
+        document.getElementById("roomDeliverySection").classList.remove("hidden");
+        document.getElementById("roomDeliveryValue").textContent = String(delivery);
+        hasAny = true;
+      }
 
-async function main(){
-const master=await loadSections();
-const guides=await loadGuides();
-renderSections(master,guides);
-}
+      const bicycle = roomData["駐輪場"];
+      if (bicycle && String(bicycle).trim() !== "") {
+        document.getElementById("roomBicycleSection").classList.remove("hidden");
+        document.getElementById("roomBicycleValue").textContent = String(bicycle);
+        hasAny = true;
+      }
 
-main();
+      const wifiSsid = pickFirst(roomData, ["Wi-Fi_SSID","Wi-Fi SSID","WiFi_SSID","wifi_ssid","wifiSsid","ssid","SSID"]);
+      const wifiPass = pickFirst(roomData, ["Wi-Fi_PASS","Wi-Fi PASS","WiFi_PASS","wifi_pass","wifiPass","password","PASS","Password","パスワード"]);
 
-</script>
+      if (wifiSsid || wifiPass) {
+        document.getElementById("roomWifiSection").classList.remove("hidden");
+        if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
+        if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+        hasAny = true;
+      }
 
-<script>
+      if (hasAny) {
+        section.classList.remove("hidden");
+        const btn = document.getElementById("roomSecretToggleBtn");
+        const body = document.getElementById("roomSecretBody");
+        if (btn && body) {
+          btn.addEventListener("click", () => {
+            const hidden = body.classList.contains("hidden");
+            if (hidden) {
+              body.classList.remove("hidden");
+              btn.textContent = "この部屋の情報を隠す";
+            } else {
+              body.classList.add("hidden");
+              btn.textContent = "この部屋の情報を表示";
+            }
+          });
+        }
+      }
+    }
 
-/* Lightbox */
+    function pickContent(masterList, sectionKey, variantKey) {
+      if (!masterList || masterList.length === 0) return null;
+      const vKey = variantKey || "base";
+      let hit = masterList.find(r => r.section_key === sectionKey && r.variant_key === vKey);
+      if (!hit) hit = masterList.find(r => r.section_key === sectionKey && r.variant_key === "base");
+      if (!hit) return null;
 
-let currentImages=[];
-let currentIndex=0;
-let startX=0;
+      return {
+        body: hit.body_text || "",
+        images: Array.isArray(hit.image_urls) ? hit.image_urls : []
+      };
+    }
 
-const lightbox=document.getElementById("lightbox");
-const lightboxImage=document.getElementById("lightboxImage");
+    function renderPlainTextAsHtml(text) {
+      if (!text) return "";
+      let escaped = escapeHtml(text);
 
-document.addEventListener("click",(e)=>{
-const img=e.target.closest("img[data-lightbox-index]");
-if(!img) return;
+      escaped = escaped.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        (m, label, url) =>
+          `<a href="${url}" target="_blank" rel="noopener" class="text-sky-600 underline">${label}</a>`
+      );
 
-const group=img.dataset.lightboxGroup;
-const imgs=[...document.querySelectorAll(
-`img[data-lightbox-group="${group}"]`
-)];
+      return escaped.replace(/\r?\n/g, "<br />");
+    }
 
-currentImages=imgs.map(x=>x.src);
-currentIndex=Number(img.dataset.lightboxIndex);
+    function buildSectionConfig(propData) {
+      if (!propData) return null;
+      const config = {};
+      SECTION_KEYS.forEach((key) => {
+        const raw = propData[key];
+        if (raw === undefined || raw === null || raw === "") {
+          config[key] = { enabled: false, variant: null };
+          return;
+        }
+        if (typeof raw === "boolean") {
+          config[key] = { enabled: raw, variant: null };
+          return;
+        }
+        if (typeof raw === "number") {
+          config[key] = { enabled: raw !== 0, variant: null };
+          return;
+        }
+        const s = String(raw).trim();
+        const lower = s.toLowerCase();
+        if (["false","0","no","off"].includes(lower)) {
+          config[key] = { enabled: false, variant: null };
+          return;
+        }
+        if (["true","1","yes","on","base"].includes(lower)) {
+          config[key] = { enabled: true, variant: null };
+          return;
+        }
+        config[key] = { enabled: true, variant: s };
+      });
+      return config;
+    }
 
-openLightbox();
-});
+    function mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey) {
+      const sections = [];
 
-function openLightbox(){
-lightbox.classList.remove("hidden");
-lightbox.classList.add("flex");
-updateImage();
-}
+      Object.keys(masterMap).forEach((key) => {
+        const master = masterMap[key] || {};
+        if (!sectionConfig || !Object.prototype.hasOwnProperty.call(sectionConfig, key)) return;
 
-function updateImage(){
-lightboxImage.src=currentImages[currentIndex];
-}
+        const cfg = sectionConfig[key];
+        if (!cfg?.enabled) return;
 
-function closeLightbox(){
-lightbox.classList.add("hidden");
-lightbox.classList.remove("flex");
-}
+        const vKey = cfg.variant || defaultVariantKey || "base";
+        const content = pickContent(masterList, key, vKey);
+        if (!content || !content.body) return;
 
-document.getElementById("lightboxClose")
-.addEventListener("click",closeLightbox);
+        sections.push({
+          key,
+          label: master.label_ja || key,
+          summary: master.summary || "",
+          group: master.group || "その他",
+          order: typeof master.order === "number" ? master.order : 9999,
+          icon: master.icon || "",
+          body: content.body,
+          images: content.images || []
+        });
+      });
 
-lightbox.addEventListener("click",(e)=>{
-if(e.target===lightbox) closeLightbox();
-});
+      sections.sort((a, b) => a.order - b.order);
+      return sections;
+    }
 
-lightbox.addEventListener("touchstart",(e)=>{
-startX=e.touches[0].clientX;
-});
+    function buildSurveyUrl({ token = "", propertyNo = "", source = "unknown" } = {}) {
+      const base = "https://guide.univ-life.com/survey.html";
+      const u = new URL(base);
+      if (token) u.searchParams.set("token", token);
+      if (!token && propertyNo) u.searchParams.set("propertyNo", propertyNo);
+      u.searchParams.set("source", source);
+      return u.toString();
+    }
 
-lightbox.addEventListener("touchend",(e)=>{
-const diff=e.changedTouches[0].clientX-startX;
-if(Math.abs(diff)<50) return;
+    function renderGroupedTabsWithAccordion(sections) {
+      const tabNav = document.getElementById("tabNav");
+      const tabPanels = document.getElementById("tabPanels");
+      tabNav.innerHTML = "";
+      tabPanels.innerHTML = "";
 
-if(diff<0)
-currentIndex=(currentIndex+1)%currentImages.length;
-else
-currentIndex=(currentIndex-1+currentImages.length)%currentImages.length;
+      if (!sections.length) {
+        tabPanels.innerHTML =
+          '<p class="text-sm text-slate-500">この物件で公開されている入居のしおりはまだ登録されていません。</p>';
+        return;
+      }
 
-updateImage();
-});
+      const groupMap = new Map();
+      sections.forEach((sec) => {
+        const gname = sec.group || "その他";
+        if (!groupMap.has(gname)) {
+          groupMap.set(gname, { name: gname, order: sec.order || 9999, icon: sec.icon || "", sections: [] });
+        }
+        const g = groupMap.get(gname);
+        g.order = Math.min(g.order, sec.order || 9999);
+        if (!g.icon && sec.icon) g.icon = sec.icon;
+        g.sections.push(sec);
+      });
 
-</script>
+      const groups = Array.from(groupMap.values()).sort((a, b) => {
+        if (a.order !== b.order) return a.order - b.order;
+        return a.name.localeCompare(b.name, "ja");
+      });
+      groups.forEach((g) => g.sections.sort((a, b) => a.order - b.order));
+
+      groups.forEach((group, gIndex) => {
+        const active = gIndex === 0;
+
+        const tabBtn = document.createElement("button");
+        tabBtn.type = "button";
+        tabBtn.dataset.tabGroup = group.name;
+        tabBtn.className =
+          "group-tab inline-flex items-center justify-center px-3 py-1.5 " +
+          "rounded-full whitespace-normal break-words text-[11px] leading-snug " +
+          "text-center max-w-[48%] border shadow-sm " +
+          (active
+            ? "bg-slate-900 text-white border-slate-900"
+            : "bg-slate-100 text-slate-700 border-slate-200");
+        tabBtn.innerHTML = `<span>${escapeHtml(group.name)}</span>`;
+        tabNav.appendChild(tabBtn);
+
+        const panel = document.createElement("section");
+        panel.dataset.tabGroupPanel = group.name;
+        panel.className = (active ? "" : "hidden ") + "bg-transparent space-y-3";
+
+        group.sections.forEach((sec) => {
+          const bodyId = `g${gIndex}-sec-${sec.key}`;
+          const expanded = false;
+
+          const card = document.createElement("div");
+          card.className = "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
+
+          const surveyUrl = (sec.key === "management_other")
+            ? (window.__token
+                ? buildSurveyUrl({ token: window.__token, source: "shiori_room" })
+                : buildSurveyUrl({ propertyNo: window.__propertyNo || "", source: "shiori_public" })
+              )
+            : "";
+
+          const groupId = `${gIndex}-${sec.key}`; // ✅ lightbox group key
+
+          card.innerHTML = `
+            <button
+              type="button"
+              class="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 focus:outline-none"
+              data-accordion-toggle="${bodyId}"
+            >
+              <div class="flex items-center gap-3 text-left">
+                <div class="flex-shrink-0">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-700">
+                    <i data-lucide="${sec.icon || "file-text"}" class="w-4 h-4"></i>
+                  </span>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-slate-900">
+                    ${escapeHtml(sec.label)}
+                  </div>
+                  ${
+                    sec.summary
+                      ? `<div class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(sec.summary)}</div>`
+                      : ""
+                  }
+                </div>
+              </div>
+              <div class="ml-3 flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${expanded ? "rotate-180" : ""}"
+                  data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </button>
+
+            <div id="${bodyId}"
+              class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${expanded ? "" : "hidden"}"
+            >
+              <div class="border-t border-slate-100 pt-2 richtext">
+                ${renderPlainTextAsHtml(sec.body)}
+
+                ${
+                  sec.images && sec.images.length
+                    ? `
+                      <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${sec.images.map((url, i) => `
+                          <img
+                            src="${escapeHtml(url)}"
+                            alt=""
+                            loading="lazy"
+                            data-lightbox-group="${groupId}"
+                            data-lightbox-index="${i}"
+                            class="rounded-lg border border-slate-200 shadow-sm w-full object-cover cursor-zoom-in"
+                          />
+                        `).join("")}
+                      </div>
+                    `
+                    : ""
+                }
+
+                ${
+                  sec.key === "management_other" && surveyUrl
+                    ? `
+                      <div class="mt-4">
+                        <a href="${surveyUrl}"
+                           target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-blue-700 hover:bg-slate-50">
+                          📝 入居直後アンケート（1分）
+                        </a>
+                        <div class="text-[11px] text-slate-400 mt-1">任意／今後の改善に活用します</div>
+                      </div>
+                    `
+                    : ""
+                }
+              </div>
+            </div>
+          `;
+
+          panel.appendChild(card);
+        });
+
+        tabPanels.appendChild(panel);
+      });
+
+      // タブ切替
+      document.querySelectorAll(".group-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.tabGroup;
+
+          document.querySelectorAll(".group-tab").forEach((t) => {
+            const active = t === tab;
+            t.classList.toggle("bg-slate-900", active);
+            t.classList.toggle("text-white", active);
+            t.classList.toggle("border-slate-900", active);
+            t.classList.toggle("bg-slate-100", !active);
+            t.classList.toggle("text-slate-700", !active);
+            t.classList.toggle("border-slate-200", !active);
+          });
+
+          document.querySelectorAll("[data-tab-group-panel]").forEach((p) => {
+            p.classList.toggle("hidden", p.dataset.tabGroupPanel !== target);
+          });
+        });
+      });
+
+      // アコーディオン
+      document.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const bodyId = btn.getAttribute("data-accordion-toggle");
+          const bodyEl = document.getElementById(bodyId);
+          const chevron = btn.querySelector('[data-chevron-for="' + bodyId + '"]');
+          if (!bodyEl) return;
+          const isHidden = bodyEl.classList.contains("hidden");
+          if (isHidden) {
+            bodyEl.classList.remove("hidden");
+            if (chevron) chevron.classList.add("rotate-180");
+          } else {
+            bodyEl.classList.add("hidden");
+            if (chevron) chevron.classList.remove("rotate-180");
+          }
+        });
+      });
+
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    }
+
+    async function main() {
+      const tabPanels = document.getElementById("tabPanels");
+
+      if (!db) {
+        showError("データを読み込めませんでした。時間をおいて再度お試しください。");
+        return;
+      }
+
+      const url = new URL(window.location.href);
+      let propertyNo = url.searchParams.get("propertyNo") || "";
+      const token = url.searchParams.get("token") || "";
+
+      window.__token = token || "";
+
+      // ✅ TOP（/）は説明ページ
+      if (!propertyNo && !token) {
+        document.title = "入居のしおり｜ユニヴ・ライフ株式会社";
+        document.getElementById("propertyTitle").textContent = "入居のしおり（Web）";
+        document.getElementById("propertyMetaSection")?.classList.add("hidden");
+        document.getElementById("tabNav").innerHTML = "";
+
+        tabPanels.innerHTML = `
+          <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
+            <h1 class="text-xl font-bold text-slate-900">
+              入居のしおり（Web）｜ユニヴ・ライフ株式会社
+            </h1>
+
+            <div class="text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件の
+                入居者様向けWeb入居のしおりです。
+              </p>
+              <p>
+                入居時にお渡ししている「入居のしおり」をWeb版として公開しています。
+              </p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>ゴミ出し方法・分別ルール</li>
+                <li>インターネット利用方法</li>
+                <li>設備の使用方法</li>
+                <li>生活マナー・注意事項</li>
+                <li>契約・費用に関するご案内</li>
+              </ul>
+
+              <p class="text-slate-500 text-xs">
+                ※ 物件別ページは、鍵渡し書類のQRコードまたはURLよりアクセスしてください。
+              </p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+              <a href="/list.html" class="text-xs text-slate-400 underline hover:text-slate-600">
+                ユニヴ・ライフ 管理物件 入居のしおり一覧
+              </a>
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      // token → postdials → propertyNo決定 ＋ 部屋カード
+      if (token) {
+        try {
+          const roomData = await loadRoomSecretByToken(token);
+          if (!roomData) {
+            showError("token=" + token + " で postdials を検索しましたが、該当データが見つかりませんでした。");
+            tabPanels.innerHTML = "";
+            return;
+          }
+          renderRoomSecretSection(roomData);
+
+          const bukkenNo = roomData["物件No"];
+          if (!bukkenNo || String(bukkenNo).trim() === "") {
+            showError("postdials のドキュメントに『物件No』フィールドがありません。");
+            tabPanels.innerHTML = "";
+            return;
+          }
+          propertyNo = String(bukkenNo).trim();
+        } catch (e) {
+          console.error("部屋情報の読み込みエラー:", e);
+          showError("お部屋専用情報（postdials）の読み込み中にエラーが発生しました。");
+          tabPanels.innerHTML = "";
+          return;
+        }
+      }
+
+      if (!propertyNo) {
+        showError("URL に ?propertyNo=XXXX または ?token=XXXX を指定してください。");
+        tabPanels.innerHTML = "";
+        return;
+      }
+
+      window.__propertyNo = propertyNo;
+
+      try {
+        const results = await Promise.allSettled([
+          loadSectionsMaster(),
+          loadPropertyShiori(propertyNo),
+          loadGuidesMasterRaw()
+        ]);
+
+        if (results.some(r => r.status === "rejected")) {
+          console.error("読み込みエラー:", results);
+          showError("データの読み込みに失敗しました。");
+          return;
+        }
+
+        const masterMap = results[0].value || {};
+        const propertyData = results[1].value || null;
+        const masterList = results[2].value || [];
+
+        if (!propertyData) {
+          showError("この物件の入居のしおり設定が登録されていません。");
+          tabPanels.innerHTML = "";
+          return;
+        }
+
+        const title =
+          propertyData.canonicalName ||
+          propertyData.propertyName ||
+          "物件No. " + propertyNo;
+
+        document.getElementById("propertyTitle").textContent = title;
+        document.title = `${title}｜入居のしおり｜ユニヴ・ライフ株式会社`;
+
+        // 部屋カードの物件名を canonicalName に統一
+        const roomTitleEl = document.getElementById("roomSecretTitle");
+        const roomSectionEl = document.getElementById("roomSecretSection");
+        if (roomTitleEl && roomSectionEl && !roomSectionEl.classList.contains("hidden")) {
+          const rn = (window.__roomNo || "").replace(/号室$/, "").trim();
+          roomTitleEl.textContent = rn ? `${title} ${rn}号室` : title;
+        }
+
+        const zip = pickFirst(propertyData, ["zip_code", "postal_code", "郵便番号"]);
+        const address = pickFirst(propertyData, ["address", "住所"]);
+
+        // ✅ SEO（共通ページだけ index）
+        (function applySeo() {
+          const url = new URL(window.location.href);
+          const tokenParam = url.searchParams.get("token") || "";
+
+          // tokenページは noindex
+          if (tokenParam) {
+            let robots = document.querySelector('meta[name="robots"]');
+            if (!robots) {
+              robots = document.createElement("meta");
+              robots.name = "robots";
+              document.head.appendChild(robots);
+            }
+            robots.content = "noindex,nofollow";
+            return;
+          }
+
+          // propertyNoページ canonical
+          if (propertyNo) {
+            let canonical = document.querySelector('link[rel="canonical"]');
+            if (!canonical) {
+              canonical = document.createElement("link");
+              canonical.rel = "canonical";
+              document.head.appendChild(canonical);
+            }
+            canonical.href = `https://guide.univ-life.com/?propertyNo=${propertyNo}`;
+          }
+
+          // title / description 動的
+          const safeTitle = title || ("物件No. " + propertyNo);
+          document.title = `${safeTitle}｜入居のしおり｜ユニヴ・ライフ株式会社`;
+
+          let metaDesc = document.querySelector('meta[name="description"]');
+          if (!metaDesc) {
+            metaDesc = document.createElement("meta");
+            metaDesc.name = "description";
+            document.head.appendChild(metaDesc);
+          }
+
+          const addrText = [zip ? `〒${zip}` : "", address || ""].filter(Boolean).join(" ");
+          metaDesc.content =
+            `${safeTitle}の入居のしおり（入居者向け案内）です。` +
+            `ゴミ出し、インターネット、設備、注意事項などを掲載しています。` +
+            (addrText ? `所在地：${addrText}` : "");
+
+          const ld = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": `${safeTitle}｜入居のしおり`,
+            "description": metaDesc.content,
+            "url": `https://guide.univ-life.com/?propertyNo=${propertyNo}`,
+            "publisher": { "@type": "Organization", "name": "ユニヴ・ライフ株式会社" }
+          };
+
+          const existing = document.getElementById("ldjson-shiori");
+          if (existing) existing.remove();
+
+          const script = document.createElement("script");
+          script.type = "application/ld+json";
+          script.id = "ldjson-shiori";
+          script.textContent = JSON.stringify(ld);
+          document.head.appendChild(script);
+        })();
+
+        // meta表示
+        const metaEl = document.getElementById("propertyMeta");
+        if (zip && address) metaEl.textContent = `〒${zip}　${address}`;
+        else if (address) metaEl.textContent = address;
+        else metaEl.textContent = "所在地情報は現在準備中です";
+
+        // 物件の公開フラグ
+        if (normalizeBool(propertyData.shiori_enabled) === false) {
+          tabPanels.innerHTML = '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
+          return;
+        }
+
+        const defaultVariantKey = propertyData.variant_key || "base";
+        const sectionConfig = buildSectionConfig(propertyData);
+        const mergedSections = mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey);
+
+        renderGroupedTabsWithAccordion(mergedSections);
+
+      } catch (e) {
+        console.error("main() 内でエラー:", e);
+        showError("データの読み込み中にエラーが発生しました。");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+
+  <!-- ======================================================= -->
+  <!-- Lightbox Script（必ず script タグ内） -->
+  <!-- ======================================================= -->
+  <script>
+    let currentImages = [];
+    let currentIndex = 0;
+    let startX = 0;
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+    const lightboxClose = document.getElementById("lightboxClose");
+    const lightboxCounter = document.getElementById("lightboxCounter");
+
+    function openLightbox(images, index) {
+      currentImages = images || [];
+      currentIndex = Math.max(0, Math.min(index || 0, currentImages.length - 1));
+
+      lightbox.classList.remove("hidden");
+      lightbox.classList.add("flex");
+      updateImage();
+    }
+
+    function closeLightbox() {
+      lightbox.classList.add("hidden");
+      lightbox.classList.remove("flex");
+    }
+
+    function updateImage() {
+      if (!currentImages.length) return;
+      lightboxImage.src = currentImages[currentIndex];
+      if (lightboxCounter) {
+        lightboxCounter.textContent = `${currentIndex + 1} / ${currentImages.length}`;
+      }
+    }
+
+    function nextImage() {
+      if (!currentImages.length) return;
+      currentIndex = (currentIndex + 1) % currentImages.length;
+      updateImage();
+    }
+
+    function prevImage() {
+      if (!currentImages.length) return;
+      currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+      updateImage();
+    }
+
+    // ✅ 画像クリックで起動（動的DOMでもOK：イベント委譲）
+    document.addEventListener("click", (e) => {
+      const img = e.target.closest('img[data-lightbox-index][data-lightbox-group]');
+      if (!img) return;
+
+      const group = img.dataset.lightboxGroup;
+      const imgs = Array.from(document.querySelectorAll(`img[data-lightbox-group="${group}"]`));
+      const images = imgs.map(i => i.currentSrc || i.src);
+
+      const idx = Number(img.dataset.lightboxIndex || 0);
+      openLightbox(images, idx);
+    });
+
+    // 閉じる
+    lightboxClose.addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    // スワイプ
+    lightbox.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    lightbox.addEventListener("touchend", (e) => {
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+      if (Math.abs(diff) < 50) return;
+      if (diff < 0) nextImage();
+      else prevImage();
+    });
+
+    // キーボード（PC）
+    document.addEventListener("keydown", (e) => {
+      if (lightbox.classList.contains("hidden")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") prevImage();
+    });
+  </script>
 
 </body>
 </html>

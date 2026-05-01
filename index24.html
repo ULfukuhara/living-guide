@@ -30,8 +30,6 @@
     gtag('js', new Date());
     gtag('config', 'G-LKMYKG189C');
   </script>
-
-  <!-- Organization JSON-LD（TOP用） -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -87,32 +85,40 @@
           </button>
         </div>
 
+        <!-- ▶ ここから中身（最初は hidden） -->
         <div id="roomSecretBody" class="mt-3 hidden space-y-3">
+
+          <!-- 集合ポスト -->
           <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
             <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
           </div>
 
+          <!-- 宅配ボックス -->
           <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
             <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
           </div>
 
+          <!-- 駐輪場 -->
           <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
             <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
           </div>
 
+          <!-- Wi-Fi -->
           <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
             <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
             <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
           </div>
+
         </div>
       </section>
       <!-- ▲ 部屋専用ひみつ情報カード -->
 
       <!-- Property Meta -->
+      <!-- ✅ 入口では非表示にするので id を付与 -->
       <section id="propertyMetaSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
         <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
         <p class="text-[11px] text-slate-400">
@@ -132,13 +138,6 @@
     </div>
   </main>
 
-  <!-- ✅ Lightbox（1つだけ） -->
-  <div id="lightbox" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
-    <button id="lightboxClose" class="absolute top-4 right-4 text-white text-2xl z-50">✕</button>
-    <img id="lightboxImage" src="" class="max-h-[90vh] max-w-[95vw] object-contain select-none" />
-    <div class="absolute bottom-4 left-0 right-0 text-center text-white/70 text-xs" id="lightboxCounter"></div>
-  </div>
-
   <!-- Footer -->
   <footer class="border-t border-slate-200 bg-white">
     <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
@@ -148,7 +147,7 @@
   </footer>
 
   <!-- ======================================================= -->
-  <!-- JS（本体） -->
+  <!-- JS -->
   <!-- ======================================================= -->
   <script type="module">
     const firebaseConfig = {
@@ -162,7 +161,6 @@
     };
 
     const SECTION_KEYS = [
-<<<<<<< HEAD
       "key",
       "mailbox",
       "delivery_box",
@@ -188,19 +186,19 @@
       "sales",
       "expenses",
       "cancellation",
-      "management_other",
-      "kurasapo_connect"
-=======
-      "key","mailbox","delivery_box","bicycle_space","room_equipment","special_note",
-      "moving","electricity","gas","water","internet","trash","common_area","pets",
-      "toilet","noise","drainage","ventilation","heater","air_conditioner",
-      "bike_parking","car_parking","sales","expenses","cancellation","management_other"
->>>>>>> 6aa733a8ce51d5557d1a8300a2392c415d689b26
+      "management_other"
     ];
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
-      getFirestore, doc, getDoc, collection, getDocs, query, where, limit
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      getDocs,
+      query,
+      where,
+      limit
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     let db = null;
@@ -228,8 +226,8 @@
       if (v === 0) return false;
       if (typeof v === "string") {
         const s = v.trim().toLowerCase();
-        if (["true", "1", "yes", "on"].includes(s)) return true;
-        if (["false", "0", "no", "off"].includes(s)) return false;
+        if (s === "true" || s === "1" || s === "yes") return true;
+        if (s === "false" || s === "0" || s === "no") return false;
       }
       return false;
     }
@@ -238,14 +236,6 @@
       const box = document.getElementById("errorBox");
       box.textContent = message;
       box.classList.remove("hidden");
-    }
-
-    function pickFirst(obj, keys) {
-      for (const k of keys) {
-        const v = obj?.[k];
-        if (v !== undefined && v !== null && String(v).trim() !== "") return v;
-      }
-      return "";
     }
 
     async function loadSectionsMaster() {
@@ -268,17 +258,17 @@
       const snap = await getDocs(colRef);
       const list = [];
       snap.forEach((d) => {
-        const data = d.data() || {};
+        const data = d.data();
         list.push({
           section_key: data.section_key || "",
           variant_key: data.variant_key || "base",
-          body_text: data.body_text || "",
-          image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
+          body_text: data.body_text || ""
         });
       });
       return list;
     }
 
+    // token から postdials 1件取得
     async function loadRoomSecretByToken(token) {
       if (!token) return null;
       const colRef = collection(db, "postdials");
@@ -289,6 +279,15 @@
       return { id: docSnap.id, ...docSnap.data() };
     }
 
+    function pickFirst(obj, keys) {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+      }
+      return "";
+    }
+
+    // 部屋専用カードを組み立て
     function renderRoomSecretSection(roomData) {
       const section = document.getElementById("roomSecretSection");
       if (!section) return;
@@ -296,15 +295,18 @@
       const propertyName = roomData["物件名"] || "";
       const roomNo = roomData["号室"] || "";
 
+      // 号室保持（properties読後に canonicalName で上書きする）
       window.__roomNo = roomNo ? String(roomNo).trim() : "";
 
       const titleParts = [];
       if (propertyName) titleParts.push(propertyName);
       if (roomNo) titleParts.push(roomNo + "号室");
-      document.getElementById("roomSecretTitle").textContent = titleParts.join(" ") || "このお部屋";
+      document.getElementById("roomSecretTitle").textContent =
+        titleParts.join(" ") || "このお部屋";
 
       let hasAny = false;
 
+      // 集合ポスト
       const mailbox = roomData["開錠番号"];
       if (mailbox && String(mailbox).trim() !== "") {
         document.getElementById("roomMailboxSection").classList.remove("hidden");
@@ -312,6 +314,7 @@
         hasAny = true;
       }
 
+      // 宅配ボックス
       const delivery = roomData["宅配ボックス"];
       if (delivery && String(delivery).trim() !== "") {
         document.getElementById("roomDeliverySection").classList.remove("hidden");
@@ -319,6 +322,7 @@
         hasAny = true;
       }
 
+      // 駐輪場
       const bicycle = roomData["駐輪場"];
       if (bicycle && String(bicycle).trim() !== "") {
         document.getElementById("roomBicycleSection").classList.remove("hidden");
@@ -326,8 +330,28 @@
         hasAny = true;
       }
 
-      const wifiSsid = pickFirst(roomData, ["Wi-Fi_SSID","Wi-Fi SSID","WiFi_SSID","wifi_ssid","wifiSsid","ssid","SSID"]);
-      const wifiPass = pickFirst(roomData, ["Wi-Fi_PASS","Wi-Fi PASS","WiFi_PASS","wifi_pass","wifiPass","password","PASS","Password","パスワード"]);
+      // Wi-Fi（キー揺れ対応）
+      const wifiSsid = pickFirst(roomData, [
+        "Wi-Fi_SSID",
+        "Wi-Fi SSID",
+        "WiFi_SSID",
+        "wifi_ssid",
+        "wifiSsid",
+        "ssid",
+        "SSID"
+      ]);
+
+      const wifiPass = pickFirst(roomData, [
+        "Wi-Fi_PASS",
+        "Wi-Fi PASS",
+        "WiFi_PASS",
+        "wifi_pass",
+        "wifiPass",
+        "password",
+        "PASS",
+        "Password",
+        "パスワード"
+      ]);
 
       if (wifiSsid || wifiPass) {
         document.getElementById("roomWifiSection").classList.remove("hidden");
@@ -338,6 +362,7 @@
 
       if (hasAny) {
         section.classList.remove("hidden");
+
         const btn = document.getElementById("roomSecretToggleBtn");
         const body = document.getElementById("roomSecretBody");
         if (btn && body) {
@@ -355,23 +380,22 @@
       }
     }
 
-    function pickContent(masterList, sectionKey, variantKey) {
-      if (!masterList || masterList.length === 0) return null;
+    function pickBodyText(masterList, sectionKey, variantKey) {
+      if (!masterList || masterList.length === 0) return "";
       const vKey = variantKey || "base";
       let hit = masterList.find(r => r.section_key === sectionKey && r.variant_key === vKey);
-      if (!hit) hit = masterList.find(r => r.section_key === sectionKey && r.variant_key === "base");
-      if (!hit) return null;
-
-      return {
-        body: hit.body_text || "",
-        images: Array.isArray(hit.image_urls) ? hit.image_urls : []
-      };
+      if (hit && hit.body_text) return hit.body_text;
+      hit = masterList.find(r => r.section_key === sectionKey && r.variant_key === "base");
+      if (hit && hit.body_text) return hit.body_text;
+      return "";
     }
 
+    // 本文レンダリング：Markdownリンク + 改行保持
     function renderPlainTextAsHtml(text) {
       if (!text) return "";
       let escaped = escapeHtml(text);
 
+      // Markdownリンク [label](url)
       escaped = escaped.replace(
         /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
         (m, label, url) =>
@@ -400,11 +424,11 @@
         }
         const s = String(raw).trim();
         const lower = s.toLowerCase();
-        if (["false","0","no","off"].includes(lower)) {
+        if (["false", "0", "no", "off"].includes(lower)) {
           config[key] = { enabled: false, variant: null };
           return;
         }
-        if (["true","1","yes","on","base"].includes(lower)) {
+        if (["true", "1", "yes", "on", "base"].includes(lower)) {
           config[key] = { enabled: true, variant: null };
           return;
         }
@@ -415,34 +439,43 @@
 
     function mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey) {
       const sections = [];
-
       Object.keys(masterMap).forEach((key) => {
         const master = masterMap[key] || {};
-        if (!sectionConfig || !Object.prototype.hasOwnProperty.call(sectionConfig, key)) return;
-
-        const cfg = sectionConfig[key];
-        if (!cfg?.enabled) return;
-
-        const vKey = cfg.variant || defaultVariantKey || "base";
-        const content = pickContent(masterList, key, vKey);
-        if (!content || !content.body) return;
-
-        sections.push({
-          key,
-          label: master.label_ja || key,
-          summary: master.summary || "",
-          group: master.group || "その他",
-          order: typeof master.order === "number" ? master.order : 9999,
-          icon: master.icon || "",
-          body: content.body,
-          images: content.images || []
-        });
+        if (sectionConfig && Object.prototype.hasOwnProperty.call(sectionConfig, key)) {
+          const cfg = sectionConfig[key];
+          if (!cfg.enabled) return;
+          const vKey = cfg.variant || defaultVariantKey || "base";
+          const body = pickBodyText(masterList, key, vKey);
+          if (!body) return;
+          sections.push({
+            key,
+            label: master.label_ja || key,
+            summary: master.summary || "",
+            group: master.group || "その他",
+            order: typeof master.order === "number" ? master.order : 9999,
+            icon: master.icon || "",
+            body
+          });
+        } else {
+          const vKey = defaultVariantKey || "base";
+          const body = pickBodyText(masterList, key, vKey);
+          if (!body) return;
+          sections.push({
+            key,
+            label: master.label_ja || key,
+            summary: master.summary || "",
+            group: master.group || "その他",
+            order: typeof master.order === "number" ? master.order : 9999,
+            icon: master.icon || "",
+            body
+          });
+        }
       });
-
       sections.sort((a, b) => a.order - b.order);
       return sections;
     }
 
+    // アンケートURL生成（tokenあり/なし両対応）
     function buildSurveyUrl({ token = "", propertyNo = "", source = "unknown" } = {}) {
       const base = "https://guide.univ-life.com/survey.html";
       const u = new URL(base);
@@ -507,16 +540,16 @@
           const expanded = false;
 
           const card = document.createElement("div");
-          card.className = "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
+          card.className =
+            "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
 
+          // 管理＞その他だけ：アンケートボタン
           const surveyUrl = (sec.key === "management_other")
             ? (window.__token
                 ? buildSurveyUrl({ token: window.__token, source: "shiori_room" })
                 : buildSurveyUrl({ propertyNo: window.__propertyNo || "", source: "shiori_public" })
               )
             : "";
-
-          const groupId = `${gIndex}-${sec.key}`; // ✅ lightbox group key
 
           card.innerHTML = `
             <button
@@ -542,38 +575,21 @@
                 </div>
               </div>
               <div class="ml-3 flex-shrink-0">
-                <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${expanded ? "rotate-180" : ""}"
-                  data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-150 ${
+                  expanded ? "rotate-180" : ""
+                }" data-chevron-for="${bodyId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
             </button>
-
-            <div id="${bodyId}"
-              class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${expanded ? "" : "hidden"}"
+            <div
+              id="${bodyId}"
+              class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${
+                expanded ? "" : "hidden"
+              }"
             >
               <div class="border-t border-slate-100 pt-2 richtext">
                 ${renderPlainTextAsHtml(sec.body)}
-
-                ${
-                  sec.images && sec.images.length
-                    ? `
-                      <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        ${sec.images.map((url, i) => `
-                          <img
-                            src="${escapeHtml(url)}"
-                            alt=""
-                            loading="lazy"
-                            data-lightbox-group="${groupId}"
-                            data-lightbox-index="${i}"
-                            class="rounded-lg border border-slate-200 shadow-sm w-full object-cover cursor-zoom-in"
-                          />
-                        `).join("")}
-                      </div>
-                    `
-                    : ""
-                }
-
                 ${
                   sec.key === "management_other" && surveyUrl
                     ? `
@@ -598,11 +614,9 @@
         tabPanels.appendChild(panel);
       });
 
-      // タブ切替
       document.querySelectorAll(".group-tab").forEach((tab) => {
         tab.addEventListener("click", () => {
           const target = tab.dataset.tabGroup;
-
           document.querySelectorAll(".group-tab").forEach((t) => {
             const active = t === tab;
             t.classList.toggle("bg-slate-900", active);
@@ -612,14 +626,12 @@
             t.classList.toggle("text-slate-700", !active);
             t.classList.toggle("border-slate-200", !active);
           });
-
           document.querySelectorAll("[data-tab-group-panel]").forEach((p) => {
             p.classList.toggle("hidden", p.dataset.tabGroupPanel !== target);
           });
         });
       });
 
-      // アコーディオン
       document.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const bodyId = btn.getAttribute("data-accordion-toggle");
@@ -644,6 +656,7 @@
 
     async function main() {
       const tabPanels = document.getElementById("tabPanels");
+      const tabNav = document.getElementById("tabNav");
 
       if (!db) {
         showError("データを読み込めませんでした。時間をおいて再度お試しください。");
@@ -654,29 +667,52 @@
       let propertyNo = url.searchParams.get("propertyNo") || "";
       const token = url.searchParams.get("token") || "";
 
+      // グローバル保持
       window.__token = token || "";
 
-      // ✅ TOP（/）は説明ページ
+      // ===============================
+      // ✅ TOP（/）は「説明ページ」（propertyNo/token 無し）
+      // ===============================
       if (!propertyNo && !token) {
+
+        // タイトル固定（SEO）
         document.title = "入居のしおり｜ユニヴ・ライフ株式会社";
         document.getElementById("propertyTitle").textContent = "入居のしおり（Web）";
+
+        // 物件メタ非表示
         document.getElementById("propertyMetaSection")?.classList.add("hidden");
+
+        // タブ削除
         document.getElementById("tabNav").innerHTML = "";
 
         tabPanels.innerHTML = `
           <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
+
             <h1 class="text-xl font-bold text-slate-900">
               入居のしおり（Web）｜ユニヴ・ライフ株式会社
             </h1>
 
             <div class="text-sm text-slate-700 leading-relaxed space-y-3">
+
               <p>
                 本ページは、ユニヴ・ライフ株式会社が管理する賃貸物件の
                 入居者様向けWeb入居のしおりです。
               </p>
+
               <p>
-                入居時にお渡ししている「入居のしおり」をWeb版として公開しています。
+                大阪府内を中心に管理している賃貸マンション・アパートの
+                入居者様向けページです。
               </p>
+
+              <p>
+                入居時にお渡ししている「入居のしおり」を
+                Web版として公開しています。
+              </p>
+
+              <p>
+                物件ごとに、以下の内容をご確認いただけます。
+              </p>
+
               <ul class="list-disc pl-5 space-y-1">
                 <li>ゴミ出し方法・分別ルール</li>
                 <li>インターネット利用方法</li>
@@ -688,19 +724,25 @@
               <p class="text-slate-500 text-xs">
                 ※ 物件別ページは、鍵渡し書類のQRコードまたはURLよりアクセスしてください。
               </p>
+
             </div>
 
+            <!-- 内部リンク（SEO強化用） -->
             <div class="pt-4 border-t border-slate-100">
-              <a href="/list.html" class="text-xs text-slate-400 underline hover:text-slate-600">
+              <a href="/list.html"
+                class="text-xs text-slate-400 underline hover:text-slate-600">
                 ユニヴ・ライフ 管理物件 入居のしおり一覧
               </a>
             </div>
+
           </section>
         `;
+
         return;
       }
 
-      // token → postdials → propertyNo決定 ＋ 部屋カード
+
+      // token があれば postdials から物件No を決める＆部屋カード表示
       if (token) {
         try {
           const roomData = await loadRoomSecretByToken(token);
@@ -732,6 +774,7 @@
         return;
       }
 
+      // グローバル保持（アンケートURL生成で使用）
       window.__propertyNo = propertyNo;
 
       try {
@@ -741,7 +784,11 @@
           loadGuidesMasterRaw()
         ]);
 
-        if (results.some(r => r.status === "rejected")) {
+        if (
+          results[0].status === "rejected" ||
+          results[1].status === "rejected" ||
+          results[2].status === "rejected"
+        ) {
           console.error("読み込みエラー:", results);
           showError("データの読み込みに失敗しました。");
           return;
@@ -765,7 +812,7 @@
         document.getElementById("propertyTitle").textContent = title;
         document.title = `${title}｜入居のしおり｜ユニヴ・ライフ株式会社`;
 
-        // 部屋カードの物件名を canonicalName に統一
+        // 部屋カードの物件名表記を canonicalName に統一
         const roomTitleEl = document.getElementById("roomSecretTitle");
         const roomSectionEl = document.getElementById("roomSecretSection");
         if (roomTitleEl && roomSectionEl && !roomSectionEl.classList.contains("hidden")) {
@@ -776,12 +823,18 @@
         const zip = pickFirst(propertyData, ["zip_code", "postal_code", "郵便番号"]);
         const address = pickFirst(propertyData, ["address", "住所"]);
 
-        // ✅ SEO（共通ページだけ index）
+        // ===============================
+        // SEO（共通ページだけ index 対象）
+        // - tokenページ: noindex
+        // - propertyNoページ: index + canonical
+        // - title/description 動的
+        // - 構造化データ（JSON-LD）
+        // ===============================
         (function applySeo() {
           const url = new URL(window.location.href);
           const tokenParam = url.searchParams.get("token") || "";
 
-          // tokenページは noindex
+          // tokenページは noindex（必須）
           if (tokenParam) {
             let robots = document.querySelector('meta[name="robots"]');
             if (!robots) {
@@ -793,7 +846,7 @@
             return;
           }
 
-          // propertyNoページ canonical
+          // propertyNoページは canonical を固定
           if (propertyNo) {
             let canonical = document.querySelector('link[rel="canonical"]');
             if (!canonical) {
@@ -804,7 +857,7 @@
             canonical.href = `https://guide.univ-life.com/?propertyNo=${propertyNo}`;
           }
 
-          // title / description 動的
+          // title / description を物件ごとに動的化
           const safeTitle = title || ("物件No. " + propertyNo);
           document.title = `${safeTitle}｜入居のしおり｜ユニヴ・ライフ株式会社`;
 
@@ -827,7 +880,10 @@
             "name": `${safeTitle}｜入居のしおり`,
             "description": metaDesc.content,
             "url": `https://guide.univ-life.com/?propertyNo=${propertyNo}`,
-            "publisher": { "@type": "Organization", "name": "ユニヴ・ライフ株式会社" }
+            "publisher": {
+              "@type": "Organization",
+              "name": "ユニヴ・ライフ株式会社"
+            }
           };
 
           const existing = document.getElementById("ldjson-shiori");
@@ -840,24 +896,31 @@
           document.head.appendChild(script);
         })();
 
-        // meta表示
         const metaEl = document.getElementById("propertyMeta");
-        if (zip && address) metaEl.textContent = `〒${zip}　${address}`;
-        else if (address) metaEl.textContent = address;
-        else metaEl.textContent = "所在地情報は現在準備中です";
+        if (zip && address) {
+          metaEl.textContent = `〒${zip}　${address}`;
+        } else if (address) {
+          metaEl.textContent = address;
+        } else {
+          metaEl.textContent = "所在地情報は現在準備中です";
+        }
 
-        // 物件の公開フラグ
         if (normalizeBool(propertyData.shiori_enabled) === false) {
-          tabPanels.innerHTML = '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
+          tabPanels.innerHTML =
+            '<p class="text-sm text-slate-500">この物件の入居のしおりは準備中です。</p>';
           return;
         }
 
         const defaultVariantKey = propertyData.variant_key || "base";
         const sectionConfig = buildSectionConfig(propertyData);
-        const mergedSections = mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey);
+        const mergedSections = mergeSections(
+          masterMap,
+          sectionConfig,
+          masterList,
+          defaultVariantKey
+        );
 
         renderGroupedTabsWithAccordion(mergedSections);
-
       } catch (e) {
         console.error("main() 内でエラー:", e);
         showError("データの読み込み中にエラーが発生しました。");
@@ -865,94 +928,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", main);
-  </script>
-
-  <!-- ======================================================= -->
-  <!-- Lightbox Script（必ず script タグ内） -->
-  <!-- ======================================================= -->
-  <script>
-    let currentImages = [];
-    let currentIndex = 0;
-    let startX = 0;
-
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImage = document.getElementById("lightboxImage");
-    const lightboxClose = document.getElementById("lightboxClose");
-    const lightboxCounter = document.getElementById("lightboxCounter");
-
-    function openLightbox(images, index) {
-      currentImages = images || [];
-      currentIndex = Math.max(0, Math.min(index || 0, currentImages.length - 1));
-
-      lightbox.classList.remove("hidden");
-      lightbox.classList.add("flex");
-      updateImage();
-    }
-
-    function closeLightbox() {
-      lightbox.classList.add("hidden");
-      lightbox.classList.remove("flex");
-    }
-
-    function updateImage() {
-      if (!currentImages.length) return;
-      lightboxImage.src = currentImages[currentIndex];
-      if (lightboxCounter) {
-        lightboxCounter.textContent = `${currentIndex + 1} / ${currentImages.length}`;
-      }
-    }
-
-    function nextImage() {
-      if (!currentImages.length) return;
-      currentIndex = (currentIndex + 1) % currentImages.length;
-      updateImage();
-    }
-
-    function prevImage() {
-      if (!currentImages.length) return;
-      currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-      updateImage();
-    }
-
-    // ✅ 画像クリックで起動（動的DOMでもOK：イベント委譲）
-    document.addEventListener("click", (e) => {
-      const img = e.target.closest('img[data-lightbox-index][data-lightbox-group]');
-      if (!img) return;
-
-      const group = img.dataset.lightboxGroup;
-      const imgs = Array.from(document.querySelectorAll(`img[data-lightbox-group="${group}"]`));
-      const images = imgs.map(i => i.currentSrc || i.src);
-
-      const idx = Number(img.dataset.lightboxIndex || 0);
-      openLightbox(images, idx);
-    });
-
-    // 閉じる
-    lightboxClose.addEventListener("click", closeLightbox);
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) closeLightbox();
-    });
-
-    // スワイプ
-    lightbox.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    lightbox.addEventListener("touchend", (e) => {
-      const endX = e.changedTouches[0].clientX;
-      const diff = endX - startX;
-      if (Math.abs(diff) < 50) return;
-      if (diff < 0) nextImage();
-      else prevImage();
-    });
-
-    // キーボード（PC）
-    document.addEventListener("keydown", (e) => {
-      if (lightbox.classList.contains("hidden")) return;
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "ArrowLeft") prevImage();
-    });
   </script>
 
 </body>

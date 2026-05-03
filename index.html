@@ -10,6 +10,9 @@
     content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。大阪市・吹田市・茨木市・高槻市ほか管理物件のご案内を掲載しています。" />
   <link rel="canonical" href="https://guide.univ-life.com/" />
 
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=2">
+  <link rel="shortcut icon" type="image/png" href="/favicon.png?v=2">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -162,34 +165,10 @@
     };
 
     const SECTION_KEYS = [
-      "key",
-      "mailbox",
-      "delivery_box",
-      "bicycle_space",
-      "room_equipment",
-      "special_note",
-      "moving",
-      "electricity",
-      "gas",
-      "water",
-      "internet",
-      "trash",
-      "common_area",
-      "pets",
-      "toilet",
-      "noise",
-      "drainage",
-      "ventilation",
-      "heater",
-      "air_conditioner",
-      "bike_parking",
-      "car_parking",
-      "sales",
-      "expenses",
-      "cancellation",
-      "management_other",
-      "usac",
-      "kurasapo_connect"
+      "key","mailbox","delivery_box","bicycle_space","room_equipment","special_note",
+      "moving","electricity","gas","water","internet","trash","common_area","pets",
+      "toilet","noise","drainage","ventilation","heater","air_conditioner",
+      "bike_parking","car_parking","sales","expenses","cancellation","management_other"
     ];
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -258,25 +237,18 @@
     }
 
     async function loadGuidesMasterRaw() {
-      const colRef = collection(db, "guides_master");
+      const colRef = collection(db, "guides_master_raw");
       const snap = await getDocs(colRef);
       const list = [];
-
       snap.forEach((d) => {
         const data = d.data() || {};
-        const sectionKey = String(data.section_key || d.id || "").trim();
-        const bodies = data.bodies || {};
-
-        Object.keys(bodies).forEach((variantKey) => {
-          list.push({
-            section_key: sectionKey,
-            variant_key: String(variantKey || "base").trim(),
-            body_text: bodies[variantKey] || "",
-            image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
-          });
+        list.push({
+          section_key: data.section_key || "",
+          variant_key: data.variant_key || "base",
+          body_text: data.body_text || "",
+          image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
         });
       });
-
       return list;
     }
 

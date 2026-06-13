@@ -5,16 +5,10 @@
   <title>ユニヴ・ライフ株式会社｜入居のしおり（Web）公式サイト</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3">
-  <link rel="shortcut icon" type="image/png" href="/favicon.png?v=3">
-
   <!-- ✅ TOP用：description（入口ページのSEO） -->
   <meta name="description"
     content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。大阪市・吹田市・茨木市・高槻市ほか管理物件のご案内を掲載しています。" />
   <link rel="canonical" href="https://guide.univ-life.com/" />
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3">
-  <link rel="shortcut icon" type="image/png" href="/favicon.png?v=3">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -239,90 +233,6 @@
       return snap.data();
     }
 
-<<<<<<< HEAD
-   async function loadGuidesMasterRaw() {
-    const list = [];
-
-    // =========================
-    // 1. guides_master 新形式
-    // 例：
-    // guides_master / usac
-    //   section_key: "usac"
-    //   bodies:
-    //     base: "本文"
-    // =========================
-    try {
-      const colRef = collection(db, "guides_master");
-      const snap = await getDocs(colRef);
-
-      snap.forEach((d) => {
-        const data = d.data() || {};
-        const sectionKey = String(data.section_key || d.id || "").trim();
-        const bodies = data.bodies || {};
-
-        if (!sectionKey) return;
-
-        if (bodies && typeof bodies === "object") {
-          Object.keys(bodies).forEach((variantKey) => {
-            const bodyText = bodies[variantKey];
-
-            if (bodyText && String(bodyText).trim() !== "") {
-              list.push({
-                section_key: sectionKey,
-                variant_key: String(variantKey || "base").trim(),
-                body_text: String(bodyText),
-                image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
-              });
-            }
-          });
-        }
-
-        // 念のため guides_master 内に body_text がある形式にも対応
-        if (data.body_text && String(data.body_text).trim() !== "") {
-          list.push({
-            section_key: sectionKey,
-            variant_key: String(data.variant_key || "base").trim(),
-            body_text: String(data.body_text),
-            image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
-          });
-        }
-      });
-    } catch (e) {
-      console.error("guides_master 読み込み失敗:", e);
-    }
-
-    // =========================
-    // 2. guides_master_raw 旧形式
-    // 例：
-    // guides_master_raw / 任意ID
-    //   section_key: "kurasapo_connect"
-    //   variant_key: "base"
-    //   body_text: "本文"
-    // =========================
-    try {
-      const rawColRef = collection(db, "guides_master_raw");
-      const rawSnap = await getDocs(rawColRef);
-
-      rawSnap.forEach((d) => {
-        const data = d.data() || {};
-
-        const sectionKey = String(data.section_key || "").trim();
-        const variantKey = String(data.variant_key || "base").trim();
-        const bodyText = String(data.body_text || "");
-
-        if (!sectionKey) return;
-        if (bodyText.trim() === "") return;
-
-        list.push({
-          section_key: sectionKey,
-          variant_key: variantKey,
-          body_text: bodyText,
-          image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
-        });
-      });
-    } catch (e) {
-      console.error("guides_master_raw 読み込み失敗:", e);
-=======
     async function loadGuidesMasterRaw() {
       const colRef = collection(db, "guides_master_raw");
       const snap = await getDocs(colRef);
@@ -337,13 +247,7 @@
         });
       });
       return list;
->>>>>>> d049c65466cae5c0056de87fcb29af8451665cdc
     }
-
-    console.log("本文マスター読み込み件数:", list.length, list);
-
-    return list;
-  }
 
     async function loadRoomSecretByToken(token) {
       if (!token) return null;
@@ -359,8 +263,8 @@
       const section = document.getElementById("roomSecretSection");
       if (!section) return;
 
-      const propertyName = roomData.propertyName || "";
-      const roomNo = roomData.roomNo || "";
+      const propertyName = roomData["物件名"] || "";
+      const roomNo = roomData["号室"] || "";
 
       window.__roomNo = roomNo ? String(roomNo).trim() : "";
 
@@ -371,21 +275,21 @@
 
       let hasAny = false;
 
-      const mailbox = roomData.mailboxCode;
+      const mailbox = roomData["開錠番号"];
       if (mailbox && String(mailbox).trim() !== "") {
         document.getElementById("roomMailboxSection").classList.remove("hidden");
         document.getElementById("roomMailboxValue").textContent = String(mailbox);
         hasAny = true;
       }
 
-      const delivery = roomData.deliveryBoxCode;
+      const delivery = roomData["宅配ボックス"];
       if (delivery && String(delivery).trim() !== "") {
         document.getElementById("roomDeliverySection").classList.remove("hidden");
         document.getElementById("roomDeliveryValue").textContent = String(delivery);
         hasAny = true;
       }
 
-      const bicycle = roomData.bicycleSpace;
+      const bicycle = roomData["駐輪場"];
       if (bicycle && String(bicycle).trim() !== "") {
         document.getElementById("roomBicycleSection").classList.remove("hidden");
         document.getElementById("roomBicycleValue").textContent = String(bicycle);
@@ -777,7 +681,7 @@
           }
           renderRoomSecretSection(roomData);
 
-          const bukkenNo = roomData.propertyNo;
+          const bukkenNo = roomData["物件No"];
           if (!bukkenNo || String(bukkenNo).trim() === "") {
             showError("postdials のドキュメントに『物件No』フィールドがありません。");
             tabPanels.innerHTML = "";

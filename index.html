@@ -367,7 +367,7 @@
       if (!section) return;
 
       const propertyName = roomData.propertyName || "";
-      const roomNo = roomData.roomNo || "";
+      const roomNo = roomData.room || roomData.roomNo || "";
 
       window.__roomNo = roomNo ? String(roomNo).trim() : "";
 
@@ -378,21 +378,21 @@
 
       let hasAny = false;
 
-      const mailbox = roomData.mailboxCode;
+      const mailbox = roomData.postdial || roomData.mailboxCode;
       if (mailbox && String(mailbox).trim() !== "") {
         document.getElementById("roomMailboxSection").classList.remove("hidden");
         document.getElementById("roomMailboxValue").textContent = String(mailbox);
         hasAny = true;
       }
 
-      const delivery = roomData.deliveryBoxCode;
+      const delivery = roomData.deliveryBox || roomData.deliveryBoxCode;
       if (delivery && String(delivery).trim() !== "") {
         document.getElementById("roomDeliverySection").classList.remove("hidden");
         document.getElementById("roomDeliveryValue").textContent = String(delivery);
         hasAny = true;
       }
 
-      const bicycle = roomData.bicycleSpace;
+      const bicycle = roomData.bicycleParking || roomData.bicycleSpace;
       if (bicycle && String(bicycle).trim() !== "") {
         document.getElementById("roomBicycleSection").classList.remove("hidden");
         document.getElementById("roomBicycleValue").textContent = String(bicycle);

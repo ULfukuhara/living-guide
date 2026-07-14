@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "univlife-kanri"
+  },
+  "targets": {
+    "univlife-kanri": {
+      "hosting": {
+        "guide": [
+          "univlife-living-guide"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

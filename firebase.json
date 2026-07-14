@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "target": "guide",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "CNAME",
+      ".git/**",
+      ".github/**",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

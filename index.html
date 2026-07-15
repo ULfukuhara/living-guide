@@ -146,26 +146,22 @@
   </div>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between">
-      <p>© ユニヴ・ライフ株式会社</p>
-      <p>入居のしおり</p>
-    </div>
-  </footer>
+  <footer id="siteFooter"></footer>
 
   <!-- ======================================================= -->
   <!-- JS（本体） -->
   <!-- ======================================================= -->
   <script type="module">
-    const firebaseConfig = {
-      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
-      authDomain: "univlife-kanri.firebaseapp.com",
-      projectId: "univlife-kanri",
-      storageBucket: "univlife-kanri.firebasestorage.app",
-      messagingSenderId: "405011982427",
-      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
-      measurementId: "G-DXMR0VL972"
-    };
+    import { db } from "/assets/firebase-init.js";
+    import { renderFooter } from "/assets/site-footer.js";
+    import {
+      doc, getDoc, collection, getDocs, query, where, limit
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    renderFooter(document.getElementById("siteFooter"), {
+      innerClass: "max-w-4xl mx-auto px-4 py-3 text-[11px] text-slate-400 flex justify-between",
+      right: `<p>入居のしおり</p>`
+    });
 
     const SECTION_KEYS = [
       "key",
@@ -197,20 +193,6 @@
       "kurasapo_connect",
       "usac"
     ];
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getFirestore, doc, getDoc, collection, getDocs, query, where, limit
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    let db = null;
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-    } catch (e) {
-      console.error("Firestore 初期化に失敗:", e);
-      db = null;
-    }
 
     function escapeHtml(str) {
       return (str || "")

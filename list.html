@@ -72,29 +72,19 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="max-w-5xl mx-auto px-4 py-4 text-[11px] text-slate-400 flex justify-between">
-      <p>© ユニヴ・ライフ株式会社</p>
-      <a href="/" class="hover:text-slate-600">トップへ</a>
-    </div>
-  </footer>
+  <footer id="siteFooter"></footer>
 
   <!-- ======================================================= -->
   <!-- JS -->
   <!-- ======================================================= -->
   <script type="module">
-    // =========================
-    // Firebase Config（index.html と同じ）
-    // =========================
-    const firebaseConfig = {
-      apiKey: "AIzaSyDneH08GavPizbtH4Oi-RsTrwGerxXWSyQ",
-      authDomain: "univlife-kanri.firebaseapp.com",
-      projectId: "univlife-kanri",
-      storageBucket: "univlife-kanri.firebasestorage.app",
-      messagingSenderId: "405011982427",
-      appId: "1:405011982427:web:cf56a37550ab714bfdb77e",
-      measurementId: "G-DXMR0VL972"
-    };
+    import { db } from "/assets/firebase-init.js";
+    import { renderFooter } from "/assets/site-footer.js";
+
+    renderFooter(document.getElementById("siteFooter"), {
+      innerClass: "max-w-5xl mx-auto px-4 py-4 text-[11px] text-slate-400 flex justify-between",
+      right: `<a href="/" class="hover:text-slate-600">トップへ</a>`
+    });
 
     // =========================
     // 市コード → 表示名
@@ -125,9 +115,7 @@
       other: "その他"
     };
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
-      getFirestore,
       collection,
       getDocs,
       query,
@@ -158,7 +146,6 @@
     // =========================
     // State
     // =========================
-    let db = null;
     let ALL = [];        // 全件
     let FILTERED = [];   // 絞り込み後
 
@@ -308,15 +295,6 @@
     // =========================
     async function main() {
       const root = document.getElementById("propertyList");
-
-      try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-      } catch (e) {
-        console.error("Firestore 初期化に失敗:", e);
-        root.innerHTML = `<p class="text-sm text-rose-600">データを読み込めませんでした。</p>`;
-        return;
-      }
 
       try {
         await loadProperties();

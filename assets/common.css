@@ -1,0 +1,4 @@
+.richtext p { margin-bottom: 0.6rem; }
+.richtext ul { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: disc; }
+.richtext ol { margin-left: 1.4rem; margin-bottom: 0.6rem; list-style: decimal; }
+.richtext a { text-decoration: underline; }

@@ -503,7 +503,6 @@
         document.getElementById("roomMailboxSection").classList.remove("hidden");
         const el = document.getElementById("roomMailboxValue");
         el.textContent = String(mailbox);
-        addCopyButton(el, String(mailbox));
         hasAny = true;
       }
 
@@ -512,7 +511,6 @@
         document.getElementById("roomDeliverySection").classList.remove("hidden");
         const el = document.getElementById("roomDeliveryValue");
         el.textContent = String(delivery);
-        addCopyButton(el, String(delivery));
         hasAny = true;
       }
 
@@ -521,7 +519,6 @@
         document.getElementById("roomBicycleSection").classList.remove("hidden");
         const el = document.getElementById("roomBicycleValue");
         el.textContent = String(bicycle);
-        addCopyButton(el, String(bicycle));
         hasAny = true;
       }
 

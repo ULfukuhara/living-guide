@@ -7,6 +7,14 @@
 
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3">
   <link rel="shortcut icon" type="image/png" href="/favicon.png?v=3">
+  <link rel="apple-touch-icon" href="/favicon.png?v=3">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- ✅ 外部接続の事前確立（初期表示の高速化） -->
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- ✅ TOP用：description（入口ページのSEO） -->
   <meta name="description"
@@ -135,14 +143,14 @@
 
       <!-- Property Meta -->
       <section id="propertyMetaSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-2">
-        <p id="propertyMeta" class="text-[11px] text-slate-400">情報を取得中</p>
+        <p id="propertyMeta" class="text-[11px] text-slate-400" aria-live="polite">情報を取得中</p>
         <p class="text-[11px] text-slate-400">
           ※ 掲載内容と実際の契約条件に相違がある場合は、賃貸借契約書の内容が優先されます。
         </p>
       </section>
 
       <!-- エラー表示 -->
-      <section id="errorBox" class="hidden rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></section>
+      <section id="errorBox" class="hidden rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700" role="alert" aria-live="assertive"></section>
 
       <!-- Tabs -->
       <section>
@@ -406,6 +414,17 @@
       return { id: snap.id, ...data };
     }
 
+    // 値の右側にボタン(コピー/表示切替)をまとめて配置するコンテナ
+    function getActionsContainer(valueEl) {
+      let group = valueEl.parentElement?.querySelector(":scope > .value-actions");
+      if (!group) {
+        group = document.createElement("div");
+        group.className = "value-actions flex-shrink-0 flex items-center gap-2";
+        valueEl.parentElement?.appendChild(group);
+      }
+      return group;
+    }
+
     function addCopyButton(valueEl, copyText) {
       if (!valueEl || !copyText) return;
       const btn = document.createElement("button");
@@ -429,10 +448,38 @@
           }
         }, 2000);
       });
-      valueEl.parentElement?.appendChild(btn);
+      getActionsContainer(valueEl).appendChild(btn);
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
+    }
+
+    // 肩越し閲覧・スクリーンショット対策：初期状態は伏字にし、タップで表示切替
+    function addRevealToggle(valueEl, prefix, secretText) {
+      if (!valueEl || !secretText) return;
+      const masked = prefix + "•".repeat(Math.min(String(secretText).length, 12));
+      const revealedText = prefix + String(secretText);
+      let revealed = false;
+      valueEl.textContent = masked;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flex-shrink-0 inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[10px] text-slate-500 hover:bg-slate-50";
+      const setLabel = () => {
+        btn.innerHTML = revealed
+          ? '<i data-lucide="eye-off" class="w-3 h-3"></i><span>隠す</span>'
+          : '<i data-lucide="eye" class="w-3 h-3"></i><span>表示</span>';
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+      };
+      btn.addEventListener("click", () => {
+        revealed = !revealed;
+        valueEl.textContent = revealed ? revealedText : masked;
+        setLabel();
+      });
+      setLabel();
+      getActionsContainer(valueEl).appendChild(btn);
     }
 
     function renderRoomSecretSection(roomData) {
@@ -490,7 +537,7 @@
         }
         if (wifiPass) {
           const el = document.getElementById("roomWifiPass");
-          el.textContent = "パスワード: " + String(wifiPass);
+          addRevealToggle(el, "パスワード: ", String(wifiPass));
           addCopyButton(el, String(wifiPass));
         }
         hasAny = true;

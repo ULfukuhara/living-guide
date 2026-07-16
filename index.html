@@ -13,13 +13,23 @@
     content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。大阪市・吹田市・茨木市・高槻市ほか管理物件のご案内を掲載しています。" />
   <link rel="canonical" href="https://guide.univ-life.com/" />
 
+  <!-- ✅ OGP（SNS/チャットでの共有プレビュー用） -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ユニヴ・ライフ株式会社 入居のしおり（Web）" />
+  <meta property="og:title" content="入居のしおり（Web）｜ユニヴ・ライフ株式会社" />
+  <meta property="og:description"
+    content="ユニヴ・ライフ株式会社が管理する賃貸物件の入居者様向け公式入居のしおり（Web）です。" />
+  <meta property="og:url" content="https://guide.univ-life.com/" />
+  <meta property="og:image" content="https://guide.univ-life.com/favicon.png" />
+  <meta name="twitter:card" content="summary" />
+
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3">
   <link rel="shortcut icon" type="image/png" href="/favicon.png?v=3">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.24.0/dist/umd/lucide.min.js"></script>
 
   <link rel="stylesheet" href="/assets/common.css">
 
@@ -91,23 +101,33 @@
         <div id="roomSecretBody" class="mt-3 hidden space-y-3">
           <div id="roomMailboxSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">集合ポスト</p>
-            <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
+            <div class="flex items-center justify-between gap-2">
+              <p id="roomMailboxValue" class="text-sm font-mono text-slate-900"></p>
+            </div>
           </div>
 
           <div id="roomDeliverySection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">宅配ボックス</p>
-            <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
+            <div class="flex items-center justify-between gap-2">
+              <p id="roomDeliveryValue" class="text-sm font-mono text-slate-900"></p>
+            </div>
           </div>
 
           <div id="roomBicycleSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">駐輪場</p>
-            <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
+            <div class="flex items-center justify-between gap-2">
+              <p id="roomBicycleValue" class="text-sm font-mono text-slate-900"></p>
+            </div>
           </div>
 
           <div id="roomWifiSection" class="hidden border-t border-slate-100 pt-3 space-y-1">
             <p class="text-[11px] font-semibold text-slate-600">Wi-Fi</p>
-            <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
-            <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+            <div class="flex items-center justify-between gap-2">
+              <p id="roomWifiSsid" class="text-xs font-mono text-slate-900"></p>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <p id="roomWifiPass" class="text-xs font-mono text-slate-900"></p>
+            </div>
           </div>
         </div>
       </section>
@@ -211,9 +231,18 @@
       return false;
     }
 
-    function showError(message) {
+    function showError(message, { retry = false } = {}) {
       const box = document.getElementById("errorBox");
-      box.textContent = message;
+      box.innerHTML = "";
+      box.append(document.createTextNode(message));
+      if (retry) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "再読み込み";
+        btn.className = "ml-2 underline font-semibold hover:text-rose-900";
+        btn.addEventListener("click", () => window.location.reload());
+        box.appendChild(btn);
+      }
       box.classList.remove("hidden");
     }
 
@@ -225,11 +254,41 @@
       return "";
     }
 
+    // 物件によらず共通のマスターデータ用キャッシュ（sessionStorage・30分）
+    const MASTER_CACHE_TTL_MS = 30 * 60 * 1000;
+
+    function getCachedMaster(key) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const { value, expiresAt } = JSON.parse(raw);
+        if (Date.now() > expiresAt) {
+          sessionStorage.removeItem(key);
+          return null;
+        }
+        return value;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setCachedMaster(key, value) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ value, expiresAt: Date.now() + MASTER_CACHE_TTL_MS }));
+      } catch (e) {
+        // sessionStorageが使えない/満杯の場合はキャッシュを諦めるだけでよい
+      }
+    }
+
     async function loadSectionsMaster() {
+      const cached = getCachedMaster("cache_sections_master");
+      if (cached) return cached;
+
       const colRef = collection(db, "sections_master");
       const snap = await getDocs(colRef);
       const map = {};
       snap.forEach((d) => { map[d.id] = d.data(); });
+      setCachedMaster("cache_sections_master", map);
       return map;
     }
 
@@ -241,6 +300,9 @@
     }
 
    async function loadGuidesMasterRaw() {
+    const cached = getCachedMaster("cache_guides_master_raw");
+    if (cached) return cached;
+
     const list = [];
 
     // =========================
@@ -326,6 +388,7 @@
 
     console.log("本文マスター読み込み件数:", list.length, list);
 
+    setCachedMaster("cache_guides_master_raw", list);
     return list;
   }
 
@@ -341,6 +404,35 @@
       if (expiresAt && expiresAt.getTime() < Date.now()) return null;
 
       return { id: snap.id, ...data };
+    }
+
+    function addCopyButton(valueEl, copyText) {
+      if (!valueEl || !copyText) return;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flex-shrink-0 inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[10px] text-slate-500 hover:bg-slate-50";
+      btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i><span>コピー</span>';
+      btn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(copyText);
+          btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i><span>コピーしました</span>';
+        } catch (e) {
+          btn.innerHTML = '<span>コピーできませんでした</span>';
+        }
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i><span>コピー</span>';
+          if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+          }
+        }, 2000);
+      });
+      valueEl.parentElement?.appendChild(btn);
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
     }
 
     function renderRoomSecretSection(roomData) {
@@ -362,21 +454,27 @@
       const mailbox = roomData.postdial || roomData.mailboxCode;
       if (mailbox && String(mailbox).trim() !== "") {
         document.getElementById("roomMailboxSection").classList.remove("hidden");
-        document.getElementById("roomMailboxValue").textContent = String(mailbox);
+        const el = document.getElementById("roomMailboxValue");
+        el.textContent = String(mailbox);
+        addCopyButton(el, String(mailbox));
         hasAny = true;
       }
 
       const delivery = roomData.deliveryBox || roomData.deliveryBoxCode;
       if (delivery && String(delivery).trim() !== "") {
         document.getElementById("roomDeliverySection").classList.remove("hidden");
-        document.getElementById("roomDeliveryValue").textContent = String(delivery);
+        const el = document.getElementById("roomDeliveryValue");
+        el.textContent = String(delivery);
+        addCopyButton(el, String(delivery));
         hasAny = true;
       }
 
       const bicycle = roomData.bicycleParking || roomData.bicycleSpace;
       if (bicycle && String(bicycle).trim() !== "") {
         document.getElementById("roomBicycleSection").classList.remove("hidden");
-        document.getElementById("roomBicycleValue").textContent = String(bicycle);
+        const el = document.getElementById("roomBicycleValue");
+        el.textContent = String(bicycle);
+        addCopyButton(el, String(bicycle));
         hasAny = true;
       }
 
@@ -385,8 +483,16 @@
 
       if (wifiSsid || wifiPass) {
         document.getElementById("roomWifiSection").classList.remove("hidden");
-        if (wifiSsid) document.getElementById("roomWifiSsid").textContent = "SSID: " + String(wifiSsid);
-        if (wifiPass) document.getElementById("roomWifiPass").textContent = "パスワード: " + String(wifiPass);
+        if (wifiSsid) {
+          const el = document.getElementById("roomWifiSsid");
+          el.textContent = "SSID: " + String(wifiSsid);
+          addCopyButton(el, String(wifiSsid));
+        }
+        if (wifiPass) {
+          const el = document.getElementById("roomWifiPass");
+          el.textContent = "パスワード: " + String(wifiPass);
+          addCopyButton(el, String(wifiPass));
+        }
         hasAny = true;
       }
 
@@ -511,6 +617,8 @@
       const tabPanels = document.getElementById("tabPanels");
       tabNav.innerHTML = "";
       tabPanels.innerHTML = "";
+      tabNav.setAttribute("role", "tablist");
+      tabNav.setAttribute("aria-label", "しおりカテゴリ");
 
       if (!sections.length) {
         tabPanels.innerHTML =
@@ -538,10 +646,17 @@
 
       groups.forEach((group, gIndex) => {
         const active = gIndex === 0;
+        const tabId = `tab-${gIndex}`;
+        const panelId = `panel-${gIndex}`;
 
         const tabBtn = document.createElement("button");
         tabBtn.type = "button";
+        tabBtn.id = tabId;
         tabBtn.dataset.tabGroup = group.name;
+        tabBtn.setAttribute("role", "tab");
+        tabBtn.setAttribute("aria-selected", active ? "true" : "false");
+        tabBtn.setAttribute("aria-controls", panelId);
+        tabBtn.tabIndex = active ? 0 : -1;
         tabBtn.className =
           "group-tab inline-flex items-center justify-center px-3 py-1.5 " +
           "rounded-full whitespace-normal break-words text-[11px] leading-snug " +
@@ -553,7 +668,11 @@
         tabNav.appendChild(tabBtn);
 
         const panel = document.createElement("section");
+        panel.id = panelId;
         panel.dataset.tabGroupPanel = group.name;
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", tabId);
+        panel.tabIndex = 0;
         panel.className = (active ? "" : "hidden ") + "bg-transparent space-y-3";
 
         group.sections.forEach((sec) => {
@@ -575,8 +694,11 @@
           card.innerHTML = `
             <button
               type="button"
+              id="btn-${bodyId}"
               class="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 focus:outline-none"
               data-accordion-toggle="${bodyId}"
+              aria-expanded="${expanded ? "true" : "false"}"
+              aria-controls="${bodyId}"
             >
               <div class="flex items-center gap-3 text-left">
                 <div class="flex-shrink-0">
@@ -604,6 +726,8 @@
             </button>
 
             <div id="${bodyId}"
+              role="region"
+              aria-labelledby="btn-${bodyId}"
               class="px-4 pb-4 pt-1 text-xs text-slate-700 leading-relaxed ${expanded ? "" : "hidden"}"
             >
               <div class="border-t border-slate-100 pt-2 richtext">
@@ -616,7 +740,7 @@
                         ${sec.images.map((url, i) => `
                           <img
                             src="${escapeHtml(url)}"
-                            alt=""
+                            alt="${escapeHtml(sec.label)}の画像${sec.images.length > 1 ? (i + 1) : ""}"
                             loading="lazy"
                             data-lightbox-group="${groupId}"
                             data-lightbox-index="${i}"
@@ -665,6 +789,8 @@
             t.classList.toggle("bg-slate-100", !active);
             t.classList.toggle("text-slate-700", !active);
             t.classList.toggle("border-slate-200", !active);
+            t.setAttribute("aria-selected", active ? "true" : "false");
+            t.tabIndex = active ? 0 : -1;
           });
 
           document.querySelectorAll("[data-tab-group-panel]").forEach((p) => {
@@ -684,9 +810,11 @@
           if (isHidden) {
             bodyEl.classList.remove("hidden");
             if (chevron) chevron.classList.add("rotate-180");
+            btn.setAttribute("aria-expanded", "true");
           } else {
             bodyEl.classList.add("hidden");
             if (chevron) chevron.classList.remove("rotate-180");
+            btn.setAttribute("aria-expanded", "false");
           }
         });
       });
@@ -774,7 +902,7 @@
           propertyNo = String(bukkenNo).trim();
         } catch (e) {
           console.error("部屋情報の読み込みエラー:", e);
-          showError("お部屋専用情報の読み込み中にエラーが発生しました。お手数ですが時間をおいて再度お試しください。");
+          showError("お部屋専用情報の読み込み中にエラーが発生しました。", { retry: true });
           tabPanels.innerHTML = "";
           return;
         }
@@ -789,26 +917,32 @@
       window.__propertyNo = propertyNo;
 
       try {
-        const results = await Promise.allSettled([
+        const [sectionsResult, propertyResult, guidesResult] = await Promise.allSettled([
           loadSectionsMaster(),
           loadPropertyShiori(propertyNo),
           loadGuidesMasterRaw()
         ]);
 
-        if (results.some(r => r.status === "rejected")) {
-          console.error("読み込みエラー:", results);
-          showError("データの読み込みに失敗しました。");
+        if (propertyResult.status === "rejected") {
+          console.error("物件データの読み込みエラー:", propertyResult.reason);
+          showError("データの読み込みに失敗しました。通信状況をご確認のうえ、再度お試しください。", { retry: true });
           return;
         }
 
-        const masterMap = results[0].value || {};
-        const propertyData = results[1].value || null;
-        const masterList = results[2].value || [];
+        const propertyData = propertyResult.value || null;
 
         if (!propertyData) {
           showError("この物件の入居のしおり設定が登録されていません。");
           tabPanels.innerHTML = "";
           return;
+        }
+
+        const masterMap = sectionsResult.status === "fulfilled" ? (sectionsResult.value || {}) : {};
+        const masterList = guidesResult.status === "fulfilled" ? (guidesResult.value || []) : [];
+
+        const hasPartialFailure = sectionsResult.status === "rejected" || guidesResult.status === "rejected";
+        if (hasPartialFailure) {
+          console.error("一部マスターデータの読み込みに失敗:", { sectionsResult, guidesResult });
         }
 
         const title =
@@ -875,6 +1009,19 @@
             `ゴミ出し、インターネット、設備、注意事項などを掲載しています。` +
             (addrText ? `所在地：${addrText}` : "");
 
+          function setMetaProperty(prop, content) {
+            let el = document.querySelector(`meta[property="${prop}"]`);
+            if (!el) {
+              el = document.createElement("meta");
+              el.setAttribute("property", prop);
+              document.head.appendChild(el);
+            }
+            el.setAttribute("content", content);
+          }
+          setMetaProperty("og:title", `${safeTitle}｜入居のしおり｜ユニヴ・ライフ株式会社`);
+          setMetaProperty("og:description", metaDesc.content);
+          setMetaProperty("og:url", `https://guide.univ-life.com/?propertyNo=${propertyNo}`);
+
           const ld = {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -912,9 +1059,13 @@
 
         renderGroupedTabsWithAccordion(mergedSections);
 
+        if (hasPartialFailure) {
+          showError("一部のコンテンツを読み込めませんでした。表示内容が不完全な場合があります。", { retry: true });
+        }
+
       } catch (e) {
         console.error("main() 内でエラー:", e);
-        showError("データの読み込み中にエラーが発生しました。");
+        showError("データの読み込み中にエラーが発生しました。", { retry: true });
       }
     }
 

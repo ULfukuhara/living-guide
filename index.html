@@ -150,6 +150,21 @@
       <!-- エラー表示 -->
       <section id="errorBox" class="hidden rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700" role="alert" aria-live="assertive"></section>
 
+      <!-- キーワード検索 -->
+      <section id="sectionSearchWrap" class="hidden">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input
+            type="search"
+            id="sectionSearchInput"
+            placeholder="キーワードで探す（例：ゴミ、Wi-Fi、駐輪場）"
+            class="w-full rounded-full border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+            aria-label="しおりの内容をキーワードで検索"
+          />
+        </div>
+        <p id="sectionSearchEmpty" class="hidden mt-2 text-xs text-slate-500">該当する項目が見つかりませんでした。</p>
+      </section>
+
       <!-- Tabs -->
       <section>
         <div id="tabNav" class="flex flex-wrap gap-2 pb-1 text-xs"></div>
@@ -657,16 +672,25 @@
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
+      const searchWrap = document.getElementById("sectionSearchWrap");
+      const searchInput = document.getElementById("sectionSearchInput");
+      const searchEmpty = document.getElementById("sectionSearchEmpty");
       tabNav.innerHTML = "";
       tabPanels.innerHTML = "";
       tabNav.setAttribute("role", "tablist");
       tabNav.setAttribute("aria-label", "しおりカテゴリ");
+      searchInput.value = "";
+      searchEmpty.classList.add("hidden");
 
       if (!sections.length) {
         tabPanels.innerHTML =
           '<p class="text-sm text-slate-500">この物件で公開されている入居のしおりはまだ登録されていません。</p>';
+        searchWrap.classList.add("hidden");
         return;
       }
+
+      searchWrap.classList.remove("hidden");
+      const searchIndex = []; // { card, tabBtn, groupPanel, autoExpanded, bodyEl, chevron, toggleBtn }
 
       const groupMap = new Map();
       sections.forEach((sec) => {
@@ -813,6 +837,13 @@
           `;
 
           panel.appendChild(card);
+
+          searchIndex.push({
+            card,
+            tabBtn,
+            bodyId,
+            searchText: [sec.label, sec.summary, sec.body].filter(Boolean).join(" ").toLowerCase(),
+          });
         });
 
         tabPanels.appendChild(panel);
@@ -842,21 +873,73 @@
       });
 
       // アコーディオン
+      function setAccordionExpanded(bodyId, expand) {
+        const bodyEl = document.getElementById(bodyId);
+        const btn = document.getElementById(`btn-${bodyId}`);
+        const chevron = document.querySelector(`[data-chevron-for="${bodyId}"]`);
+        if (!bodyEl || !btn) return;
+        bodyEl.classList.toggle("hidden", !expand);
+        if (chevron) chevron.classList.toggle("rotate-180", expand);
+        btn.setAttribute("aria-expanded", expand ? "true" : "false");
+      }
+
       document.querySelectorAll("[data-accordion-toggle]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const bodyId = btn.getAttribute("data-accordion-toggle");
           const bodyEl = document.getElementById(bodyId);
-          const chevron = btn.querySelector('[data-chevron-for="' + bodyId + '"]');
           if (!bodyEl) return;
-          const isHidden = bodyEl.classList.contains("hidden");
-          if (isHidden) {
-            bodyEl.classList.remove("hidden");
-            if (chevron) chevron.classList.add("rotate-180");
-            btn.setAttribute("aria-expanded", "true");
-          } else {
-            bodyEl.classList.add("hidden");
-            if (chevron) chevron.classList.remove("rotate-180");
-            btn.setAttribute("aria-expanded", "false");
+          setAccordionExpanded(bodyId, bodyEl.classList.contains("hidden"));
+        });
+      });
+
+      // キーワード検索：タブを横断してセクションを絞り込み、一致した項目は自動展開する
+      let lastActiveGroupName = groups[0] ? groups[0].name : "";
+      const autoExpandedIds = new Set();
+
+      function applyGroupVisibility(groupName) {
+        document.querySelectorAll("[data-tab-group-panel]").forEach((p) => {
+          p.classList.toggle("hidden", p.dataset.tabGroupPanel !== groupName);
+        });
+      }
+
+      function runSearch(rawQuery) {
+        const q = rawQuery.trim().toLowerCase();
+
+        if (!q) {
+          searchIndex.forEach(({ card }) => card.classList.remove("hidden"));
+          autoExpandedIds.forEach((id) => setAccordionExpanded(id, false));
+          autoExpandedIds.clear();
+          applyGroupVisibility(lastActiveGroupName);
+          searchEmpty.classList.add("hidden");
+          return;
+        }
+
+        document.querySelectorAll("[data-tab-group-panel]").forEach((p) => p.classList.remove("hidden"));
+
+        let matchCount = 0;
+        searchIndex.forEach(({ card, bodyId, searchText }) => {
+          const match = searchText.includes(q);
+          card.classList.toggle("hidden", !match);
+          if (match) {
+            matchCount++;
+            if (!autoExpandedIds.has(bodyId)) {
+              setAccordionExpanded(bodyId, true);
+              autoExpandedIds.add(bodyId);
+            }
+          }
+        });
+
+        searchEmpty.classList.toggle("hidden", matchCount > 0);
+      }
+
+      searchInput.oninput = () => runSearch(searchInput.value);
+
+      document.querySelectorAll(".group-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          lastActiveGroupName = tab.dataset.tabGroup;
+          if (searchInput.value.trim()) {
+            searchInput.value = "";
+            runSearch("");
           }
         });
       });

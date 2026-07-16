@@ -85,6 +85,20 @@
   <main class="flex-1">
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-12 space-y-6">
 
+      <!-- 困ったときは（kurasapo_connectセクションがある物件のみ表示） -->
+      <section id="quickHelpCard" class="hidden bg-emerald-50 rounded-2xl border border-emerald-100 p-4 sm:p-5">
+        <div class="flex items-start gap-3">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-emerald-100 text-emerald-700">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+          </span>
+          <div class="min-w-0">
+            <p id="quickHelpTitle" class="text-sm font-semibold text-slate-900"></p>
+            <p id="quickHelpDesc" class="mt-1 text-xs text-slate-600"></p>
+            <div id="quickHelpLinks" class="mt-2 flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ▼ 部屋専用ひみつ情報カード（token がある時だけ表示） -->
       <section id="roomSecretSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-5 space-y-3">
         <div class="flex items-start justify-between gap-3">
@@ -669,6 +683,50 @@
       return u.toString();
     }
 
+    // 本文中の [ラベル](URL) 形式のリンクを抽出（renderPlainTextAsHtmlと同じ記法）
+    function extractLinks(text) {
+      const re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+      const out = [];
+      let m;
+      while ((m = re.exec(text || "")) !== null) {
+        out.push({ label: m[1], url: m[2] });
+      }
+      return out;
+    }
+
+    // 「困ったときは」導線：くらさぽコネクトのご案内が有効な物件のみ、リンクをページ上部に表示
+    function renderQuickHelpCard(sections) {
+      const card = document.getElementById("quickHelpCard");
+      const sec = sections.find((s) => s.key === "kurasapo_connect");
+      const links = sec ? extractLinks(sec.body) : [];
+
+      if (!sec || !links.length) {
+        card.classList.add("hidden");
+        return;
+      }
+
+      document.getElementById("quickHelpTitle").textContent = sec.label || "困ったときは";
+      document.getElementById("quickHelpDesc").textContent = sec.summary || "";
+
+      const linksEl = document.getElementById("quickHelpLinks");
+      linksEl.innerHTML = "";
+      links.forEach(({ label, url }) => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.className =
+          "inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50";
+        a.textContent = label;
+        linksEl.appendChild(a);
+      });
+
+      card.classList.remove("hidden");
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    }
+
     function renderGroupedTabsWithAccordion(sections) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
@@ -1183,6 +1241,7 @@
         const mergedSections = mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey);
 
         renderGroupedTabsWithAccordion(mergedSections);
+        renderQuickHelpCard(mergedSections);
 
         if (hasPartialFailure) {
           showError("一部のコンテンツを読み込めませんでした。表示内容が不完全な場合があります。", { retry: true });

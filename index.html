@@ -150,7 +150,7 @@
     import { db } from "/assets/firebase-init.js";
     import { renderFooter } from "/assets/site-footer.js";
     import {
-      doc, getDoc, collection, getDocs, query, where, limit
+      doc, getDoc, collection, getDocs
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     renderFooter(document.getElementById("siteFooter"), {
@@ -331,12 +331,16 @@
 
     async function loadRoomSecretByToken(token) {
       if (!token) return null;
-      const colRef = collection(db, "postdials");
-      const q = query(colRef, where("token", "==", token), limit(1));
-      const snap = await getDocs(q);
-      if (snap.empty) return null;
-      const docSnap = snap.docs[0];
-      return { id: docSnap.id, ...docSnap.data() };
+      const ref = doc(db, "postdials", token);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return null;
+      const data = snap.data();
+
+      if (data.tokenIsActive === false) return null;
+      const expiresAt = data.tokenExpiresAt?.toDate ? data.tokenExpiresAt.toDate() : null;
+      if (expiresAt && expiresAt.getTime() < Date.now()) return null;
+
+      return { id: snap.id, ...data };
     }
 
     function renderRoomSecretSection(roomData) {
@@ -755,7 +759,7 @@
         try {
           const roomData = await loadRoomSecretByToken(token);
           if (!roomData) {
-            showError("token=" + token + " で postdials を検索しましたが、該当データが見つかりませんでした。");
+            showError("このURLは無効か、有効期限が切れています。お手数ですが管理会社までお問い合わせください。");
             tabPanels.innerHTML = "";
             return;
           }
@@ -763,14 +767,14 @@
 
           const bukkenNo = roomData.propertyNo;
           if (!bukkenNo || String(bukkenNo).trim() === "") {
-            showError("postdials のドキュメントに『物件No』フィールドがありません。");
+            showError("お部屋専用情報の読み込みに失敗しました。お手数ですが管理会社までお問い合わせください。");
             tabPanels.innerHTML = "";
             return;
           }
           propertyNo = String(bukkenNo).trim();
         } catch (e) {
           console.error("部屋情報の読み込みエラー:", e);
-          showError("お部屋専用情報（postdials）の読み込み中にエラーが発生しました。");
+          showError("お部屋専用情報の読み込み中にエラーが発生しました。お手数ですが時間をおいて再度お試しください。");
           tabPanels.innerHTML = "";
           return;
         }

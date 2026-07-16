@@ -711,13 +711,20 @@
       const linksEl = document.getElementById("quickHelpLinks");
       linksEl.innerHTML = "";
       links.forEach(({ label, url }) => {
+        // ストアURLから簡潔な表示名に統一（本文中の表記ゆれに左右されないように）
+        const shortLabel = /play\.google\.com/.test(url)
+          ? "Google Play"
+          : /apps\.apple\.com/.test(url)
+          ? "App Store"
+          : label;
+
         const a = document.createElement("a");
         a.href = url;
         a.target = "_blank";
         a.rel = "noopener";
         a.className =
           "inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50";
-        a.textContent = label;
+        a.innerHTML = `<i data-lucide="download" class="w-3 h-3"></i><span>${escapeHtml(shortLabel)}</span>`;
         linksEl.appendChild(a);
       });
 

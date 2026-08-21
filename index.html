@@ -91,11 +91,18 @@
           <span class="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-emerald-100 text-emerald-700">
             <i data-lucide="smartphone" class="w-4 h-4"></i>
           </span>
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <p id="quickHelpTitle" class="text-sm font-semibold text-slate-900"></p>
             <p id="quickHelpDesc" class="mt-1 text-xs text-slate-600"></p>
             <div id="quickHelpLinks" class="mt-2 flex flex-wrap gap-2"></div>
           </div>
+          <button
+            id="quickHelpCollapseBtn"
+            type="button"
+            class="flex-shrink-0 text-slate-400 hover:text-slate-600 p-1 -m-1"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
       </section>
 
@@ -710,6 +717,25 @@
     }
 
     // 「困ったときは」導線：くらさぽコネクトのご案内が有効な物件のみ、リンクをページ上部に表示
+    // 「困ったときは」カードの既読状態（一度閉じたら次回以降は折りたたんで表示）
+    const QUICK_HELP_DISMISSED_KEY = "shiori_quickhelp_dismissed";
+
+    function getQuickHelpDismissed() {
+      try {
+        return localStorage.getItem(QUICK_HELP_DISMISSED_KEY) === "1";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function setQuickHelpDismissed(dismissed) {
+      try {
+        localStorage.setItem(QUICK_HELP_DISMISSED_KEY, dismissed ? "1" : "0");
+      } catch (e) {
+        // localStorageが使えない場合は毎回展開表示のままでよい
+      }
+    }
+
     function renderQuickHelpCard(sections) {
       const card = document.getElementById("quickHelpCard");
       const sec = sections.find((s) => s.key === "kurasapo_connect");
@@ -740,10 +766,46 @@
         a.className =
           "inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50";
         a.innerHTML = `<i data-lucide="download" class="w-3 h-3"></i><span>${escapeHtml(shortLabel)}</span>`;
+        // ダウンロードリンクを踏んだ＝アプリを入手した とみなし、以降は折りたたみ表示にする
+        a.addEventListener("click", () => setQuickHelpDismissed(true));
         linksEl.appendChild(a);
       });
 
       card.classList.remove("hidden");
+
+      const descEl = document.getElementById("quickHelpDesc");
+      const collapseBtn = document.getElementById("quickHelpCollapseBtn");
+
+      function applyCollapsedState(collapsed) {
+        descEl.classList.toggle("hidden", collapsed);
+        linksEl.classList.toggle("hidden", collapsed);
+        if (collapseBtn) {
+          collapseBtn.setAttribute("aria-label", collapsed ? "困ったときはの案内を開く" : "困ったときはの案内を閉じる");
+          collapseBtn.innerHTML = collapsed
+            ? '<i data-lucide="chevron-down" class="w-4 h-4"></i>'
+            : '<i data-lucide="x" class="w-4 h-4"></i>';
+          if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+          }
+        }
+      }
+
+      applyCollapsedState(getQuickHelpDismissed());
+
+      if (collapseBtn) {
+        collapseBtn.onclick = () => {
+          const collapsedNow = descEl.classList.contains("hidden");
+          if (collapsedNow) {
+            // 折りたたみ中にタップ＝この画面だけ一時的に開く（既読状態は変えない）
+            applyCollapsedState(false);
+          } else {
+            // 展開中にタップ＝閉じて、以降は折りたたみ表示として記憶する
+            setQuickHelpDismissed(true);
+            applyCollapsedState(true);
+          }
+        };
+      }
+
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }

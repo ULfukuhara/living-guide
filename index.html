@@ -357,6 +357,20 @@
         const sectionKey = String(data.section_key || d.id || "").trim();
         const bodies = data.bodies || {};
 
+        // image_urls は variant_key ごとの map { variantKey: [url, ...] } が正式形式。
+        // 配列のまま持っている古いデータがもしあれば、全variant共通の画像として扱う（後方互換）。
+        const imagesByVariant = (data.image_urls && typeof data.image_urls === "object" && !Array.isArray(data.image_urls))
+          ? data.image_urls
+          : null;
+        const legacySharedImages = Array.isArray(data.image_urls) ? data.image_urls : [];
+
+        function imagesFor(variantKey) {
+          if (imagesByVariant) {
+            return Array.isArray(imagesByVariant[variantKey]) ? imagesByVariant[variantKey] : [];
+          }
+          return legacySharedImages;
+        }
+
         if (!sectionKey) return;
 
         if (bodies && typeof bodies === "object") {
@@ -368,7 +382,7 @@
                 section_key: sectionKey,
                 variant_key: String(variantKey || "base").trim(),
                 body_text: String(bodyText),
-                image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
+                image_urls: imagesFor(variantKey)
               });
             }
           });
@@ -376,11 +390,12 @@
 
         // 念のため guides_master 内に body_text がある形式にも対応
         if (data.body_text && String(data.body_text).trim() !== "") {
+          const vKey = String(data.variant_key || "base").trim();
           list.push({
             section_key: sectionKey,
-            variant_key: String(data.variant_key || "base").trim(),
+            variant_key: vKey,
             body_text: String(data.body_text),
-            image_urls: Array.isArray(data.image_urls) ? data.image_urls : []
+            image_urls: imagesFor(vKey)
           });
         }
       });

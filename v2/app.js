@@ -81,10 +81,10 @@ function helpBanner() {
 }
 function renderHome() {
   const intro = element('section', 'intro');
-  intro.append(element('h1', '', '暮らしの「困った」を、ここから。'), element('p', '', '知りたいこと・お困りごとを選んでください。'));
+  intro.append(element('h1', '', '暮らしの「困った」を、ここから。'), element('p', '', '困ったことや知りたいことを検索できます。'));
   const search = element('label', 'search'); const symbol = element('span'); symbol.innerHTML = icon('search');
-  const input = element('input'); input.type = 'search'; input.placeholder = 'お困りごとを検索'; input.setAttribute('aria-label', 'お困りごとを検索'); input.setAttribute('aria-controls', 'searchResults');
-  search.append(symbol, input); intro.append(search, element('p', 'search-hint', '例：お湯が出ない、ゴミ、くらさぽ'));
+  const input = element('input'); input.type = 'search'; input.placeholder = 'お湯が出ない、ゴミなど'; input.setAttribute('aria-label', 'お困りごとを検索'); input.setAttribute('aria-controls', 'searchResults');
+  search.append(symbol, input); intro.append(search);
   const results = element('div', 'result-list'); results.id = 'searchResults'; results.setAttribute('aria-live', 'polite'); results.hidden = true;
   intro.append(results); main.append(intro);
   input.addEventListener('input', () => {
@@ -100,22 +100,48 @@ function renderHome() {
     for (const [route, title] of hits) results.append(link(`${title} →`, `#${route}`));
     if (!hits.length) results.append(element('p', 'status', '該当する案内が見つかりませんでした。別の言葉で検索するか、現在の入居のしおりをご確認ください。'));
   });
-  const heading = element('div', 'section-label'); heading.append(element('h2', '', 'どのようなご用件ですか？'), element('span', '', 'SUPPORT MENU')); main.append(heading);
+  const menu = element('section', 'home-menu');
+  menu.setAttribute('aria-labelledby', 'homeMenuTitle');
+  const heading = element('h2', '', 'よく使うメニュー'); heading.id = 'homeMenuTitle';
   const cards = element('div', 'cards');
-  cards.append(card('trouble', '困ったとき', '設備・症状から探す', 'orange'), card('trash', 'ゴミの出し方', '収集日・分別のご案内', 'green'), card('rules', '暮らしのルール', '気持ちよく暮らすために', ''), card('procedures', '各種手続き', 'お引越し・解約など', 'purple'), card('kurasapo', 'くらさぽコネクト', 'お問い合わせ・アプリのご案内', 'navy'), card('faq', 'よくある質問', '現在のしおりから確認', ''));
-  if (guide.sections.delivery_box) cards.append(card('delivery-box', '宅配ボックス', '利用方法・荷物の受け取り', '', 'rules'));
-  main.append(cards);
+  cards.append(card('trouble', '困ったとき', '水漏れ・お湯・電気など', 'orange'), card('trash', 'ゴミの出し方', '収集日・分別', 'green'), card('procedures', '各種手続き', '解約・引越しなど', 'purple'), card('rules', '暮らしのルール', '生活マナー・注意事項', ''));
+  menu.append(heading, cards); main.append(menu);
+
+  // Only surface shortcuts backed by the property's already-selected content.
+  const popular = [
+    ['gas', 'no-hot-water', 'お湯が出ない'],
+    ['trash', 'trash', 'ゴミの出し方・収集日'],
+    ['delivery_box', 'delivery-box', '宅配ボックス']
+  ].filter(([key]) => guide.sections[key]);
+  function homeList(title, id, items) {
+    const section = element('section', 'home-links'); section.setAttribute('aria-labelledby', id);
+    const heading = element('h2', '', title); heading.id = id;
+    const list = element('ul', 'home-list');
+    for (const [route, label, description] of items) {
+      const row = element('li'); const a = link('', '#' + route);
+      const arrow = element('span', 'home-chevron', '›'); arrow.setAttribute('aria-hidden', 'true');
+      const text = element('span', 'home-link-text', label);
+      if (description) text.append(element('small', '', description));
+      a.append(text, arrow); row.append(a); list.append(row);
+    }
+    section.append(heading, list); return section;
+  }
+  if (popular.length) main.append(homeList('よくあるお困りごと', 'popularTitle', popular.map(([, route, title]) => [route, title])));
+  main.append(homeList('その他のサポート', 'otherSupportTitle', [
+    ['kurasapo', 'お問い合わせ・修理の相談', 'くらさぽコネクト'], ['faq', 'よくある質問']
+  ]));
   if (guide.propertyNo === '11300') {
-    const test = element('aside', 'notice');
+    const test = element('details', 'home-preview');
+    test.append(element('summary', '', '表示テスト'));
     test.append(element('p', '', '表示テスト：物件の設定は変更せず、宅配ボックスの別パターンを確認できます。'), link('宅配ボックス表示テストを開く →', '#content-blocks-poc', 'button secondary'));
     main.append(test);
   }
-  if (guide.sections.kurasapo_connect) main.append(helpBanner());
 }
 async function render() {
   const currentRender = ++renderVersion;
   const requested = location.hash.slice(1) || 'home';
   const route = Object.hasOwn(routes, requested) ? requested : 'home';
+  document.body.classList.toggle('home-view', route === 'home');
   main.replaceChildren();
   if (guide.partial) main.append(element('p', 'notice', '一部の案内を取得できませんでした。再読み込みするか、現在の入居のしおりをご確認ください。'));
   if (guide.unpublished) {

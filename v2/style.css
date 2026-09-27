@@ -2,3 +2,14 @@
 :root .section-label span{white-space:nowrap}@media(max-width:759px){.section-label span{display:none}}
 main:focus,main:focus-visible{outline:none}
 :root .poc{white-space:nowrap}@media(max-width:359px){.brand img{width:145px}.brand-row{gap:10px}}
+
+/* content_blocks: existing v2 colors and type scale. */
+.content-blocks{display:grid;gap:22px;min-width:0;overflow-wrap:anywhere}
+.content-blocks p,.content-blocks h3{margin:0}
+.content-blocks h3{font-size:1.1rem}
+.content-blocks .block-text{white-space:pre-wrap}
+.content-blocks figure{margin:0;min-width:0}
+.content-blocks img{display:block;width:100%;max-width:100%;height:auto;border-radius:12px}
+.content-blocks figcaption{font-size:.8rem;color:var(--muted);margin-top:8px}
+.content-blocks .notice{white-space:pre-wrap}
+.content-blocks .button{max-width:100%;overflow-wrap:anywhere}

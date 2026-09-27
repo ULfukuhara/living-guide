@@ -1,11 +1,15 @@
+import { renderContentBlocks, loadPreview, blocksToAiText } from './content-blocks.js?v=20260927-blocks';
 import { BRAND } from './config.js';
-import { safeWebUrl } from './content.js';
+import { safeWebUrl } from './content.js?v=20260927-blocks';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
 const main = document.querySelector('#main');
 let guide;
+let previewBlocks = [];
+let previewLoaded = false;
+let renderVersion = 0;
 const routes = {
-  home: 'ホーム', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない',
+  'delivery-box': '宅配ボックス', 'content-blocks-poc': '宅配ボックス表示テスト', home: 'ホーム', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない',
   trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '各種手続き', rules: '暮らしのルール', faq: 'よくある質問'
 };
 const icons = {
@@ -40,6 +44,10 @@ function renderBody(section, title) {
   panel.append(element('h2', '', title || section?.label || 'ご案内'));
   if (!section) {
     panel.append(element('p', 'muted', 'この物件では、この案内が登録されていないか、公開対象になっていません。'));
+    return panel;
+  }
+  if (section.blocks?.length) {
+    panel.append(renderContentBlocks(section.blocks, guideHref));
     return panel;
   }
   // Treat source content as text, allowing only the existing Markdown web-link notation.
@@ -87,6 +95,7 @@ function renderHome() {
       ['trash', 'ゴミの出し方', guide.sections.trash?.body || '', 'ごみ 分別 収集日 粗大ごみ'],
       ['kurasapo', 'くらさぽコネクト', guide.sections.kurasapo_connect?.body || '', '問い合わせ 修理 相談']
     ];
+    if (guide.sections.delivery_box) targets.push(['delivery-box', '宅配ボックス', guide.sections.delivery_box.blocks?.length ? blocksToAiText(guide.sections.delivery_box.blocks) : guide.sections.delivery_box.body, '荷物 受け取り']);
     const hits = targets.filter(item => item.slice(1).join(' ').normalize('NFKC').toLowerCase().includes(query));
     for (const [route, title] of hits) results.append(link(`${title} →`, `#${route}`));
     if (!hits.length) results.append(element('p', 'status', '該当する案内が見つかりませんでした。別の言葉で検索するか、現在の入居のしおりをご確認ください。'));
@@ -94,9 +103,17 @@ function renderHome() {
   const heading = element('div', 'section-label'); heading.append(element('h2', '', 'どのようなご用件ですか？'), element('span', '', 'SUPPORT MENU')); main.append(heading);
   const cards = element('div', 'cards');
   cards.append(card('trouble', '困ったとき', '設備・症状から探す', 'orange'), card('trash', 'ゴミの出し方', '収集日・分別のご案内', 'green'), card('rules', '暮らしのルール', '気持ちよく暮らすために', ''), card('procedures', '各種手続き', 'お引越し・解約など', 'purple'), card('kurasapo', 'くらさぽコネクト', 'お問い合わせ・アプリのご案内', 'navy'), card('faq', 'よくある質問', '現在のしおりから確認', ''));
-  main.append(cards); if (guide.sections.kurasapo_connect) main.append(helpBanner());
+  if (guide.sections.delivery_box) cards.append(card('delivery-box', '宅配ボックス', '利用方法・荷物の受け取り', '', 'rules'));
+  main.append(cards);
+  if (guide.propertyNo === '11300') {
+    const test = element('aside', 'notice');
+    test.append(element('p', '', '表示テスト：物件の設定は変更せず、宅配ボックスの別パターンを確認できます。'), link('宅配ボックス表示テストを開く →', '#content-blocks-poc', 'button secondary'));
+    main.append(test);
+  }
+  if (guide.sections.kurasapo_connect) main.append(helpBanner());
 }
-function render() {
+async function render() {
+  const currentRender = ++renderVersion;
   const requested = location.hash.slice(1) || 'home';
   const route = Object.hasOwn(routes, requested) ? requested : 'home';
   main.replaceChildren();
@@ -121,6 +138,25 @@ function render() {
     } else if (route === 'no-hot-water') {
       main.append(element('p', 'muted', '現在の入居のしおりにある、給湯器を含むガスの案内をご確認ください。'), renderBody(guide.sections.gas, 'ガス・給湯器のご案内'));
       if (guide.sections.kurasapo_connect) main.append(helpBanner());
+    } else if (route === 'delivery-box') main.append(renderBody(guide.sections.delivery_box));
+    else if (route === 'content-blocks-poc') {
+      if (guide.propertyNo !== '11300') {
+        main.append(element('p', 'status', 'この物件では表示テストを利用できません。'));
+      } else {
+        main.append(element('p', 'notice', '表示テスト用の下書きです。この物件の設定は変更していません。掲載内容・画像は実際の宅配ボックスの操作案内として使用しないでください。'));
+        const actions = element('div', 'actions');
+        actions.append(link('この物件の現在の案内と比較する', '#delivery-box', 'button secondary'));
+        main.append(actions);
+        const loading = element('p', 'status', 'テスト用コンテンツを読み込んでいます…'); main.append(loading);
+        if (!previewLoaded) { previewBlocks = await loadPreview(); previewLoaded = true; }
+        if (currentRender !== renderVersion) return;
+        loading.remove();
+        if (previewBlocks.length) main.append(renderBody({label:'宅配ボックス', blocks:previewBlocks}, '宅配ボックス（表示テスト）'));
+        else {
+          main.append(element('p', 'notice', 'テスト用コンテンツを読み込めませんでした。現在の案内を表示します。'));
+          main.append(renderBody(guide.sections.delivery_box));
+        }
+      }
     } else if (route === 'trash') main.append(renderBody(guide.sections.trash, 'この物件のゴミ案内'));
     else if (route === 'kurasapo') {
       main.append(renderBody(guide.sections.kurasapo_connect, 'くらさぽコネクトのご案内'));
@@ -148,7 +184,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js');
+  const { loadGuide } = await import('./data.js?v=20260927-blocks');
   guide = await loadGuide(location.search);
   document.querySelector('#propertyName').textContent = guide.title;
   if (guide.room) { const room = document.querySelector('#roomName'); room.textContent = `${guide.room}号室`; room.hidden = false; }

@@ -1,0 +1,46 @@
+{
+  "section_key": "delivery_box",
+  "variant_key": "kotei_Num",
+  "schema_version": 2,
+  "blocks": [
+    {
+      "id": "delivery_box_kotei_001",
+      "type": "text",
+      "order": 10,
+      "content": "宅配ボックスをご利用の場合は、以下の手順をご確認ください。"
+    },
+    {
+      "id": "delivery_box_kotei_002",
+      "type": "image",
+      "order": 20,
+      "image_url": "https://assets.univ-life.com/%E3%82%A8%E3%82%A2%E3%82%B3%E3%83%B3%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%93%81%E7%95%AA%E7%A2%BA%E8%AA%8D%E6%96%B9%E6%B3%95.png",
+      "alt_text": "表示テスト用画像（宅配ボックスの操作説明ではありません）"
+    },
+    {
+      "id": "delivery_box_kotei_003",
+      "type": "heading",
+      "order": 30,
+      "content": "荷物の受け取り方"
+    },
+    {
+      "id": "delivery_box_kotei_004",
+      "type": "text",
+      "order": 40,
+      "content": "暗証番号を入力して扉を開けてください。"
+    },
+    {
+      "id": "delivery_box_kotei_005",
+      "type": "notice",
+      "order": 50,
+      "content": "利用後は必ず扉を閉めてください。"
+    },
+    {
+      "id": "delivery_box_kotei_006",
+      "type": "button",
+      "order": 60,
+      "action_url": "/kurasapo/",
+      "action_label": "くらさぽから問い合わせる"
+    }
+  ],
+  "preview": true
+}

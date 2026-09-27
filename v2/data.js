@@ -1,6 +1,7 @@
+import { attachPublishedBlocks } from './content-blocks.js?v=20260927-blocks';
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
-import { flattenGuides, selectSections, roomIdentity, normalizeBool, SECTION_KEYS } from './content.js';
+import { flattenGuides, selectSections, roomIdentity, normalizeBool, SECTION_KEYS } from './content.js?v=20260927-blocks';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);
@@ -31,5 +32,10 @@ export async function loadGuide(search) {
   }
   const masters = Object.fromEntries(records(results[0].value).filter(item => SECTION_KEYS.includes(item.id)).map(item => [item.id, item.data]));
   const contents = flattenGuides(...results.slice(1).map(result => result.status === 'fulfilled' ? records(result.value) : []));
-  return { title, room, sections: selectSections(property, masters, contents), partial: results.some(result => result.status === 'rejected') };
+  const sections = selectSections(property, masters, contents);
+  await attachPublishedBlocks(property, masters, sections, async id => {
+    const snapshot = await getDoc(doc(db, 'guide_contents', id));
+    return snapshot.exists() ? snapshot.data() : null;
+  });
+  return { title, room, propertyNo, sections, partial: results.some(result => result.status === 'rejected') };
 }

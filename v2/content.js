@@ -1,5 +1,5 @@
 // PoC only: existing Firestore content remains the single source of truth.
-export const SECTION_KEYS = ['gas', 'trash', 'kurasapo_connect'];
+export const SECTION_KEYS = ['gas', 'trash', 'kurasapo_connect', 'delivery_box'];
 
 export function normalizeBool(value) {
   return value === true || value === 1 || (typeof value === 'string' && ['true', '1', 'yes', 'on'].includes(value.trim().toLowerCase()));
@@ -44,7 +44,7 @@ export function selectSections(property, masters, contents) {
     const variant = setting.variant || property.variant_key || 'base';
     const content = contents.find(item => item.key === key && item.variant === variant)
       || contents.find(item => item.key === key && item.variant === 'base');
-    if (content?.body) result[key] = { ...content, label: masters[key].label_ja || key };
+    if (content?.body) result[key] = { ...content, label: masters[key].label_ja || key, selectedVariant: variant };
   }
   return result;
 }

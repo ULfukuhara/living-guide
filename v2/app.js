@@ -81,9 +81,9 @@ function helpBanner() {
 }
 function renderHome() {
   const intro = element('section', 'intro');
-  intro.append(element('h1', '', '暮らしの「困った」を、ここから。'), element('p', '', '困ったことや知りたいことを検索できます。'));
+  intro.append(element('h1', '', 'お困りごとを検索'));
   const search = element('label', 'search'); const symbol = element('span'); symbol.innerHTML = icon('search');
-  const input = element('input'); input.type = 'search'; input.placeholder = 'お湯が出ない、ゴミなど'; input.setAttribute('aria-label', 'お困りごとを検索'); input.setAttribute('aria-controls', 'searchResults');
+  const input = element('input'); input.type = 'search'; input.placeholder = 'お湯が出ない、ゴミ、解約など'; input.setAttribute('aria-label', 'お困りごとを検索'); input.setAttribute('aria-controls', 'searchResults');
   search.append(symbol, input); intro.append(search);
   const results = element('div', 'result-list'); results.id = 'searchResults'; results.setAttribute('aria-live', 'polite'); results.hidden = true;
   intro.append(results); main.append(intro);
@@ -104,7 +104,7 @@ function renderHome() {
   menu.setAttribute('aria-labelledby', 'homeMenuTitle');
   const heading = element('h2', '', 'よく使うメニュー'); heading.id = 'homeMenuTitle';
   const cards = element('div', 'cards');
-  cards.append(card('trouble', '困ったとき', '水漏れ・お湯・電気など', 'orange'), card('trash', 'ゴミの出し方', '収集日・分別', 'green'), card('procedures', '各種手続き', '解約・引越しなど', 'purple'), card('rules', '暮らしのルール', '生活マナー・注意事項', ''));
+  cards.append(card('trouble', '困ったとき', '水漏れ・お湯・電気など', 'orange'), card('trash', 'ゴミの出し方', '収集日・分別', 'green'), card('procedures', '各種手続き', '解約・引越しなど', 'blue'), card('rules', '暮らしのルール', '生活マナー・注意事項', 'purple'));
   menu.append(heading, cards); main.append(menu);
 
   // Only surface shortcuts backed by the property's already-selected content.

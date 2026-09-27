@@ -3,6 +3,13 @@ import { sectionSetting } from './content.js?v=20260927-blocks';
 const SECTION = 'delivery_box';
 const VARIANT = 'kotei_Num';
 const TYPES = new Set(['heading', 'text', 'image', 'notice', 'button']);
+// Allow-listed per block_type. Anything else (empty, typo, future value) falls back to 'default'.
+const STYLES = { text: ['default', 'lead'], heading: ['default', 'strong'], image: ['default', 'full'], notice: ['default', 'info', 'warning'], button: ['default', 'primary'] };
+function blockStyleClass(type, styleKey) {
+  const key = typeof styleKey === 'string' ? styleKey.trim() : '';
+  const resolved = (STYLES[type] || []).includes(key) ? key : 'default';
+  return resolved === 'default' ? '' : `style-${type}-${resolved}`;
+}
 export function safeBlockUrl(value, image = false) {
   if (typeof value !== 'string' || /[\u0000-\u0020\\]/.test(value)) return null;
   if (!image && value.startsWith('/') && !value.startsWith('//')) return value;
@@ -57,20 +64,22 @@ export function blocksToAiText(blocks) {
 export function renderContentBlocks(blocks, internalHref = value=>value) {
   const root = document.createElement('div'); root.className='content-blocks';
   for (const b of blocks) {
+    const styleClass = blockStyleClass(b.type, b.style_key);
     let node;
     if (b.type === 'image') {
       node=document.createElement('figure');
+      if (styleClass) node.classList.add(styleClass);
       const img=document.createElement('img'); img.src=safeBlockUrl(b.image_url,true); img.alt=b.alt_text; img.loading='lazy'; img.referrerPolicy='no-referrer';
       img.addEventListener('error',()=>{const error=document.createElement('p');error.className='notice';error.textContent='案内画像を読み込めませんでした。';img.replaceWith(error);});
       node.append(img);
       if (b.alt_text.startsWith('表示テスト用画像')) {const caption=document.createElement('figcaption');caption.textContent=b.alt_text;node.append(caption);}
     } else if (b.type === 'button') {
       node=document.createElement('p'); const a=document.createElement('a');const url=safeBlockUrl(b.action_url);
-      a.className='button'; a.textContent=b.action_label; a.href=url.startsWith('/')?internalHref(url):url;
+      a.className='button'; if (styleClass) a.classList.add(styleClass); a.textContent=b.action_label; a.href=url.startsWith('/')?internalHref(url):url;
       if (!url.startsWith('/')) {a.target='_blank';a.rel='noopener noreferrer';} node.append(a);
     } else {
       node=document.createElement(b.type==='heading'?'h3':b.type==='notice'?'aside':'p');
-      node.className=b.type==='notice'?'notice':'block-text'; node.textContent=b.content;
+      node.className=b.type==='notice'?'notice':'block-text'; if (styleClass) node.classList.add(styleClass); node.textContent=b.content;
       if (b.type==='notice') node.setAttribute('aria-label','注意事項');
     }
     root.append(node);

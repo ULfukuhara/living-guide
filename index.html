@@ -766,6 +766,11 @@
 
       const linksEl = document.getElementById("quickHelpLinks");
       linksEl.innerHTML = "";
+      const guideLink = document.createElement("a");
+      guideLink.href = guideHref("/kurasapo/");
+      guideLink.className = "inline-flex items-center justify-center min-h-11 rounded-full bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800";
+      guideLink.textContent = "くらさぽコネクトの使い方を見る";
+      linksEl.appendChild(guideLink);
       links.forEach(({ label, url }) => {
         // ストアURLから簡潔な表示名に統一（本文中の表記ゆれに左右されないように）
         const shortLabel = /play\.google\.com/.test(url)
@@ -1189,6 +1194,11 @@
         document.getElementById("tabNav").innerHTML = "";
 
         tabPanels.innerHTML = `
+          <section class="bg-emerald-50 rounded-2xl border border-emerald-100 p-4 sm:p-5 space-y-3">
+            <h2 class="text-base font-semibold text-slate-900">管理会社へのお問い合わせ</h2>
+            <p class="text-sm text-slate-600 leading-relaxed">設備の不具合や建物についてのお問い合わせは、くらさぽコネクトをご利用ください。</p>
+            <a href="/kurasapo/" class="inline-flex items-center justify-center min-h-11 rounded-full bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800">くらさぽコネクトの使い方を見る</a>
+          </section>
           <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-6">
             <h1 class="text-xl font-bold text-slate-900">
               入居のしおり（Web）｜ユニヴ・ライフ株式会社

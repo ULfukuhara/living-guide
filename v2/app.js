@@ -87,6 +87,13 @@ function renderHome() {
   search.append(symbol, input); intro.append(search);
   const results = element('div', 'result-list'); results.id = 'searchResults'; results.setAttribute('aria-live', 'polite'); results.hidden = true;
   intro.append(results); main.append(intro);
+  const quickRow = element('div', 'quick-row'); quickRow.setAttribute('aria-label', 'よく使う項目へのショートカット');
+  for (const [route, label, tone] of [['trouble', '困ったとき', 'warm'], ['trash', 'ゴミ', 'mint'], ['procedures', '手続き', 'sky'], ['rules', 'ルール', 'lavender']]) {
+    const a = link('', `#${route}`, `quick-item ${tone}`);
+    const bubble = element('span', 'quick-bubble'); bubble.innerHTML = icon(route);
+    a.append(bubble, element('span', '', label)); quickRow.append(a);
+  }
+  main.append(quickRow);
   input.addEventListener('input', () => {
     const query = input.value.normalize('NFKC').trim().toLowerCase(); results.replaceChildren(); results.hidden = !query;
     if (!query) return;
@@ -109,9 +116,10 @@ function renderHome() {
 
   // Only surface shortcuts backed by the property's already-selected content.
   const popular = [
-    ['gas', 'no-hot-water', 'お湯が出ない'],
-    ['trash', 'trash', 'ゴミの出し方・収集日'],
-    ['delivery_box', 'delivery-box', '宅配ボックス']
+    ['gas', 'no-hot-water', 'お湯が出ない', 'heater', 'warm'],
+    ['trash', 'trash', 'ゴミの出し方', 'trash', 'mint'],
+    ['delivery_box', 'delivery-box', '宅配ボックス', 'parcel', 'sky'],
+    ['kurasapo_connect', 'kurasapo', 'くらさぽ', 'kurasapo', 'lavender']
   ].filter(([key]) => guide.sections[key]);
   function homeList(title, id, items) {
     const section = element('section', 'home-links'); section.setAttribute('aria-labelledby', id);
@@ -126,7 +134,22 @@ function renderHome() {
     }
     section.append(heading, list); return section;
   }
-  if (popular.length) main.append(homeList('よくあるお困りごと', 'popularTitle', popular.map(([, route, title]) => [route, title])));
+  if (popular.length) {
+    const section = element('section', 'home-links home-popular'); section.setAttribute('aria-labelledby', 'popularTitle');
+    const heading = element('h2', '', 'よくあるお困りごと'); heading.id = 'popularTitle';
+    const list = element('ul', 'popular-grid');
+    for (const [, route, title, symbol, tone] of popular) {
+      const row = element('li'); const a = link('', '#' + route, 'popular-card ' + tone);
+      const visual = element('span', 'popular-visual'); visual.setAttribute('aria-hidden', 'true');
+      visual.innerHTML = symbol === 'parcel'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4v11l-9 4-9-4Z M3 7l9 4 9-4 M12 11v11 M7.5 5l9 4v5"/></svg>'
+        : icon(symbol);
+      const label = element('span', 'popular-label');
+      const arrow = element('span', 'home-chevron', '›'); arrow.setAttribute('aria-hidden', 'true');
+      label.append(element('strong', '', title), arrow); a.append(visual, label); row.append(a); list.append(row);
+    }
+    section.append(heading, list); main.append(section);
+  }
   main.append(homeList('その他のサポート', 'otherSupportTitle', [
     ['kurasapo', 'お問い合わせ・修理の相談', 'くらさぽコネクト'], ['faq', 'よくある質問']
   ]));
@@ -142,6 +165,14 @@ async function render() {
   const requested = location.hash.slice(1) || 'home';
   const route = Object.hasOwn(routes, requested) ? requested : 'home';
   document.body.classList.toggle('home-view', route === 'home');
+  const photo = document.querySelector('#homePhoto');
+  // This supplied photo is approved only for Casa Nebbia; do not infer photos for other properties.
+  const showPhoto = route === 'home' && !guide.unpublished && guide.propertyNo === '11300' && !photo.dataset.failed;
+  photo.hidden = !showPhoto;
+  document.querySelector('.property').classList.toggle('has-home-photo', showPhoto);
+  document.body.classList.toggle('home-ready', !guide.unpublished);
+  document.querySelector('#homeBadge').hidden = !guide.sections.kurasapo_connect;
+  if (showPhoto && !photo.getAttribute('src')) photo.src = './casa-nebbia.webp';
   main.replaceChildren();
   if (guide.partial) main.append(element('p', 'notice', '一部の案内を取得できませんでした。再読み込みするか、現在の入居のしおりをご確認ください。'));
   if (guide.unpublished) {
@@ -203,6 +234,10 @@ async function render() {
   }
   document.title = `${routes[route]}｜${guide.title}｜UNIV LIFE 入居者サポート`;
 }
+document.querySelector('#homePhoto').addEventListener('error', event => {
+  event.currentTarget.hidden = true; event.currentTarget.dataset.failed = 'true';
+  document.querySelector('.property').classList.remove('has-home-photo');
+});
 document.querySelector('#notice').textContent = BRAND.notice;
 document.querySelector('#currentGuide').href = guideHref('/');
 if (BRAND.logoSrc) {

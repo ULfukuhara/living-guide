@@ -1,0 +1,81 @@
+/* 入居のしおり専用。共通ページ・データ・トークン処理には影響させない。 */
+.guide-page { background:#f6f8f7; color:#252c30; font-family:"Noto Sans JP","Yu Gothic",Meiryo,sans-serif; -webkit-font-smoothing:antialiased; }
+.guide-page header { border-bottom:1px solid #e0e8e4; box-shadow:none; }
+.guide-page header>div { max-width:1024px; padding-top:18px; padding-bottom:18px; }
+.guide-page header p { color:#52695f; font-size:12px; letter-spacing:.07em; }
+.guide-page #propertyTitle { font-size:19px; margin-top:3px; }
+.guide-page main>div { max-width:1024px; padding-top:32px; }
+.guide-page #propertyMetaSection { background:transparent; border:0; box-shadow:none; padding:0 0 12px; }
+.guide-eyebrow { color:#31705b; font-size:11px; font-weight:700; letter-spacing:.18em; }
+.guide-title { font-size:32px; font-weight:700; letter-spacing:.025em; line-height:1.5; }
+.guide-intro { font-size:14px; color:#53665f; line-height:1.8; }
+.guide-page #propertyMeta { font-size:13px; color:#53665f; padding-top:8px; }
+.guide-page #propertyMetaSection>p:last-child { font-size:12px; color:#63736b; line-height:1.8; }
+.mobile-break { display:none; }
+.search-label { display:block; font-size:14px; font-weight:700; margin-bottom:10px; }
+.guide-page #sectionSearchInput { border-radius:12px; min-height:54px; font-size:16px; border-color:#bbcfc4; padding-left:40px; }
+.guide-page #sectionSearchInput::placeholder { color:#718077; }
+.search-status { font-size:13px; color:#3b6858; margin-top:8px; }
+.search-status:empty { display:none; }
+.section-heading { font-size:19px; font-weight:700; margin-bottom:14px; }
+.section-caption { font-size:13px; color:#596f64; margin-top:-7px; margin-bottom:16px; }
+.frequent-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.frequent-link { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:15px; padding:20px 16px; border:1px solid #d7e4dd; border-radius:16px; text-align:left; background:#fff; min-width:0; transition:background .15s,border-color .15s; }
+.frequent-link:hover { background:#edf7f1; border-color:#79a88f; }
+.shortcut-icon { display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; color:#267354; background:#edf5ef; border-radius:12px; }
+.shortcut-icon svg { width:21px; height:21px; }
+.frequent-link strong { display:block; font-size:15px; color:#234537; }
+.frequent-link small { display:block; font-size:12px; color:#5f7367; margin-top:7px; line-height:1.6; }
+.shortcut-arrow { position:absolute; top:20px; right:17px; color:#688574; }
+.guide-page #guideCategories { margin-top:36px; }
+.guide-page #tabNav { gap:8px; }
+.guide-page .group-tab { min-height:44px; border-radius:9px; padding:10px 14px; font-size:13px; box-shadow:none; background:#fff; color:#496153; border:1px solid #d7e1da; }
+.guide-page .group-tab[aria-selected="true"] { background:#265c46; color:white; border-color:#265c46; }
+.guide-page [data-accordion-toggle] { padding:19px 20px; scroll-margin-top:110px; }
+.guide-page [data-accordion-toggle] .text-sm { font-size:16px; }
+.guide-page [data-accordion-toggle] .text-\[11px\] { font-size:13px; line-height:1.7; color:#5c6e63; }
+.guide-page #tabPanels [role="region"] { font-size:15px; line-height:1.95; padding:0 20px 22px; overflow-wrap:anywhere; }
+.guide-page .richtext { padding-top:18px; }
+.guide-page #quickHelpCard { margin-top:32px; background:#eaf3ed; border-color:#d1e3d7; }
+.guide-page #quickHelpDesc { font-size:13px; line-height:1.8; }
+.guide-page #quickHelpLinks a { min-height:44px; align-items:center; }
+.guide-page #quickHelpCollapseBtn { min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; }
+.guide-page #roomSecretSection { border-color:#b9d4c4; }
+.guide-page #roomSecretSection button { min-height:44px; }
+.guide-page #roomSecretSection .text-\[11px\] { font-size:12px; color:#53695b; }
+.guide-page :is(button,a,input):focus-visible { outline:3px solid #318466; outline-offset:4px; }
+.skip-link { position:fixed; top:-100px; left:16px; z-index:100; background:white; color:#205a40; padding:12px; }
+.skip-link:focus { top:8px; }
+/* 配色案：白いカードとチャコールの文字を主体に、深緑で操作を示す。 */
+.guide-page :is(#propertyTitle,.guide-title,.section-heading,.search-label) { color:#252c30; }
+.guide-page :is(.guide-intro,#propertyMeta,.section-caption) { color:#535e64; }
+.guide-page #propertyMetaSection>p:last-child { color:#626b70; }
+.guide-page #sectionSearchInput { border-color:#a9b6af; color:#252c30; }
+.guide-page #sectionSearchInput::placeholder { color:#65716b; }
+.guide-page .frequent-link { border-color:#d4ddd7; box-shadow:0 2px 5px #253d2e05; }
+.guide-page .frequent-link strong { color:#252c30; }
+.guide-page .frequent-link small { color:#56635c; }
+.guide-page .group-tab { color:#414e47; border-color:#c8d4cc; }
+.guide-page .group-tab[aria-selected="true"] { background:#20573e; border-color:#20573e; color:#fff; }
+.guide-page [data-accordion-toggle] .text-sm { color:#252c30; }
+.guide-page [data-accordion-toggle] .text-\[11px\] { color:#58645e; }
+.guide-page #tabPanels [role="region"] { color:#343f39; }
+.guide-page #quickHelpCard { background:#f0f5f1; border-color:#cadbcf; }
+@media(max-width:640px) {
+ .guide-page header>div { padding-top:12px; padding-bottom:12px; }
+ .guide-page #propertyTitle { font-size:17px; }
+ .guide-page main>div { padding-top:24px; }
+ .guide-title { font-size:27px; }
+ .mobile-break { display:initial; }
+ .guide-intro { font-size:13px; }
+ .frequent-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+ .frequent-link { padding:15px 13px; gap:11px; }
+ .frequent-link strong { font-size:14px; }
+ .frequent-link small { font-size:11px; }
+ .section-heading { font-size:18px; }
+ .guide-page #tabNav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .guide-page .group-tab { max-width:none; font-size:12px; padding:10px 7px; }
+ .guide-page [data-accordion-toggle] { padding:16px 14px; }
+ .guide-page #tabPanels [role="region"] { padding:0 14px 18px; }
+ .guide-page #roomSecretSection>div:first-child { flex-wrap:wrap; }
+}

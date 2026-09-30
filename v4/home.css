@@ -55,3 +55,42 @@ body.is-home{--home-navy:#092c83;background:#f0f8fc;color:var(--home-navy)}
 
 /* TOP has no fixed navigation; remove its reserved footer space. */
 .is-home .footer{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+
+/* Refined neutral palette: retain the established navigation and readable copy. */
+body.is-home{--home-navy:#183651;background:#f3f6f8;color:var(--home-navy)}
+.is-home .v4-menu{--tint:#f4f7fa;--accent:#315f83;min-height:112px;border-radius:9px;box-shadow:none;background:var(--tint)}
+.is-home .v4-menu.red{--tint:#fcf6f4;--accent:#b45148}
+.is-home .v4-icon{width:34px;height:34px;color:var(--accent)}
+.is-home .v4-menu strong{font-size:16px;font-weight:600;margin-top:8px;letter-spacing:.02em}
+.is-home .v4-menu small{color:#56697c;margin-top:3px;font-size:12px}
+.is-home .quick-menu-grid{gap:10px}
+.is-home .home-search{border-radius:12px;border-color:#dce5eb;box-shadow:none;min-height:64px;color:#315f83}
+.is-home .home-search svg{width:27px;height:27px;stroke-width:1.7}
+.is-home .home-search input::placeholder{color:#50677b}
+.is-home .home-search small{color:#586d80}
+.is-home .v4-chevron{font-size:23px;color:#647f96}
+.is-home .home-section-heading h2{font-size:16px;font-weight:600;letter-spacing:.02em}
+.is-home .v4-all{color:#536e85;font-weight:500}
+.is-home .v4-photo{border-radius:8px}
+.is-home .popular-card strong{font-size:13px;font-weight:600;letter-spacing:0}
+.is-home .kurasapo-cta{border-radius:10px;background:#f0f5f7;padding-inline:14px;gap:12px}
+.is-home .v4-phone{transform:none;border-radius:8px;background:transparent;color:#47748d;width:38px;height:52px}
+.is-home .v4-phone svg{width:29px;height:42px;stroke-width:1.6}
+.is-home .kurasapo-cta strong{font-size:16px;font-weight:600}
+.is-home .kurasapo-cta small{font-size:13px;color:#526b7c}
+.is-home .v4-room-hints>button{background:#f0f5f8;color:#355d77;border-radius:8px;font-weight:500}
+.is-home .v4-room-hints svg,.is-home .v4-hint-arrow{color:#4a718b}
+.is-home .v4-detail{color:#315f83;border-color:#ccdce6;font-weight:600;border-radius:8px}
+.is-home #homeMenuButton{color:#315575}
+.is-home .v4-property h1{font-weight:600;letter-spacing:.015em}
+.is-home .v4-property p{color:#5b7183}
+
+/* Muted category colors and clearer room imagery. */
+.is-home .v4-menu.orange{--accent:#b57635}
+.is-home .v4-menu.blue{--accent:#397ba4}
+.is-home .v4-menu.green{--accent:#38856d}
+.is-home .v4-menu.pink{--accent:#ad657e}
+.is-home .v4-menu.purple{--accent:#7c6ca3}
+.is-home .v4-menu.red{--accent:#b45148}
+.is-home .v4-property:before{opacity:.56}
+.is-home .v4-property:after{background:linear-gradient(90deg,#ffffffe0 0%,#ffffffb8 42%,#ffffff24 78%,#ffffff08 100%),linear-gradient(180deg,#ffffff00 0%,#ffffff18 55%,#fff 100%)}

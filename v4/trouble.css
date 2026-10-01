@@ -1,4 +1,4 @@
-/* Only the two new trouble screens use these overrides. */
+/* Trouble pages share this layout. */
 body.is-trouble{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc;color:var(--navy)}
 .is-trouble .home-header{max-width:460px;margin-inline:auto;background:#fff;border:0}
 .is-trouble .home-header-inner{max-width:460px;min-height:66px;padding:10px 20px;gap:10px}
@@ -38,8 +38,7 @@ body.is-trouble{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc
 .is-trouble .trouble-help{background:#ecf9ff;border:0;border-radius:14px;padding:22px 18px;margin:22px 0 0}
 .trouble-help h2{font-size:19px}
 .trouble-help p{font-size:14px}
-.trouble-help .button{width:100%;background:#dce9f3;color:#526980;cursor:default}
-.trouble-help #trouble-contact-note{font-size:12px;margin:12px 0 0}
+.trouble-help .button{width:100%}
 .is-trouble .footer{width:100%;max-width:460px;background:#fff;padding:22px 20px 110px;margin:0 auto;color:#7384a6;font-size:10px}
 .is-trouble #bottomNav{position:fixed;bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:460px;margin:0;border-radius:0;border:0;border-top:1px solid #e6f1fb;background:#fffffff7;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 .is-trouble #bottomNav a{font-size:11px;color:#4a68b0}

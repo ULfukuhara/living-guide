@@ -1,4 +1,4 @@
-import { mountTrouble, mountNoHotWater } from './trouble.js';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261001-4';
 import { BRAND } from './config.js';
 import { mountHome, initHeader } from './home.js';
 import { safeWebUrl, SECTION_KEYS } from './content.js';
@@ -7,9 +7,11 @@ import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 const main = document.querySelector('#main');
 let guide;
 const routes = {
-  home: 'ホーム', property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない',
-  trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '各種手続き', rules: '暮らしのルール', faq: 'よくある質問'
+  home: 'ホーム', property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない', 'toilet-trouble': 'トイレのトラブル', 'air-conditioner-trouble': 'エアコンが効かない',
+  trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '各種手続き', rules: '暮らしのルール', faq: 'よくある質問',
+  ...Object.fromEntries(troubleItems.map(({ route, title }) => [route, title]))
 };
+const troubleRoutes = new Set(troubleItems.map(item => item.route));
 const icons = {
   home: '<path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/>',
   trouble: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 3v1"/>',
@@ -124,7 +126,7 @@ function render() {
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = guide.sections[sectionKey]?.label || routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
-  document.body.classList.toggle('is-trouble', ['trouble', 'no-hot-water'].includes(route));
+  document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
   main.replaceChildren();
   if (guide.partial) main.append(element('p', 'notice', '一部の案内を取得できませんでした。再読み込みするか、現在の入居のしおりをご確認ください。'));
   if (guide.unpublished) {
@@ -134,7 +136,7 @@ function render() {
   }
   if (route === 'home') renderHome();
   else {
-    const parent = route === 'no-hot-water' ? 'trouble' : route === 'heater' ? 'trouble' : 'home';
+    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : 'home';
     main.append(link(`← ${routes[parent]}`, `#${parent}`, 'back'), element('h1', '', routeTitle));
     if (route === 'property') {
       const panel = element('section', 'panel');
@@ -158,6 +160,12 @@ function render() {
       const cards = element('div', 'cards'); cards.append(card('no-hot-water', 'お湯が出ない', '給湯器の案内を確認する', 'orange', 'heater')); main.append(cards);
     } else if (route === 'no-hot-water') {
       mountNoHotWater(main, guide, { element, link, renderBody });
+    } else if (route === 'toilet-trouble') {
+      mountToiletTrouble(main, guide, { element, link, renderBody });
+    } else if (route === 'air-conditioner-trouble') {
+      mountAirConditionerTrouble(main, guide, { element, link, renderBody });
+    } else if (Object.hasOwn(otherTroubleGuides, route)) {
+      mountOtherTrouble(main, guide, { element, link, renderBody }, route);
     } else if (route === 'trash') main.append(renderBody(guide.sections.trash, 'この物件のゴミ案内'));
     else if (route === 'kurasapo') {
       main.append(renderBody(guide.sections.kurasapo_connect, 'くらさぽコネクトのご案内'));
@@ -177,7 +185,7 @@ function render() {
   if (route !== 'home') {
     for (const [key, label] of [['home', 'ホーム'], ['trouble', '困ったとき'], ['procedures', '手続き'], ['kurasapo', 'くらさぽ']]) {
       const a = link('', '#'+key); a.innerHTML = icon(key); a.append(element('span', '', label));
-      const active = ['heater', 'no-hot-water'].includes(route) ? 'trouble' : route;
+      const active = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : route;
       if (key === active) a.setAttribute('aria-current', 'page');
       nav.append(a);
     }

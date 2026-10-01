@@ -1,3 +1,4 @@
+import { mountTrouble, mountNoHotWater } from './trouble.js';
 import { BRAND } from './config.js';
 import { mountHome, initHeader } from './home.js';
 import { safeWebUrl, SECTION_KEYS } from './content.js';
@@ -81,14 +82,6 @@ const categories = [
   ['cancellation', '退去・解約', 'お引越し前の確認事項', 'moving', 'purple'],
   ['management_other', '各種手続き', '申請・ご連絡について', 'procedures']
 ];
-const problems = [
-  ['gas', 'お湯が出ない', 'ガス・給湯器の案内を確認', 'water', 'orange'],
-  ['delivery_box', '宅配ボックスが開かない', '受け取り方法・操作を確認', 'box', 'green'],
-  ['internet', 'Wi-Fiを使いたい', '接続・利用開始の案内', 'wifi'],
-  ['key', '鍵をなくした', '鍵の取り扱い・連絡先を確認', 'key', 'purple'],
-  ['electricity', '電気がつかない', '電気・ブレーカーの案内', 'electricity', 'orange'],
-  ['noise', '騒音が気になる', '生活マナーと相談の案内', 'rules', 'green']
-];
 Object.assign(icons, {
   wifi: '<path d="M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0m-11 4a6 6 0 0 1 8 0"/><circle cx="12" cy="20" r="1"/>',
   box: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M9 4v6m6-6v6m-5 5h4"/>',
@@ -131,6 +124,7 @@ function render() {
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = guide.sections[sectionKey]?.label || routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
+  document.body.classList.toggle('is-trouble', ['trouble', 'no-hot-water'].includes(route));
   main.replaceChildren();
   if (guide.partial) main.append(element('p', 'notice', '一部の案内を取得できませんでした。再読み込みするか、現在の入居のしおりをご確認ください。'));
   if (guide.unpublished) {
@@ -140,7 +134,7 @@ function render() {
   }
   if (route === 'home') renderHome();
   else {
-    const parent = route === 'no-hot-water' ? 'heater' : route === 'heater' ? 'trouble' : 'home';
+    const parent = route === 'no-hot-water' ? 'trouble' : route === 'heater' ? 'trouble' : 'home';
     main.append(link(`← ${routes[parent]}`, `#${parent}`, 'back'), element('h1', '', routeTitle));
     if (route === 'property') {
       const panel = element('section', 'panel');
@@ -150,9 +144,11 @@ function render() {
       main.append(panel);
     } else if (route.startsWith('section/')) {
       main.append(renderBody(guide.sections[sectionKey]), helpBanner());
-    } else if (['trouble', 'equipment', 'rules', 'procedures'].includes(route)) {
+    } else if (route === 'trouble') {
+      mountTrouble(main, guide, { element, link, icon });
+    } else if (['equipment', 'rules', 'procedures'].includes(route)) {
       const groups = { equipment: ['key', 'mailbox', 'delivery_box', 'room_equipment', 'internet', 'electricity', 'gas', 'water', 'heater', 'air_conditioner', 'toilet', 'drainage', 'ventilation'], rules: ['trash', 'common_area', 'noise', 'pets', 'bicycle_space', 'bike_parking', 'car_parking', 'special_note'], procedures: ['moving', 'cancellation', 'expenses', 'sales', 'management_other', 'kurasapo_connect', 'usac'] };
-      const items = route === 'trouble' ? problems.filter(item => guide.sections[item[0]]) : (groups[route] || []).filter(key => guide.sections[key]).map(key => categories.find(item => item[0] === key) || [key, guide.sections[key].label, 'ご案内を確認する', 'rules']);
+      const items = (groups[route] || []).filter(key => guide.sections[key]).map(key => categories.find(item => item[0] === key) || [key, guide.sections[key].label, 'ご案内を確認する', 'rules']);
       const grid = element('div', 'cards living-grid');
       items.forEach(item => grid.append(sectionCard(item)));
       if (!items.length) grid.append(element('p', 'status', 'この物件で公開されている案内はありません。'));
@@ -161,8 +157,7 @@ function render() {
       main.append(element('p', 'muted', '症状から案内を確認できます。'));
       const cards = element('div', 'cards'); cards.append(card('no-hot-water', 'お湯が出ない', '給湯器の案内を確認する', 'orange', 'heater')); main.append(cards);
     } else if (route === 'no-hot-water') {
-      main.append(element('p', 'muted', '現在の入居のしおりにある、給湯器を含むガスの案内をご確認ください。'), renderBody(guide.sections.gas, 'ガス・給湯器のご案内'));
-      if (guide.sections.kurasapo_connect) main.append(helpBanner());
+      mountNoHotWater(main, guide, { element, link, renderBody });
     } else if (route === 'trash') main.append(renderBody(guide.sections.trash, 'この物件のゴミ案内'));
     else if (route === 'kurasapo') {
       main.append(renderBody(guide.sections.kurasapo_connect, 'くらさぽコネクトのご案内'));

@@ -170,13 +170,17 @@ function render() {
       const panel = element('section', 'panel'); panel.append(element('p', '', 'この項目は、現在の入居のしおりでご確認いただけます。'), link('現在の入居のしおりへ →', guideHref('/'), 'button')); main.append(panel);
     }
   }
-  const nav = document.querySelector('#bottomNav'); nav.hidden = false; nav.replaceChildren();
-  for (const [key, label] of (route === 'home' ? [['home', 'ホーム'], ['search', '検索'], ['trouble', '困ったとき']] : [['home', 'ホーム'], ['trouble', '困ったとき'], ['procedures', '手続き'], ['kurasapo', 'くらさぽ']])) {
-    const a = link('', key === 'search' ? '#homeSearch' : `#${key}`);
-    if (key === 'search') a.addEventListener('click', event => { event.preventDefault(); document.querySelector('#homeSearch')?.focus(); });
-    a.innerHTML = icon(key); a.append(element('span', '', label));
-    const active = ['heater', 'no-hot-water'].includes(route) ? 'trouble' : route;
-    if (key === active) a.setAttribute('aria-current', 'page'); nav.append(a);
+  const nav = document.querySelector('#bottomNav');
+  nav.replaceChildren();
+  nav.hidden = route === 'home';
+  // TOP already offers search and all main destinations; keep persistent navigation on subpages only.
+  if (route !== 'home') {
+    for (const [key, label] of [['home', 'ホーム'], ['trouble', '困ったとき'], ['procedures', '手続き'], ['kurasapo', 'くらさぽ']]) {
+      const a = link('', '#'+key); a.innerHTML = icon(key); a.append(element('span', '', label));
+      const active = ['heater', 'no-hot-water'].includes(route) ? 'trouble' : route;
+      if (key === active) a.setAttribute('aria-current', 'page');
+      nav.append(a);
+    }
   }
   document.title = `${routeTitle}｜${guide.title}｜入居のしおり`;
 }

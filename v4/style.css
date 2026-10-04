@@ -14,3 +14,15 @@ main.container{padding-top:32px}.intro{background:#eef5ee;border:1px solid #e0ea
 @media(max-width:359px){.trouble-grid{grid-template-columns:1fr}.trouble-grid .card{min-height:150px}.room-grid{grid-template-columns:1fr}.guide-title{font-size:.9rem}.brand img{width:110px}.main-menu .card{padding:14px}.intro{padding:20px 16px}}
 
 .more-guides{margin-top:18px}.more-guides summary{cursor:pointer;padding:16px 4px;font-size:.93rem;color:var(--navy);font-weight:700}.more-guides[open] summary{margin-bottom:12px}
+:root .content-block-image{margin-block:20px}
+:root .content-block-actions{margin-bottom:20px}
+:root .content-block{margin-block:18px;overflow-wrap:anywhere}
+:root .content-block-text.block-style-lead{font-weight:700;font-size:1.08rem}
+:root .content-block-heading h3{font-size:1.1rem;line-height:1.6;margin:0;white-space:pre-wrap}
+:root .content-block-heading.block-style-strong h3{border-left:4px solid #24588a;padding-left:12px;font-size:1.18rem}
+:root .content-block-image .photos{grid-template-columns:1fr;max-width:640px;margin-inline:auto}
+:root .content-block-image.block-style-full .photos{max-width:none}
+:root .content-block-notice{padding:16px;border:1px solid #dce3ec;border-radius:12px;background:#f5f7fa}
+:root .content-block-notice.block-style-info{background:#edf6ff;border-color:#b7d4ee}
+:root .content-block-notice.block-style-warning{background:#fff7e7;border-color:#d9ad55}
+:root .content-block-notice .body-text:last-child{margin-bottom:0}

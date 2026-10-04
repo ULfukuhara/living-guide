@@ -1,0 +1,208 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================
+    // 共通関数
+    // =========================
+    function isSignedIn() {
+      return request.auth != null
+        && request.auth.token.email != null;
+    }
+
+    function isAllowedUser() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/allowed_users/$(request.auth.token.email.lower()))
+        && get(/databases/$(database)/documents/allowed_users/$(request.auth.token.email.lower())).data.active == true;
+    }
+
+    // =========================
+    // 1. 入居のしおりWeb 公開用
+    // =========================
+
+    // 物件ごとのしおり設定
+    match /properties_shiori/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // セクション定義マスタ
+    match /sections_master/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // しおり本文マスタ（旧形式）
+    match /guides_master_raw/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // しおり本文マスタ（新形式）
+    match /guides_master/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // しおり本文ブロック（公開対象のみ）
+    match /content_blocks/{blockId} {
+      allow read: if resource.data.enabled == true;
+      allow write: if false;
+    }
+
+    // 公開用ブロック表示スタイル
+    match /block_styles_master/{styleId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 部屋専用情報
+    // ドキュメントIDに token 値を使うことで、tokenを知っている人だけが
+    // get できるようにしている（listは禁止＝全件列挙・ダンプ不可）。
+    // 旧形式（物件No_部屋番号 等の短いID）は匿名ではアクセス不可。
+    // 社内許可ユーザーは物件情報ビューア等から従来どおり閲覧可能。
+    match /postdials/{docId} {
+      allow get: if docId.size() >= 20 || isAllowedUser();
+      allow list: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // 物件個別メモ
+    match /property_notes/{document=**} {
+      allow read: if isAllowedUser();
+      allow create: if isAllowedUser();
+      allow update: if isAllowedUser();
+      allow delete: if false;
+    }
+
+    // =========================
+    // 2. 入居直後アンケート
+    // =========================
+
+    // 入居者が送信するだけなので create のみ許可
+    match /movein_survey/{docId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // =========================
+    // 3. 社内用 物件情報ビューア
+    // =========================
+
+    // 許可ユーザー一覧
+    match /allowed_users/{userEmail} {
+      // 自分自身の許可情報だけ読める
+      allow read: if isSignedIn()
+        && request.auth.token.email.lower() == userEmail;
+      allow write: if false;
+    }
+
+    // 物件一覧ビュー
+    match /property_db_view/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // 物件詳細・BM情報など
+    match /properties/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // BM契約情報
+    match /bm_contracts/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // BM予定・実施履歴
+    match /bm_schedules/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // 設備・現場メモ
+    match /property_site_memos/{document=**} {
+      allow read: if isAllowedUser();
+      allow update: if isAllowedUser();
+      allow create: if isAllowedUser();
+      allow delete: if false;
+    }
+
+    // 清掃チェック表 記録（GAS Webアプリがサービスアカウント経由で書き込み、
+    // 物件情報ビューアが閲覧する）
+    match /cleaning_checklist_records/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    match /viewer_reports/{document=**} {
+      allow read, write: if isAllowedUser();
+    }
+
+    match /delivery_box_master/{docId} {
+      allow read: if isAllowedUser();
+      allow write: if false; // 登録・更新はPythonスクリプト（サービスアカウント）経由のみ
+    }
+
+    match /delivery_box_inspections/{docId} {
+      allow read, write: if isAllowedUser();
+    }
+
+    match /delivery_box_inspection_details/{docId} {
+      allow read, write: if isAllowedUser();
+    }
+
+    match /delivery_box_inspection_photos/{docId} {
+      allow read, write: if isAllowedUser();
+    }
+
+    match /managerReports/{reportId} {
+      allow read: if isAllowedUser();
+      // 業務報告履歴画面から対応状況（responseStatus）を更新できるようにする。
+      // 新規作成・削除は引き続きGAS（サービスアカウント経由）のみ。
+      allow update: if isAllowedUser();
+      allow create, delete: if false;
+    }
+
+    match /moveProgressCache/{docId} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    match /photoProgressCache/{docId} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    match /coolingEquipment/{deviceId} {
+      allow read: if isAllowedUser();
+      allow create, update: if isAllowedUser();
+      allow delete: if false;
+    }
+
+    match /coolingEquipmentHistory/{historyId} {
+      allow read: if isAllowedUser();
+      allow create: if isAllowedUser();
+      allow update: if isAllowedUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['returnedAt']);
+      allow delete: if false;
+    }
+
+    // サービスリクエスト履歴（賃貸革命から月次で取り込む確定済みデータ。
+    // 書き込みはPythonスクリプト（サービスアカウント経由）のみ）
+    match /sr_intake/{document=**} {
+      allow read: if isAllowedUser();
+      allow write: if false;
+    }
+
+    // =========================
+    // 4. その他は閉じる
+    // =========================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

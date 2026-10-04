@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>content_blocks ローカル検証</title><link rel="stylesheet" href="/v4/style.css">
+<main class="container"><h1>content_blocks ローカル検証</h1><p>動作確認用の仮データです。</p><div id="blocks"></div><div id="fallback"></div></main>
+<script type="module">
+import { normalizeBlocks, selectSections } from '/v4/content.js';
+import { renderBody } from '/v4/body.js';
+const property = {shiori_enabled:true,delivery_box:'kotei_Num'};
+const masters = {delivery_box:{label_ja:'宅配ボックス'}};
+const make = (data) => ({id:data.block_id,data:{section_key:'delivery_box',variant_key:'kotei_Num',enabled:true,...data}});
+const records = [
+  make({block_id:'heading',block_order:5,block_type:'heading',content:'荷物の受け取り方',style_key:'strong'}),
+  make({block_id:'notice',block_order:30,block_type:'notice',content:'利用後は必ず扉を閉めてください。',style_key:'warning'}),
+  make({block_id:'button',block_order:40,block_type:'button',action_label:'くらさぽの案内を見る',action_url:'https://guide.univ-life.com/kurasapo/?propertyNo=11300',style_key:'primary'}),
+  make({block_id:'image',block_order:20,block_type:'image',image_url:'http://127.0.0.1:4173/v4/univlife-logo.png',alt_text:'検証用画像（会社ロゴ）'}),
+  make({block_id:'text',block_order:10,block_type:'text',content:'宅配ボックスをご利用の場合は、以下の手順をご確認ください。',style_key:'lead',image_url:'https://example.com/unrelated.png'}),
+  make({block_id:'disabled',block_order:1,block_type:'text',content:'非公開の検証文',enabled:'FALSE'})
+];
+const selected=selectSections(property,masters,[],normalizeBlocks(records));
+document.querySelector('#blocks').append(renderBody(selected.delivery_box,'見出し・文章・画像・注意・ボタン'));
+const legacy=[{key:'delivery_box',variant:'kotei_Num',body:'有効なブロックがない場合は従来の本文を表示します。',images:[]}];
+const fallback=selectSections(property,masters,legacy,normalizeBlocks(records.map(r=>({...r,data:{...r.data,enabled:'FALSE'}}))));
+document.querySelector('#fallback').append(renderBody(fallback.delivery_box,'FALSEのみ：従来の本文'));
+</script></html>

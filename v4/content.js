@@ -35,16 +35,73 @@ export function flattenGuides(current, legacy) {
   return result;
 }
 
-export function selectSections(property, masters, contents) {
+export const BLOCK_STYLES = Object.freeze({
+  text: ['default', 'lead'], heading: ['default', 'strong'],
+  image: ['default', 'full'], notice: ['default', 'info', 'warning'],
+  button: ['default', 'primary']
+});
+
+export function normalizeBlockStyles(records) {
+  const styles = {};
+  for (const { data } of records) {
+    const type = String(data.block_type || '').trim();
+    const style = String(data.style_key || 'default').trim();
+    if (BLOCK_STYLES[type]?.includes(style)) styles[`${type}/${style}`] = normalizeBool(data.enabled);
+  }
+  return styles;
+}
+
+export function normalizeBlocks(records, styles = {}) {
+  const blocks = [];
+  for (const { id, data } of records) {
+    const key = String(data.section_key || '').trim();
+    const type = String(data.block_type || '').trim();
+    if (!normalizeBool(data.enabled) || !SECTION_KEYS.includes(key) || !Object.hasOwn(BLOCK_STYLES, type)) continue;
+    const content = String(data.content || '').trim();
+    const imageUrl = safeWebUrl(data.image_url);
+    const actionLabel = String(data.action_label || '').trim();
+    const actionUrl = safeWebUrl(data.action_url);
+    if ((['text', 'heading', 'notice'].includes(type) && !content)
+      || (type === 'image' && !imageUrl) || (type === 'button' && (!actionLabel || !actionUrl))) continue;
+    const requestedStyle = String(data.style_key || 'default').trim();
+    const style = BLOCK_STYLES[type].includes(requestedStyle) && styles[`${type}/${requestedStyle}`] !== false
+      ? requestedStyle : 'default';
+    const order = Number(data.block_order);
+    blocks.push({
+      id: String(data.block_id || id || ''), key,
+      variant: String(data.variant_key || 'base').trim(),
+      order: Number.isFinite(order) ? order : 0, type, content, style,
+      imageUrl: type === 'image' ? imageUrl : null,
+      alt: String(data.alt_text || '').trim(),
+      actionLabel, actionUrl
+    });
+  }
+  return blocks.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+}
+
+export function selectSections(property, masters, contents, blocks = []) {
   if (!normalizeBool(property.shiori_enabled)) return {};
   const result = {};
   for (const key of SECTION_KEYS) {
     const setting = sectionSetting(property[key]);
     if (!setting.enabled || !masters[key]) continue;
     const variant = setting.variant || property.variant_key || 'base';
-    const content = contents.find(item => item.key === key && item.variant === variant)
-      || contents.find(item => item.key === key && item.variant === 'base');
-    if (content?.body) result[key] = { ...content, label: masters[key].label_ja || key };
+    // Finish selecting the property's variant before falling back to base.
+    // A base block must not override a variant-specific legacy guide.
+    for (const selectedVariant of new Set([variant, 'base'])) {
+      const selectedBlocks = blocks.filter(item => item.key === key && item.variant === selectedVariant);
+      const content = contents.find(item => item.key === key && item.variant === selectedVariant);
+      if (selectedBlocks.length) {
+        result[key] = { key, variant: selectedVariant, blocks: selectedBlocks,
+          body: selectedBlocks.map(block => block.type === 'image' ? block.alt : block.type === 'button' ? block.actionLabel : block.content).join('\n'),
+          images: [], label: masters[key].label_ja || key };
+        break;
+      }
+      if (content?.body) {
+        result[key] = { ...content, label: masters[key].label_ja || key };
+        break;
+      }
+    }
   }
   return result;
 }

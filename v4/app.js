@@ -1,13 +1,15 @@
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261001-4';
+import { guideGroups, groupTitles, sectionGroup } from './navigation.js';
+import { renderBody } from './body.js';
 import { BRAND } from './config.js';
 import { mountHome, initHeader } from './home.js?v=20261001-1';
-import { safeWebUrl, SECTION_KEYS } from './content.js';
+import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
 const main = document.querySelector('#main');
 let guide;
 const routes = {
-  home: 'ホーム', property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない', 'toilet-trouble': 'トイレのトラブル', 'air-conditioner-trouble': 'エアコンが効かない',
+  home: 'ホーム', ...groupTitles, property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない', 'toilet-trouble': 'トイレのトラブル', 'air-conditioner-trouble': 'エアコンが効かない',
   trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '各種手続き', rules: '暮らしのルール', faq: 'よくある質問',
   ...Object.fromEntries(troubleItems.map(({ route, title }) => [route, title]))
 };
@@ -39,37 +41,6 @@ function card(route, title, description, color, symbol = route) {
   a.append(pictogram, element('strong', '', title), element('small', '', description));
   return a;
 }
-function renderBody(section, title) {
-  const panel = element('section', 'panel');
-  panel.append(element('h2', '', title || section?.label || 'ご案内'));
-  if (!section) {
-    panel.append(element('p', 'muted', 'この物件では、この案内が登録されていないか、公開対象になっていません。'));
-    return panel;
-  }
-  // Treat source content as text, allowing only the existing Markdown web-link notation.
-  for (const paragraph of section.body.split(/\r?\n\s*\r?\n/)) {
-    const p = element('p', 'body-text');
-    const pattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
-    let cursor = 0;
-    for (const match of paragraph.matchAll(pattern)) {
-      p.append(document.createTextNode(paragraph.slice(cursor, match.index)));
-      const url = safeWebUrl(match[2]);
-      if (url) { const a = link(match[1], url); a.target = '_blank'; a.rel = 'noopener noreferrer'; p.append(a); }
-      else p.append(document.createTextNode(match[0]));
-      cursor = match.index + match[0].length;
-    }
-    p.append(document.createTextNode(paragraph.slice(cursor))); panel.append(p);
-  }
-  const photos = element('div', 'photos');
-  for (const [index, src] of section.images.entries()) {
-    const url = safeWebUrl(src); if (!url) continue;
-    const img = element('img'); img.src = url; img.alt = `${section.label}の案内画像 ${index + 1}`; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
-    img.addEventListener('error', () => img.replaceWith(element('p', 'muted', '案内画像を読み込めませんでした。')));
-    photos.append(img);
-  }
-  if (photos.childElementCount) panel.append(photos);
-  return panel;
-}
 const categories = [
   ['trash', 'ゴミの出し方', '収集日・分別を確認', 'trash', 'green'],
   ['internet', 'インターネット', '利用開始・接続について', 'wifi'],
@@ -82,14 +53,8 @@ const categories = [
   ['common_area', '共用部分', 'みんなで使う場所のルール', 'home', 'green'],
   ['noise', '生活マナー', '音への配慮・快適な暮らし', 'rules', 'purple'],
   ['cancellation', '退去・解約', 'お引越し前の確認事項', 'moving', 'purple'],
-  ['management_other', '各種手続き', '申請・ご連絡について', 'procedures']
+  ['management_other', '各種手続き', 'ご案内を確認する', 'procedures']
 ];
-const guideGroups = {
-  equipment: ['key', 'mailbox', 'delivery_box', 'room_equipment', 'internet', 'electricity', 'gas', 'water', 'heater', 'air_conditioner', 'toilet', 'drainage', 'ventilation'],
-  trash: ['trash'],
-  rules: ['trash', 'common_area', 'noise', 'pets', 'bicycle_space', 'bike_parking', 'car_parking', 'special_note'],
-  procedures: ['moving', 'cancellation', 'expenses', 'sales', 'management_other', 'kurasapo_connect', 'usac']
-};
 Object.assign(icons, {
   wifi: '<path d="M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0m-11 4a6 6 0 0 1 8 0"/><circle cx="12" cy="20" r="1"/>',
   box: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M9 4v6m6-6v6m-5 5h4"/>',
@@ -128,6 +93,7 @@ function renderHome() { mountHome(main, guide, { element, link, icon, card }); }
 
 function renderGuideList(route) {
   const descriptions = {
+    intro: '入居後にまず確認していただきたい案内です。',
     equipment: 'お部屋や設備の案内をお選びください。',
     trash: 'ゴミの出し方や収集日の案内をご確認ください。',
     rules: '暮らしのルールをお選びください。',
@@ -139,7 +105,8 @@ function renderGuideList(route) {
   for (const key of guideGroups[route]) {
     const section = guide.sections[key];
     if (!section) continue;
-    const [, title, description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', 'rules'];
+    const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', 'rules'];
+    const title = section.label;
     const row = link('', '#section/' + key, 'trouble-item');
     const pictogram = element('span', 'icon ' + (color || ''));
     pictogram.innerHTML = icon(symbol);
@@ -172,7 +139,7 @@ function render() {
   }
   if (route === 'home') renderHome();
   else {
-    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? Object.keys(guideGroups).find(key => guideGroups[key].includes(sectionKey)) || 'home' : 'home';
+    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? sectionGroup(sectionKey) : 'home';
     main.append(link(`← ${routes[parent]}`, `#${parent}`, 'back'), element('h1', '', routeTitle));
     if (route === 'property') {
       const panel = element('section', 'panel');
@@ -215,7 +182,7 @@ function render() {
   if (route !== 'home') {
     for (const [key, label] of [['home', 'ホーム'], ['trouble', '困ったとき'], ['procedures', '手続き'], ['kurasapo', 'くらさぽ']]) {
       const a = link('', '#'+key); a.innerHTML = icon(key); a.append(element('span', '', label));
-      const active = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey && guideGroups.procedures.includes(sectionKey) ? 'procedures' : route;
+      const active = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey && sectionGroup(sectionKey) === 'procedures' ? 'procedures' : route;
       if (key === active) a.setAttribute('aria-current', 'page');
       nav.append(a);
     }

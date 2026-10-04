@@ -1,0 +1,13 @@
+// Proposed additions inside match /databases/{database}/documents.
+// Do not replace the full existing ruleset with this snippet.
+// content_blocks uses a boolean enabled field; the client queries enabled == true.
+match /content_blocks/{blockId} {
+  allow read: if resource.data.enabled == true;
+  allow write: if false;
+}
+
+// Public presentation metadata only; never store private information here.
+match /block_styles_master/{styleId} {
+  allow read: if true;
+  allow write: if false;
+}

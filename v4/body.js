@@ -36,9 +36,30 @@ function image(src, alt) {
   return img;
 }
 
-export function renderBody(section, title) {
+function appendDeliveryText(parent, text) {
+  const lines = text.split(/\r?\n/);
+  if (lines[0]?.trim() === '【宅配ボックスのご利用について】') lines.shift();
+  let paragraph = [];
+  const flush = () => {
+    const content = paragraph.join('\n').trim();
+    if (content) appendText(parent, content);
+    paragraph = [];
+  };
+  for (const line of lines) {
+    const heading = line.match(/^\s*■\s*(.+?)\s*$/);
+    if (heading) {
+      flush();
+      parent.append(element('h2', 'delivery-heading', heading[1]));
+    } else paragraph.push(line);
+  }
+  flush();
+}
+
+export function renderBody(section, title, options = {}) {
   const panel = element('section', 'panel');
-  panel.append(element('h2', '', title || section?.label || 'ご案内'));
+  const label = title || section?.label || 'ご案内';
+  if (options.deliveryLayout) panel.setAttribute('aria-label', label);
+  else panel.append(element('h2', '', label));
   if (!section) {
     panel.append(element('p', 'muted', 'この物件では、この案内が登録されていないか、公開対象になっていません。'));
     return panel;
@@ -63,7 +84,8 @@ export function renderBody(section, title) {
     }
     return panel;
   }
-  appendText(panel, section.body || '');
+  if (options.deliveryLayout) appendDeliveryText(panel, section.body || '');
+  else appendText(panel, section.body || '');
   const photos = element('div', 'photos');
   for (const [index, src] of (section.images || []).entries()) {
     const url = safeWebUrl(src);

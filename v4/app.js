@@ -148,7 +148,7 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route.startsWith('section/')) {
-      main.append(renderBody(guide.sections[sectionKey]), helpBanner());
+      main.append(renderBody(guide.sections[sectionKey], undefined, { deliveryLayout: sectionKey === 'delivery_box' }), helpBanner());
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {

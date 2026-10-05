@@ -1,6 +1,7 @@
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js';
+import { applyPropertyContent } from './property-content.js';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);
@@ -45,5 +46,5 @@ export async function loadGuide(search) {
     address: String(property.address || property['住所'] || ''),
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: selectSections(property, masters, contents, blocks), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
+    sections: applyPropertyContent(propertyNo, selectSections(property, masters, contents, blocks), { mailboxPreview: ['localhost', '127.0.0.1'].includes(location.hostname) }), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
 }

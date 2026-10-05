@@ -58,7 +58,7 @@ function appendDeliveryText(parent, text) {
 export function renderBody(section, title, options = {}) {
   const panel = element('section', 'panel');
   const label = title || section?.label || 'ご案内';
-  if (options.deliveryLayout) panel.setAttribute('aria-label', label);
+  if (options.deliveryLayout || section?.hidePanelTitle) panel.setAttribute('aria-label', label);
   else panel.append(element('h2', '', label));
   if (!section) {
     panel.append(element('p', 'muted', 'この物件では、この案内が登録されていないか、公開対象になっていません。'));
@@ -68,7 +68,7 @@ export function renderBody(section, title, options = {}) {
     for (const block of section.blocks) {
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
       if (block.type === 'text') appendText(wrapper, block.content);
-      if (block.type === 'heading') wrapper.append(element('h3', '', block.content));
+      if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);
       if (block.type === 'image') {
         const photos = element('div', 'photos content-block-image');

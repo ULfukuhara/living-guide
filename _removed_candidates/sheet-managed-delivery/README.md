@@ -13,4 +13,4 @@
 復元用：firestore-before.json、rules-before.json、data.js、property-content.js。
 rows.jsonは今回同期したスナップショットであり、ライブのシートではない。
 sync.cjsを再実行する前は、必ずシートの対象15行を再取得してrows.jsonを更新する。
-メールボックス案はlocalhost/127.0.0.1のみ。本番は既存のメールボックス本文を維持。
+メールボックスも2026-10-05にシート管理へ移行。更新手順は../sheet-managed-mailbox/README.mdを参照。

@@ -46,5 +46,5 @@ export async function loadGuide(search) {
     address: String(property.address || property['住所'] || ''),
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: applyPropertyContent(propertyNo, selectSections(property, masters, contents, blocks), { mailboxPreview: ['localhost', '127.0.0.1'].includes(location.hostname) }), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
+    sections: applyPropertyContent(propertyNo, selectSections(property, masters, contents, blocks)), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
 }

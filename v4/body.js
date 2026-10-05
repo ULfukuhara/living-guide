@@ -9,7 +9,8 @@ function element(tag, className, text) {
 
 function webLink(label, href, className) {
   const a = element('a', className, label);
-  a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  a.href = href;
+  if (!href.startsWith('tel:')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   return a;
 }
 

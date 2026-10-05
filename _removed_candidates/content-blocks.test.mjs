@@ -51,3 +51,9 @@ assert.equal(preserved.delivery_box.body,'既存の宅配ボックス案内');
 assert.equal(preserved.delivery_box.label,'宅配ボックス');
 assert.equal(savedProperty.delivery_box,'base');
 console.log('PASS: property variant and section master preserved; unrelated blocks do not replace legacy body');
+assert.equal(normalizeBlocks([record({block_type:'button',action_label:'電話',action_url:'tel:08001003311'})])[0].actionUrl,'tel:08001003311');
+for (const url of ['tel:0800;ext=1','tel:0800?body=secret','javascript:alert(1)']) {
+  assert.equal(normalizeBlocks([record({block_type:'button',action_label:'電話',action_url:url})]).length,0);
+}
+assert.equal(normalizeBlocks([record({block_type:'image',image_url:'tel:08001003311'})]).length,0);
+console.log('PASS: telephone actions allowed; unsafe actions and telephone image URLs rejected');

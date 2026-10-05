@@ -60,7 +60,7 @@ export function normalizeBlocks(records, styles = {}) {
     const content = String(data.content || '').trim();
     const imageUrl = safeWebUrl(data.image_url);
     const actionLabel = String(data.action_label || '').trim();
-    const actionUrl = safeWebUrl(data.action_url);
+    const actionUrl = safeActionUrl(data.action_url);
     if ((['text', 'heading', 'notice'].includes(type) && !content)
       || (type === 'image' && !imageUrl) || (type === 'button' && (!actionLabel || !actionUrl))) continue;
     const requestedStyle = String(data.style_key || 'default').trim();
@@ -114,6 +114,12 @@ export function roomIdentity(data, now = Date.now()) {
   const propertyNo = String(data.propertyNo || '').trim();
   if (!propertyNo || propertyNo.includes('/')) throw new Error('物件情報を確認できませんでした。管理会社へお問い合わせください。');
   return { propertyNo, room: String(data.room || data.roomNo || '').replace(/号室$/, '').trim() };
+}
+
+export function safeActionUrl(value) {
+  const phone = String(value || '').trim();
+  if (/^tel:\+?[0-9][0-9-]{2,19}$/.test(phone)) return phone;
+  return safeWebUrl(value);
 }
 
 export function safeWebUrl(value) {

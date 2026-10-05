@@ -1,7 +1,7 @@
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
-import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js';
-import { applyPropertyContent } from './property-content.js';
+import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261005-1';
+import { applyPropertyContent } from './property-content.js?v=20261005-1';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);

@@ -1,5 +1,13 @@
 import { safeWebUrl } from './content.js';
 
+export const GUIDE_LAYOUT_KEYS = Object.freeze([
+  'moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment',
+  'internet', 'trash', 'common_area', 'electricity', 'gas', 'water',
+  'air_conditioner', 'ventilation', 'drainage', 'toilet', 'heater',
+  'noise', 'pets', 'cancellation', 'expenses', 'management_other', 'kurasapo_connect', 'usac',
+  'bike_parking', 'car_parking', 'sales', 'special_note'
+]);
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -66,7 +74,7 @@ export function renderBody(section, title, options = {}) {
     return panel;
   }
   if (section.blocks?.length) {
-    const movingLayout = ['moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment'].includes(section.key);
+    const movingLayout = GUIDE_LAYOUT_KEYS.includes(section.key);
     if (movingLayout) panel.classList.add('moving-guide');
     let movingCard;
     for (const [index, block] of section.blocks.entries()) {

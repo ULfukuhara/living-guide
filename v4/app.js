@@ -1,8 +1,8 @@
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261006-5';
-import { guideGroups, groupTitles, sectionGroup } from './navigation.js';
-import { renderBody } from './body.js?v=20261006-9';
+import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261006-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261006-11';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261001-1';
+import { mountHome, initHeader } from './home.js?v=20261006-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -55,6 +55,16 @@ const categories = [
   ['cancellation', '退去・解約', 'お引越し前の確認事項', 'moving', 'purple'],
   ['management_other', '各種手続き', 'ご案内を確認する', 'procedures']
 ];
+const sectionDescriptions = {
+  key: '鍵の管理・紛失時の対応', mailbox: '郵便物の受け取り・開錠方法',
+  room_equipment: '設備の確認・お手入れ・不具合の連絡', moving: '入居前後に行うこと',
+  heater: '暖房器具の使い方・注意事項', toilet: '使い方・詰まりを防ぐために',
+  drainage: '排水口のお手入れ・水まわりの注意', ventilation: '換気・結露やカビの予防',
+  pets: '飼育に関するルール', bike_parking: 'バイクの駐車場所・利用ルール',
+  car_parking: '駐車場の契約・利用ルール', sales: '訪問販売・勧誘への対応',
+  expenses: '修理・消耗品などの費用負担', special_note: 'この物件の注意事項',
+  kurasapo_connect: 'アプリの登録・管理会社への連絡', usac: '入居者サポートのご案内'
+};
 Object.assign(icons, {
   wifi: '<path d="M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0m-11 4a6 6 0 0 1 8 0"/><circle cx="12" cy="20" r="1"/>',
   box: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M9 4v6m6-6v6m-5 5h4"/>',
@@ -106,12 +116,12 @@ function renderGuideList(route) {
     const section = guide.sections[key];
     if (!section) continue;
     const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', 'rules'];
-    const title = section.label;
+    const title = sectionTitle(key, section);
     const row = link('', '#section/' + key, 'trouble-item');
     const pictogram = element('span', 'icon ' + (color || ''));
     pictogram.innerHTML = icon(symbol);
     const copy = element('span', 'trouble-item-copy');
-    copy.append(element('strong', '', title), element('small', '', description));
+    copy.append(element('strong', '', title), element('small', '', sectionDescriptions[key] || description));
     const arrow = element('span', 'trouble-arrow', '›');
     arrow.setAttribute('aria-hidden', 'true');
     row.append(pictogram, copy, arrow);
@@ -128,7 +138,7 @@ function render() {
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = sectionKey === 'key' && guide.sections.key
     ? '鍵の管理・紛失時の対応'
-    : guide.sections[sectionKey]?.label || routes[route] || 'ご案内';
+    : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
   document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
   document.body.classList.toggle('is-detail', route === 'trouble' || troubleRoutes.has(route) || Object.hasOwn(guideGroups, route) || (sectionKey && Object.values(guideGroups).some(keys => keys.includes(sectionKey))));
@@ -150,7 +160,7 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route.startsWith('section/')) {
-      main.append(renderBody(guide.sections[sectionKey], undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: ['moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment'].includes(sectionKey) }), helpBanner());
+      main.append(renderBody(guide.sections[sectionKey], sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey) }), helpBanner());
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {

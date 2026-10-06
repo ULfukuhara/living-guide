@@ -24,10 +24,12 @@ body.is-detail{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc;
 .trouble-arrow{font-size:26px;color:#007dff}
 .trouble-safety{font-size:13px;line-height:1.8;padding:14px;border-radius:12px;background:#fff7ed;color:#785020}
 .trouble-steps{list-style:none;padding:0;margin:20px 0}
-.is-detail .trouble-step{margin:0 0 14px;padding:19px 16px;border-radius:14px;border-color:#e1edf7;background:#f8fbff}
-.trouble-step h2{display:flex;align-items:center;gap:10px;font-size:17px;margin:0 0 13px}
+.is-detail .trouble-step{margin:0;padding:26px 4px;border:0;border-bottom:1px solid #e9edf1;border-radius:0;background:transparent;color:#3c4653}
+.is-detail .trouble-step:first-child{padding:20px;margin-bottom:8px;border:1px solid #e1e9f1;border-left:3px solid #55759c;border-radius:12px;background:#f5f8fb}
+.is-detail .trouble-step:last-child{border-bottom:0}
+.trouble-step h2{display:flex;align-items:center;gap:10px;font-size:17px;line-height:1.65;color:#243f66;margin:0 0 14px}
 .trouble-step-number{display:grid;place-items:center;flex:none;width:29px;height:29px;background:#e5f1ff;color:#176ab3;border-radius:50%;font-size:14px}
-.trouble-step ul{padding-left:22px;margin:0;font-size:14px}
+.trouble-step ul{padding-left:22px;margin:0;font-size:15px;line-height:1.9}
 .trouble-step li+li{margin-top:9px}
 .trouble-step p{font-size:14px;margin-bottom:10px}
 .trouble-property-guide{border-top:1px solid var(--line)}

@@ -1,5 +1,8 @@
 // Classification depends on section keys, independently of the body format.
 // Keep all existing section URLs and labels supplied by sections_master.
+export function sectionTitle(key, section) {
+  return key === 'bike_parking' ? 'バイク置き場' : section.label;
+}
 export const guideGroups = Object.freeze({
   intro: ['moving', 'key', 'mailbox', 'electricity', 'gas', 'water', 'internet', 'special_note'],
   equipment: ['key', 'mailbox', 'delivery_box', 'room_equipment', 'internet', 'electricity', 'gas', 'water', 'heater', 'air_conditioner', 'toilet', 'drainage', 'ventilation'],

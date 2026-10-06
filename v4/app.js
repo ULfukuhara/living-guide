@@ -1,6 +1,6 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261001-4';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261006-5';
 import { guideGroups, groupTitles, sectionGroup } from './navigation.js';
-import { renderBody } from './body.js?v=20261005-1';
+import { renderBody } from './body.js?v=20261006-9';
 import { BRAND } from './config.js';
 import { mountHome, initHeader } from './home.js?v=20261001-1';
 import { SECTION_KEYS } from './content.js';
@@ -126,7 +126,9 @@ function render() {
   const requested = location.hash.slice(1) || 'home';
   const sectionKey = requested.startsWith('section/') ? requested.slice(8) : '';
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
-  const routeTitle = guide.sections[sectionKey]?.label || routes[route] || 'ご案内';
+  const routeTitle = sectionKey === 'key' && guide.sections.key
+    ? '鍵の管理・紛失時の対応'
+    : guide.sections[sectionKey]?.label || routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
   document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
   document.body.classList.toggle('is-detail', route === 'trouble' || troubleRoutes.has(route) || Object.hasOwn(guideGroups, route) || (sectionKey && Object.values(guideGroups).some(keys => keys.includes(sectionKey))));
@@ -148,7 +150,7 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route.startsWith('section/')) {
-      main.append(renderBody(guide.sections[sectionKey], undefined, { deliveryLayout: sectionKey === 'delivery_box' }), helpBanner());
+      main.append(renderBody(guide.sections[sectionKey], undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: ['moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment'].includes(sectionKey) }), helpBanner());
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {
@@ -197,7 +199,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261005-1');
+  const { loadGuide } = await import('./data.js?v=20261006-2');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', () => { render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });
@@ -211,4 +213,3 @@ try {
   const retry = element('button', 'button', '再読み込み'); retry.type = 'button'; retry.addEventListener('click', () => location.reload());
   main.append(message, retry);
 }
-

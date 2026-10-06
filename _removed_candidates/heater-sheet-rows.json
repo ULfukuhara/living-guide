@@ -1,0 +1,44 @@
+[
+  {
+    "block_id": "heater_casa_11300_001",
+    "section_key": "heater",
+    "variant_key": "casa_11300",
+    "block_order": 10,
+    "block_type": "heading",
+    "content": "石油ストーブ・石油暖房は使用できません",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "heater_casa_11300_002",
+    "section_key": "heater",
+    "variant_key": "casa_11300",
+    "block_order": 20,
+    "block_type": "notice",
+    "content": "火災の原因となるおそれがあるため、当マンションでは石油ストーブおよび石油を使用する暖房器具の使用を禁止しています。",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "warning",
+    "enabled": true
+  },
+  {
+    "block_id": "heater_casa_11300_003",
+    "section_key": "heater",
+    "variant_key": "casa_11300",
+    "block_order": 30,
+    "block_type": "button",
+    "content": "",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "くらさぽコネクトで問い合わせる",
+    "action_url": "https://guide.univ-life.com/kurasapo/?propertyNo=11300",
+    "style_key": "default",
+    "enabled": true
+  }
+]

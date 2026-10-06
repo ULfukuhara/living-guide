@@ -66,7 +66,21 @@ export function renderBody(section, title, options = {}) {
     return panel;
   }
   if (section.blocks?.length) {
-    for (const block of section.blocks) {
+    const movingLayout = ['moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment'].includes(section.key);
+    if (movingLayout) panel.classList.add('moving-guide');
+    let movingCard;
+    for (const [index, block] of section.blocks.entries()) {
+      if (movingLayout && options.hideContactAction && block.type === 'button' && block.actionUrl) {
+        const url = new URL(block.actionUrl);
+        if (url.origin === 'https://guide.univ-life.com' && url.pathname === '/kurasapo/') continue;
+      }
+      if (movingLayout && block.type === 'heading' && block.level !== 3) {
+        movingCard = undefined;
+        if (section.blocks[index + 1]?.type !== 'heading') {
+          movingCard = element('section', 'moving-guide-item');
+          panel.append(movingCard);
+        }
+      }
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
       if (block.type === 'text') appendText(wrapper, block.content);
       if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
@@ -81,7 +95,10 @@ export function renderBody(section, title, options = {}) {
         actions.append(webLink(block.actionLabel, block.actionUrl, block.type === 'button' && block.style === 'default' ? 'button secondary' : 'button'));
         wrapper.append(actions);
       }
-      panel.append(wrapper);
+      if (movingLayout && block.type === 'button') {
+        panel.append(wrapper);
+        movingCard = undefined;
+      } else (movingCard || panel).append(wrapper);
     }
     return panel;
   }

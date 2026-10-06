@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>くらさぽコネクト 本文案｜Casaネッビア</title><link rel="stylesheet" href="/v4/style.css"><style>body{padding:24px 16px}main{max-width:760px;margin:auto}.draft-note{padding:16px;background:#fff4dc;border-radius:12px}</style></head><body><main id="main"><a href="/v4/?propertyNo=11300#section/kurasapo_connect">← 現在の案内</a><h1>くらさぽコネクト</h1><p class="draft-note">Casaネッビア専用の本文案です。シート302〜310行に下書きを登録しています。公開表示は変更していません。</p></main><script type="module">
+import {normalizeBlocks} from '/v4/content.js';
+import {renderBody} from '/v4/body.js';
+const rows=await (await fetch('./kurasapo-connect-sheet-rows.json')).json();
+const blocks=normalizeBlocks(rows.map(row=>({id:row.block_id,data:{...row,enabled:true}})));
+document.querySelector('#main').append(renderBody({label:'くらさぽコネクト',blocks,hidePanelTitle:true}));
+</script></body></html>

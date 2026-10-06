@@ -50,7 +50,15 @@ function mountChecks(main, guide, { element: el, renderBody }, checks, sectionKe
         step.append(el('p', 'muted', 'この物件で公開されている案内もご確認ください。'));
         for (const key of sections) {
           const details = el('details', 'trouble-property-guide');
-          details.append(el('summary', '', guide.sections[key].label), renderBody(guide.sections[key]));
+          const section = guide.sections[key];
+          const body = String(guide.propertyNo) === '11300' && section.blocks?.length
+            ? { ...section, blocks: section.blocks.filter(block => {
+                if (block.type !== 'button' || !block.actionUrl) return true;
+                const url = new URL(block.actionUrl);
+                return url.origin !== 'https://guide.univ-life.com' || url.pathname !== '/kurasapo/';
+              }) }
+            : section;
+          details.append(el('summary', '', section.label), renderBody(body));
           step.append(details);
         }
       } else {
@@ -62,20 +70,23 @@ function mountChecks(main, guide, { element: el, renderBody }, checks, sectionKe
   main.append(steps);
 }
 
-function mountContact(main, { element: el, link }, message) {
+function mountContact(main, { element: el, link }, message, action) {
   const help = el('section', 'panel trouble-help');
   help.append(el('h2', '', '改善しない場合'), el('p', '', message));
-  help.append(link('くらさぽコネクトの案内を見る', guideHref('/kurasapo/'), 'button'));
+  help.append(link(action?.actionLabel || 'くらさぽコネクトの案内を見る', action?.actionUrl || guideHref('/kurasapo/'), 'button'));
   main.append(help);
 }
 
 export function mountNoHotWater(main, guide, helpers) {
   const { element: el } = helpers;
+  const isCasa = String(guide.propertyNo) === '11300';
   main.append(el('p', 'trouble-intro', 'まず以下の内容をご確認ください。'));
   main.append(el('p', 'trouble-safety', 'ガスのにおいがする場合は、点火や電気のスイッチ操作をせず、ご契約のガス会社の緊急窓口へご連絡ください。'));
   mountChecks(main, guide, helpers, [
     ['給湯器リモコン', ['電源が入っているか確認してください。', 'エラー番号が表示されている場合は、番号を控えてください。']],
-    ['ガスコンロ', ['ガスのにおいがしないことを確認してから、ガスコンロが点火するか確認してください。', 'ガスコンロがない場合は、次の確認へ進んでください。']],
+    isCasa
+      ? ['IHコンロと給湯のガス', ['この物件はIHコンロですが、給湯にはガスを使用しています。', 'IHコンロが使えても、給湯のガスが使えるとは限りません。次のガスメーターの確認へ進んでください。']]
+      : ['ガスコンロ', ['ガスのにおいがしないことを確認してから、ガスコンロが点火するか確認してください。', 'ガスコンロがない場合は、次の確認へ進んでください。']],
     ['ガスメーター', ['安全装置が作動していないか、表示を確認してください。', '復帰操作は、ご契約のガス会社の案内に従ってください。']],
     ['その他・この物件の給湯設備', []]
   ], ['gas'], 'この物件の給湯設備に関する追加の案内は、現在掲載されていません。設備の取扱説明書もご確認ください。');
@@ -170,10 +181,30 @@ export const otherTroubleGuides = {
 
 export function mountOtherTrouble(main, guide, helpers, route) {
   const { element: el } = helpers;
-  const info = otherTroubleGuides[route];
+  const baseInfo = otherTroubleGuides[route];
+  const info = route === 'other-trouble' && String(guide.propertyNo) === '11300'
+    ? { ...baseInfo,
+        checks: [...baseInfo.checks.slice(0, -1), ['この物件の設備・連絡方法の案内', []]],
+        sections: ['room_equipment', 'kurasapo_connect'],
+        missing: '設備や連絡方法に関する追加の案内は、現在掲載されていません。' }
+    : route === 'water-leak' && String(guide.propertyNo) === '11300'
+      ? { ...baseInfo, sections: ['drainage', 'toilet'] }
+      : route === 'internet-trouble' && String(guide.propertyNo) === '11300'
+        ? { ...baseInfo, checks: [
+            ['有線で接続する場合', ['LANケーブルがお部屋の情報コンセントと接続機器に接続されているか確認してください。']],
+            ['Wi-Fiで接続する場合', ['この物件にはWi-Fiルーターが設置されていません。ご自身で用意したルーターの接続とランプ表示を確認してください。', '端末のWi-Fi設定と、ご自身のルーターのネットワーク名を確認してください。']],
+            ['接続できても利用できない', ['ほかの端末でも同じ症状か確認してください。', 'いつから利用できないか、表示されるエラーがあれば控えてください。']],
+            ['この物件の無料インターネット（0net）案内', []]
+          ] }
+      : baseInfo;
   if (!info) return;
   main.append(el('p', 'trouble-intro', 'まず以下の内容をご確認ください。'));
   main.append(el('p', 'trouble-safety', info.note));
   mountChecks(main, guide, helpers, info.checks, info.sections, info.missing);
-  mountContact(main, helpers, info.contact);
+  const providerContact = route === 'internet-trouble' && String(guide.propertyNo) === '11300'
+    ? guide.sections.internet?.blocks?.find(block => block.type === 'button' && block.actionUrl?.startsWith('tel:'))
+    : undefined;
+  mountContact(main, helpers, providerContact
+    ? '接続状況と確認した内容を控えて、物件のインターネット案内に記載されたサービス提供会社へお問い合わせください。'
+    : info.contact, providerContact);
 }

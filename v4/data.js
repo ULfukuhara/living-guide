@@ -34,7 +34,7 @@ export async function loadGuide(search) {
   if (results[0].status === 'rejected' || results.slice(1, 4).every(result => result.status === 'rejected')) {
     throw new Error('案内を読み込めませんでした。通信状況をご確認のうえ、再読み込みしてください。');
   }
-  const masters = Object.fromEntries(records(results[0].value).filter(item => SECTION_KEYS.includes(item.id)).map(item => [item.id, item.data]));
+  const masters = Object.fromEntries(records(results[0].value).filter(item => (SECTION_KEYS.includes(item.id) || (String(propertyNo) === '11300' && item.id === 'plumbing'))).map(item => [item.id, item.data]));
   const contents = flattenGuides(...results.slice(1, 3).map(result => result.status === 'fulfilled' ? records(result.value) : []));
   const styles = normalizeBlockStyles(results[4].status === 'fulfilled' ? records(results[4].value) : []);
   const blocks = normalizeBlocks(results[3].status === 'fulfilled' ? records(results[3].value) : [], styles);
@@ -46,5 +46,5 @@ export async function loadGuide(search) {
     address: String(property.address || property['住所'] || ''),
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: applyPropertyContent(propertyNo, selectSections(property, masters, contents, blocks)), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
+    sections: applyPropertyContent(propertyNo, selectSections(String(propertyNo) === '11300' ? { ...property, drainage: property.water_area } : property, String(propertyNo) === '11300' ? { ...masters, heater: masters.heater || { label_ja: '暖房器具' }, drainage: masters.plumbing || { label_ja: '水まわり全般' } } : masters, contents, blocks)), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
 }

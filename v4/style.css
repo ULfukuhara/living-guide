@@ -27,3 +27,12 @@ main.container{padding-top:32px}.intro{background:#eef5ee;border:1px solid #e0ea
 :root .content-block-notice.block-style-warning{background:#fff7e7;border-color:#d9ad55}
 :root .content-block-notice .body-text:last-child{margin-bottom:0}
 .delivery-heading{margin-top:28px;margin-bottom:12px}.delivery-heading:first-child{margin-top:0}
+#currentGuide { display: none; }
+.moving-guide{background:transparent;border:0;padding:0;box-shadow:none}
+.moving-guide-item{padding:26px 4px;margin:0;border:0;border-bottom:1px solid #e9edf1;border-radius:0;background:transparent}
+.moving-guide-item:first-of-type{padding:20px;margin-bottom:8px;border:1px solid #e1e9f1;border-left:3px solid #55759c;border-radius:12px;background:#f5f8fb}
+.moving-guide-item:last-of-type{border-bottom:0}
+.moving-guide-item .content-block-heading h2,.moving-guide-item .content-block-heading h3{margin:0 0 14px;font-size:17px;line-height:1.65;color:#243f66}
+.moving-guide-item .content-block{margin:0}
+.moving-guide-item .body-text{margin:0;line-height:1.9;color:#3c4653;font-size:15px}
+.moving-guide-item .body-text+.body-text{margin-top:12px}

@@ -1,8 +1,8 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261006-5';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261007-night-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261006-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261006-11';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261007-night-1';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261006-1';
+import { mountHome, initHeader } from './home.js?v=20261007-night-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -73,6 +73,8 @@ Object.assign(icons, {
   electricity: '<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
   air: '<rect x="2" y="3" width="20" height="10" rx="2"/><path d="M5 10h14M7 16v4m5-4v6m5-6v4"/>',
   key: '<circle cx="8" cy="8" r="5"/><path d="m12 12 9 9m-5-5 3-3m-1 5 3-3"/>',
+  mailbox: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>',
+  equipment: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0L21.5 5.5a6 6 0 0 1-7.9 7.9l-7.8 7.8a2.1 2.1 0 0 1-3-3l7.8-7.8a6 6 0 0 1 7.9-7.9Z"/>',
   moving: '<path d="M3 10V3h12v18H3v-6m7-3h12m-4-4 4 4-4 4"/>'
 });
 function sectionCard(item, compact = false) {
@@ -115,7 +117,8 @@ function renderGuideList(route) {
   for (const key of guideGroups[route]) {
     const section = guide.sections[key];
     if (!section) continue;
-    const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', 'rules'];
+    const fallbackSymbol = { key: 'key', mailbox: 'mailbox', room_equipment: 'equipment', moving: 'moving', heater: 'heater', toilet: 'water', drainage: 'water', ventilation: 'air', expenses: 'procedures', kurasapo_connect: 'kurasapo' }[key] || 'rules';
+    const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', fallbackSymbol];
     const title = sectionTitle(key, section);
     const row = link('', '#section/' + key, 'trouble-item');
     const pictogram = element('span', 'icon ' + (color || ''));

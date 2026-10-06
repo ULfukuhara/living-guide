@@ -1,0 +1,23 @@
+{
+  "status": "draft_only_pending_morning_approval",
+  "sheet": "content_blocks",
+  "propertyNo": "11300",
+  "source": "https://www.0net-internet-service.com/home/howtouse",
+  "changes": [
+    {
+      "block_id": "internet_casa_11300_011",
+      "field": "action_url",
+      "before": "https://0net-internet-service.com/home/howtouse",
+      "after": "https://www.0net-internet-service.com/home/howtouse",
+      "reason": "現在のURLは証明書エラー。www付きの公式URLはブラウザで表示を確認。"
+    },
+    {
+      "block_id": "internet_casa_11300_006",
+      "field": "content",
+      "before": "無線LANルーターは、入居者様ご自身でご用意ください。\n市販の一般的な無線LANルーターをご利用いただけます。",
+      "after": "無線LANルーターは、入居者様ご自身でご用意ください。\n市販の一般的な無線LANルーターをご利用いただけます。\nルーターの動作モードは、アクセスポイント（AP）またはブリッジ（BR）に設定してください。設定方法は、メーカーの案内をご確認ください。",
+      "reason": "0net公式の利用案内で必要とされている動作モードを補足。"
+    }
+  ],
+  "apply_policy": "承認後、最新の行をblock_idで特定し対象フィールドだけを更新する。enabled・variant_key・その他フィールドを上書きしない。Firestoreも最新値と比較し対象フィールドのみ更新。"
+}

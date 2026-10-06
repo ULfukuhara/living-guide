@@ -58,7 +58,20 @@ function mountChecks(main, guide, { element: el, renderBody }, checks, sectionKe
                 return url.origin !== 'https://guide.univ-life.com' || url.pathname !== '/kurasapo/';
               }) }
             : section;
-          details.append(el('summary', '', section.label), renderBody(body));
+          const panel = renderBody(body);
+          // The page already has one contact action below the checks. Remove
+          // standalone duplicate links, while preserving contextual sentences.
+          for (const paragraph of panel.querySelectorAll('.body-text')) {
+            const anchors = paragraph.querySelectorAll('a');
+            if (anchors.length !== 1 || paragraph.textContent.trim() !== anchors[0].textContent.trim()) continue;
+            const url = new URL(anchors[0].href);
+            if (url.origin === 'https://guide.univ-life.com' && url.pathname === '/kurasapo/') {
+              const wrapper = paragraph.parentElement;
+              paragraph.remove();
+              if (wrapper.classList.contains('content-block') && !wrapper.childElementCount && !wrapper.textContent.trim()) wrapper.remove();
+            }
+          }
+          details.append(el('summary', '', section.label), panel);
           step.append(details);
         }
       } else {

@@ -1,0 +1,52 @@
+/* Shared V4 palette, loaded after the screen-specific styles. */
+body.is-home,body.is-detail,body.is-trouble{
+  --navy:#243f66;--home-navy:#243f66;--muted:#607184;--line:#e1e9f1;
+  background:#f0f5f8;color:#3c4653;
+  font-family:"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+}
+.is-home h1,.is-home h2,.is-detail h1,.is-detail h2{color:var(--navy)}
+.is-home .home-header,.is-detail .home-header{max-width:460px;margin-inline:auto;background:#fff}
+.is-home .home-header .brand img,.is-detail .home-header .brand img{width:175px;height:40px;object-fit:contain}
+.is-home #homeMenuButton,.is-detail #homeMenuButton{color:#355b7e}
+.is-home .v4-menu{background:#f5f8fb}
+.is-home .orange{--accent:#b57939}
+.is-home .blue{--accent:#477a9a}
+.is-home .green{--accent:#548365}
+.is-home .pink{--accent:#a76e81}
+.is-home .purple{--accent:#83729e}
+.is-home .red{--accent:#ad6975}
+.is-home .v4-menu small,.is-home .v4-property p,.is-home .kurasapo-cta small,
+.is-detail .trouble-intro,.is-detail .trouble-item small,.is-detail .support-banner p{color:var(--muted)}
+.is-home .home-search,.is-home .v4-detail{border-color:var(--line)}
+.is-detail .trouble-item{background:#f5f8fb;border-color:var(--line);color:var(--navy)}
+.is-detail .trouble-item:hover{background:#edf3f8;border-color:#b7cbdc}
+.is-trouble .trouble-item:first-child{background:#f5f8fb;border-color:var(--line)}
+.is-detail .trouble-arrow,.is-home .v4-chevron{color:#607e99}
+.is-home .kurasapo-cta,.is-detail .support-banner,.is-detail .trouble-help{
+  background:#f5f8fb;border:1px solid var(--line);border-radius:12px;color:var(--navy);
+}
+.is-detail .trouble-help p{color:#3c4653}
+.is-detail .button{background:var(--navy);color:#fff}
+.is-detail .button.secondary{background:#eaf0f6;color:var(--navy)}
+.is-detail #bottomNav a{color:var(--muted)}
+.is-detail #bottomNav [aria-current=page]{color:var(--navy);background:#edf3f8}
+.is-home .footer,.is-detail .footer{color:var(--muted)}
+/* Safety notices retain their warm color so they stand out from guidance. */
+
+/* Shared sizing and interaction cues for guide lists and articles. */
+.is-detail .home-header-inner{min-height:56px;padding-block:5px}
+.is-home #homeMenuButton,.is-detail #homeMenuButton{min-width:44px;min-height:44px}
+.is-detail #homeMenuButton{font-size:0;display:grid;place-items:center}
+.is-detail #homeMenuButton:before{content:'';width:19px;height:15px;background:linear-gradient(currentColor,currentColor) top/100% 2px no-repeat,linear-gradient(currentColor,currentColor) center/100% 2px no-repeat,linear-gradient(currentColor,currentColor) bottom/100% 2px no-repeat}
+.is-detail h1{font-size:24px;line-height:1.5;overflow-wrap:anywhere}
+.is-detail .trouble-item .icon{background:#eaf0f6;color:#477a9a;border-radius:12px}
+.is-detail .trouble-item .icon.orange{background:#f8efe4;color:#95642f}
+.is-detail .trouble-item .icon.green{background:#edf3ed;color:#548365}
+.is-detail .trouble-item .icon.purple{background:#f1edf6;color:#83729e}
+.is-detail .trouble-step-number{background:#eaf0f6;color:var(--navy)}
+.is-detail .trouble-property-guide summary{color:var(--navy)}
+.is-detail .button,.is-detail .body-text a{overflow-wrap:anywhere;max-width:100%}
+.is-home .home-search:focus-within{border-color:#55759c;box-shadow:0 0 0 2px #55759c20}
+.is-home .home-search input{font-size:16px}
+.is-home .home-results a{min-height:44px;display:flex;align-items:center}
+.is-home .home-search-status:empty{display:none}

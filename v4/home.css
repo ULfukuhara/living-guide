@@ -94,3 +94,19 @@ body.is-home{--home-navy:#183651;background:#f3f6f8;color:var(--home-navy)}
 .is-home .v4-menu.red{--accent:#b45148}
 .is-home .v4-property:before{opacity:.56}
 .is-home .v4-property:after{background:linear-gradient(90deg,#ffffffe0 0%,#ffffffb8 42%,#ffffff24 78%,#ffffff08 100%),linear-gradient(180deg,#ffffff00 0%,#ffffff18 55%,#fff 100%)}
+
+/* Keep menu labels aligned and readable on narrow phones. */
+.is-home .quick-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.is-home .v4-menu{justify-content:flex-start;min-height:104px;padding:9px 8px;border-radius:12px}
+.is-home .v4-icon{width:32px;height:32px;flex:none}
+.is-home .v4-menu strong{font-size:15px;line-height:1.5;letter-spacing:0;margin-top:8px;text-align:center}
+.is-home .v4-menu small{font-size:12px;line-height:1.5;margin-top:4px;padding:0;text-align:center}
+.is-home .popular-info{padding-top:18px}
+.is-home .kurasapo-cta{margin-top:14px}
+
+/* Reduce vertical space without reducing label sizes or touch targets. */
+.is-home .home-header-inner{min-height:56px;padding-block:5px}
+.is-home .v4-property{min-height:74px;padding-top:12px;padding-bottom:10px}
+.is-home .home-search{min-height:58px;padding-block:5px;margin-top:6px;margin-bottom:10px}
+.is-home .v4-photo{background-image:none;background-color:#edf2f6}
+.is-home .v4-photo.photo-ready{background-image:url('./home-scenes.png')}

@@ -40,7 +40,7 @@ function appendText(parent, text) {
 
 function image(src, alt) {
   const img = element('img');
-  img.src = src; img.alt = alt; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+  img.src = src; img.alt = alt; img.loading = 'lazy'; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
   img.addEventListener('error', () => img.replaceWith(element('p', 'muted', '案内画像を読み込めませんでした。')));
   return img;
 }

@@ -1,0 +1,72 @@
+[
+  {
+    "block_id": "management_other_casa_11300_001",
+    "section_key": "management_other",
+    "variant_key": "casa_11300",
+    "block_order": 10,
+    "block_type": "heading",
+    "content": "ご入居後の感想をお聞かせください",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "management_other_casa_11300_002",
+    "section_key": "management_other",
+    "variant_key": "casa_11300",
+    "block_order": 20,
+    "block_type": "text",
+    "content": "より分かりやすく、安心してお住まいいただけるよう、管理体制やご案内内容の改善に取り組んでいます。\nご入居後の率直なご感想をお聞かせいただくため、簡単なアンケートを実施しています。",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "management_other_casa_11300_003",
+    "section_key": "management_other",
+    "variant_key": "casa_11300",
+    "block_order": 30,
+    "block_type": "heading",
+    "content": "回答は任意です（所要時間：約1分）",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "management_other_casa_11300_004",
+    "section_key": "management_other",
+    "variant_key": "casa_11300",
+    "block_order": 40,
+    "block_type": "text",
+    "content": "アンケートは任意でご回答いただけます。\nいただいたご意見は、今後のサービス向上に活用します。",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "management_other_casa_11300_005",
+    "section_key": "management_other",
+    "variant_key": "casa_11300",
+    "block_order": 50,
+    "block_type": "button",
+    "content": "",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "入居後アンケートに回答する",
+    "action_url": "https://guide.univ-life.com/survey.html?propertyNo=11300&source=shiori_public",
+    "style_key": "default",
+    "enabled": true
+  }
+]

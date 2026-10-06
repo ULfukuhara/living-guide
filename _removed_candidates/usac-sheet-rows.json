@@ -1,0 +1,44 @@
+[
+  {
+    "block_id": "usac_casa_11300_001",
+    "section_key": "usac",
+    "variant_key": "casa_11300",
+    "block_order": 10,
+    "block_type": "heading",
+    "content": "生活サポートサービス（USAC）のご案内",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "usac_casa_11300_002",
+    "section_key": "usac",
+    "variant_key": "casa_11300",
+    "block_order": 20,
+    "block_type": "text",
+    "content": "サービス内容やお申込み方法は、下記のパンフレットをご確認ください。",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "",
+    "action_url": "",
+    "style_key": "default",
+    "enabled": true
+  },
+  {
+    "block_id": "usac_casa_11300_003",
+    "section_key": "usac",
+    "variant_key": "casa_11300",
+    "block_order": 30,
+    "block_type": "button",
+    "content": "",
+    "image_url": "",
+    "alt_text": "",
+    "action_label": "USAC ご案内パンフレットを見る（PDF）",
+    "action_url": "https://assets.univ-life.com/USAC-guide.pdf",
+    "style_key": "default",
+    "enabled": true
+  }
+]

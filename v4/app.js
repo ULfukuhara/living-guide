@@ -1,8 +1,8 @@
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261007-night-1';
-import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261006-1';
+import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261007-procedures-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261007-night-1';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261007-night-1';
+import { mountHome, initHeader } from './home.js?v=20261007-procedures-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -10,7 +10,7 @@ const main = document.querySelector('#main');
 let guide;
 const routes = {
   home: 'ホーム', ...groupTitles, property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない', 'toilet-trouble': 'トイレのトラブル', 'air-conditioner-trouble': 'エアコンが効かない',
-  trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '各種手続き', rules: '暮らしのルール', faq: 'よくある質問',
+  trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '手続き・サポート', rules: '暮らしのルール', faq: 'よくある質問',
   ...Object.fromEntries(troubleItems.map(({ route, title }) => [route, title]))
 };
 const troubleRoutes = new Set(troubleItems.map(item => item.route));
@@ -51,7 +51,7 @@ const categories = [
   ['electricity', '電気', '電気・ブレーカーの確認', 'electricity', 'orange'],
   ['air_conditioner', 'エアコン', '使い方・お手入れ', 'air'],
   ['common_area', '共用部分', 'みんなで使う場所のルール', 'home', 'green'],
-  ['noise', '生活マナー', '音への配慮・快適な暮らし', 'rules', 'purple'],
+  ['noise', '生活マナー', '音への配慮・快適な暮らし', 'sound', 'purple'],
   ['cancellation', '退去・解約', 'お引越し前の確認事項', 'moving', 'purple'],
   ['management_other', '各種手続き', 'ご案内を確認する', 'procedures']
 ];
@@ -76,6 +76,18 @@ Object.assign(icons, {
   mailbox: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>',
   equipment: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0L21.5 5.5a6 6 0 0 1-7.9 7.9l-7.8 7.8a2.1 2.1 0 0 1-3-3l7.8-7.8a6 6 0 0 1 7.9-7.9Z"/>',
   moving: '<path d="M3 10V3h12v18H3v-6m7-3h12m-4-4 4 4-4 4"/>'
+});
+icons.support = '<path d="m12 2 8 3v6c0 5-4 8-8 11-4-3-8-6-8-11V5z"/><path d="m8 12 3 3 5-6"/>';
+Object.assign(icons, {
+  sound: '<path d="M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+  paw: '<ellipse cx="6" cy="8" rx="2" ry="3"/><ellipse cx="11" cy="5" rx="2" ry="3"/><ellipse cx="17" cy="7" rx="2" ry="3"/><ellipse cx="21" cy="12" rx="1.5" ry="2.5"/><path d="M5 18c0-3 3-7 6-7s7 4 7 7c0 4-4 2-6 2s-7 2-7-2Z"/>',
+  motorcycle: '<circle cx="5" cy="17" r="4"/><circle cx="19" cy="17" r="4"/><path d="M5 17h7l4-8 3 8M13 5h3l2 4M4 10h7l3 3M3 7h5"/>',
+  car: '<path d="m3 11 3-7h12l3 7v9h-3v-3H6v3H3zM3 11h18M7 14h1m8 0h1"/>',
+  visitor: '<path d="M3 21V3h10v18M1 21h14M9 12h1"/><circle cx="19" cy="9" r="3"/><path d="M15 21v-4a4 4 0 0 1 8 0v4"/>',
+  toilet: '<path d="M4 3h8v8H4zM4 7h3M3 11h18v2a6 6 0 0 1-6 6h-3l-1 3H7l1-6a7 7 0 0 1-5-5Z"/>',
+  faucet: '<path d="M3 13v-3h14a4 4 0 0 1 4 4v2h-5v-2H3M9 10V5m-4 0h8M19 19v2"/>',
+  fan: '<rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="12" cy="12" r="2"/><path d="M12 10C6 3 5 10 10 12m4 0c7-6 0-7-2-2m0 4c6 7 7 0 2-2m-4 0c-7 6 0 7 2 2"/>',
+  radiator: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 8v8m5-8v8m5-8v8M6 19v3m12-3v3"/>'
 });
 function sectionCard(item, compact = false) {
   const [key, title, description, symbol, color] = item;
@@ -109,7 +121,7 @@ function renderGuideList(route) {
     equipment: 'お部屋や設備の案内をお選びください。',
     trash: 'ゴミの出し方や収集日の案内をご確認ください。',
     rules: '暮らしのルールをお選びください。',
-    procedures: '手続きの案内をお選びください。'
+    procedures: '解約・費用・お問い合わせなどの案内です。'
   };
   main.append(element('p', 'trouble-intro', descriptions[route]));
   const list = element('nav', 'trouble-list');
@@ -117,7 +129,7 @@ function renderGuideList(route) {
   for (const key of guideGroups[route]) {
     const section = guide.sections[key];
     if (!section) continue;
-    const fallbackSymbol = { key: 'key', mailbox: 'mailbox', room_equipment: 'equipment', moving: 'moving', heater: 'heater', toilet: 'water', drainage: 'water', ventilation: 'air', expenses: 'procedures', kurasapo_connect: 'kurasapo' }[key] || 'rules';
+    const fallbackSymbol = { key: 'key', mailbox: 'mailbox', room_equipment: 'equipment', moving: 'moving', heater: 'radiator', toilet: 'toilet', drainage: 'faucet', ventilation: 'fan', pets: 'paw', bike_parking: 'motorcycle', car_parking: 'car', sales: 'visitor', expenses: 'procedures', kurasapo_connect: 'kurasapo', usac: 'support' }[key] || 'rules';
     const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', fallbackSymbol];
     const title = sectionTitle(key, section);
     const row = link('', '#section/' + key, 'trouble-item');

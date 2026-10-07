@@ -1,8 +1,12 @@
-import { groupedSections, sectionTitle } from './navigation.js?v=20261006-1';
+import { groupedSections, sectionTitle } from './navigation.js?v=20261007-procedures-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}
-const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','各種手続き','解約・費用の案内','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
+const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','手続き・サポート','解約・費用・相談','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
 const shapes={"home":"<path d=\"m3 10 9-7 9 7v11h-6v-7H9v7H3z\"/>","equipment":"<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0L21.5 5.5a6 6 0 0 1-7.9 7.9l-7.8 7.8a2.1 2.1 0 0 1-3-3l7.8-7.8a6 6 0 0 1 7.9-7.9Z\"/>","trash":"<path d=\"M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7\"/>","rules":"<path d=\"M12 5v16M3 3h5l4 2 4-2h5v16h-5l-4 2-4-2H3z\"/>","procedures":"<path d=\"M5 3h10l4 4v14H5zM14 3v5h5M9 12h6m-6 4h6\"/>","trouble":"<path d=\"M10.3 4a2 2 0 0 1 3.4 0l8 14a2 2 0 0 1-1.7 3H4a2 2 0 0 1-1.7-3zM12 9v5\"/><circle cx=\"12\" cy=\"17.5\" r=\".7\" fill=\"currentColor\" stroke=\"none\"/>"};
+Object.assign(shapes,{
+ equipment:'<path d="m2 10 8-7 8 7M4 9v12h6v-7"/><circle cx="17" cy="17" r="3"/><path d="M17 12v2m0 6v2m-5-5h2m6 0h2m-8.5-3.5 1.4 1.4m4.2 4.2 1.4 1.4m-7 0 1.4-1.4m4.2-4.2 1.4-1.4"/>',
+ trouble:'<path d="M21 11a9 9 0 0 1-9 9H3l1-5A9 9 0 1 1 21 11Z"/><path d="M9 8a3 3 0 0 1 6 0c0 2-3 2-3 4"/><circle cx="12" cy="16" r=".7" fill="currentColor" stroke="none"/>'
+});
 export function mountHome(main,guide,{element:el,link,icon}){
  const home=el('div','home-screen');
  const modal=(title,build)=>{const d=el('dialog','room-dialog v4-dialog');d.setAttribute('aria-label',title);const c=el('button','room-close','閉じる ×');c.type='button';c.onclick=()=>d.close();d.append(c,el('h2','',title));build(d);d.addEventListener('close',()=>d.remove(),{once:true});d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});document.body.append(d);d.showModal();};

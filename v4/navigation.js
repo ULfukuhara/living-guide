@@ -13,7 +13,7 @@ export const guideGroups = Object.freeze({
 
 export const groupTitles = Object.freeze({
   intro: 'はじめに', equipment: 'お部屋・設備', trash: 'ゴミの出し方',
-  rules: '暮らしのルール', procedures: '各種手続き'
+  rules: '暮らしのルール', procedures: '手続き・サポート'
 });
 
 // Shared topics may appear in multiple menus; this determines their back link

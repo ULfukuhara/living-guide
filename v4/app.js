@@ -144,7 +144,7 @@ function render() {
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
   document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
-  document.body.classList.toggle('is-detail', route === 'trouble' || troubleRoutes.has(route) || Object.hasOwn(guideGroups, route) || (sectionKey && Object.values(guideGroups).some(keys => keys.includes(sectionKey))));
+  document.body.classList.toggle('is-detail', route === 'kurasapo' || route === 'trouble' || troubleRoutes.has(route) || Object.hasOwn(guideGroups, route) || (sectionKey && Object.values(guideGroups).some(keys => keys.includes(sectionKey))));
   main.replaceChildren();
   if (guide.partial) main.append(element('p', 'notice', '一部の案内を取得できませんでした。再読み込みするか、現在の入居のしおりをご確認ください。'));
   if (guide.unpublished) {
@@ -180,11 +180,13 @@ function render() {
     } else if (Object.hasOwn(otherTroubleGuides, route)) {
       mountOtherTrouble(main, guide, { element, link, renderBody }, route);
     } else if (route === 'kurasapo') {
-      main.append(renderBody(guide.sections.kurasapo_connect, 'くらさぽコネクトのご案内'));
+      main.append(renderBody(guide.sections.kurasapo_connect, 'くらさぽコネクトのご案内', { hideContactAction: true }));
       if (guide.sections.kurasapo_connect) {
+        const banner = element('aside', 'support-banner');
+        banner.append(element('h2', '', '利用開始・ログインのご案内'), element('p', '', 'アプリの登録やログインについては、使い方・利用開始方法をご確認ください。'));
         const actions = element('div', 'actions');
-        const external = link('くらさぽコネクト公式サイトを開く ↗', KURASAPO_LINKS.official, 'button'); external.target = '_blank'; external.rel = 'noopener noreferrer';
-        actions.append(external, link('使い方・利用開始方法を見る', guideHref('/kurasapo/'), 'button secondary')); main.append(actions);
+        const external = link('くらさぽコネクト公式サイトを開く ↗', KURASAPO_LINKS.official, 'button secondary'); external.target = '_blank'; external.rel = 'noopener noreferrer';
+        actions.append(link('使い方・利用開始方法を見る', guideHref('/kurasapo/'), 'button'), external); banner.append(actions); main.append(banner);
       }
     } else {
       const panel = element('section', 'panel'); panel.append(element('p', '', 'この項目は、現在の入居のしおりでご確認いただけます。'), link('現在の入居のしおりへ →', guideHref('/'), 'button')); main.append(panel);
@@ -225,4 +227,6 @@ try {
     ? '案内の読み込みに失敗しました。通信状況をご確認のうえ、再度お試しください。' : error.message;
   const retry = element('button', 'button', '再読み込み'); retry.type = 'button'; retry.addEventListener('click', () => location.reload());
   main.append(message, retry);
+} finally {
+  document.body.classList.remove('is-loading');
 }

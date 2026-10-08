@@ -4,7 +4,7 @@ export function sectionTitle(key, section) {
   return key === 'bike_parking' ? 'バイク置き場' : section.label;
 }
 export const guideGroups = Object.freeze({
-  intro: ['moving', 'key', 'mailbox', 'electricity', 'gas', 'water', 'internet', 'special_note'],
+  intro: ['moving', 'electricity', 'gas', 'water', 'key', 'mailbox', 'internet', 'kurasapo_connect', 'special_note'],
   equipment: ['key', 'mailbox', 'delivery_box', 'room_equipment', 'internet', 'electricity', 'gas', 'water', 'heater', 'air_conditioner', 'toilet', 'drainage', 'ventilation'],
   trash: ['trash'],
   rules: ['common_area', 'noise', 'pets', 'bicycle_space', 'bike_parking', 'car_parking', 'sales', 'special_note'],

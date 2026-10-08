@@ -22,7 +22,19 @@ function webLink(label, href, className) {
   return a;
 }
 
-function appendText(parent, text) {
+function appendText(parent, text, options = {}) {
+  if (options.bulletLists && text.split(/\r?\n/).some(line => /^・/.test(line))) {
+    let list;
+    for (const line of text.split(/\r?\n/)) {
+      if (line.startsWith('・')) {
+        if (!list) { list = element('ul', 'procedure-examples'); parent.append(list); }
+        const item = element('li');
+        appendText(item, line.slice(1));
+        list.append(item);
+      } else { list = undefined; if (line.trim()) appendText(parent, line); }
+    }
+    return;
+  }
   // Source text is never interpreted as HTML.
   for (const paragraph of text.split(/\r?\n\s*\r?\n/)) {
     const p = element('p', 'body-text');
@@ -90,7 +102,7 @@ export function renderBody(section, title, options = {}) {
         }
       }
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
-      if (block.type === 'text') appendText(wrapper, block.content);
+      if (block.type === 'text') appendText(wrapper, block.content, { bulletLists: options.procedureExamples });
       if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);
       if (block.type === 'image') {

@@ -41,6 +41,44 @@ body.is-detail{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc;
 .trouble-help h2{font-size:19px}
 .trouble-help p{font-size:14px}
 .trouble-help .button{width:100%}
+.trouble-equipment-note{padding:12px 14px;background:#f5f8fb;border-radius:10px;font-size:14px;line-height:1.8}
+.trouble-symptoms .trouble-step summary{cursor:pointer;min-height:48px;padding:12px 0;font-size:17px;font-weight:700;color:#243f66;line-height:1.65}
+.is-detail .trouble-symptoms .trouble-step:first-child{padding:14px 4px;border:0;border-bottom:1px solid #e9edf1;border-radius:0;background:transparent}
+.trouble-symptoms .trouble-step{padding:14px 4px}
+.trouble-symptoms .trouble-step ul{margin:8px 0 16px}
+.trouble-guide-link{display:block;padding:10px 0;line-height:1.7;font-size:14px;overflow-wrap:anywhere}
+.trouble-close{display:block;margin:8px 0 14px;padding:10px 14px;min-height:44px;border:1px solid #dce4ed;border-radius:8px;background:#fff;color:#365575;font:inherit;font-size:13px;cursor:pointer}
+.procedure-group-title{font-size:16px;line-height:1.6;color:#365575;margin:24px 2px 2px}
+.procedure-group-title:first-child{margin-top:0}
+.procedure-index{display:grid;gap:0;margin:16px 0 24px;border-block:1px solid #e1e9f1}
+.procedure-jump{padding:12px 4px;min-height:44px;text-align:left;border:0;border-bottom:1px solid #e1e9f1;background:transparent;color:#365575;font:inherit;font-size:14px;line-height:1.7;cursor:pointer}
+.procedure-jump:last-child{border-bottom:0}
+.procedure-jump::after{content:' ↓'}
+.procedure-examples{padding-left:22px;line-height:1.9}
+.procedure-examples li+li{margin-top:10px}
+.procedure-examples .body-text{margin:0}
+.cancellation-flow{margin:20px 0 26px}
+.cancellation-flow>h2{font-size:19px;margin-bottom:18px;color:#243f66}
+.cancellation-flow-steps{list-style:none;padding:0;margin:0}
+.cancellation-flow-step{position:relative;display:flex;align-items:flex-start;gap:12px;padding:16px;background:#f5f8fb;border:1px solid #e1e9f1;border-radius:12px;margin-bottom:26px}
+.cancellation-flow-step:not(:last-child)::after{content:'↓';position:absolute;left:28px;bottom:-25px;color:#66809d;font-size:20px;line-height:24px}
+.cancellation-flow-number{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:#365575;color:white;font-size:14px;font-weight:700}
+.cancellation-flow-copy{flex:1;min-width:0}
+.cancellation-flow-copy h3,.cancellation-flow-parking h3{font-size:16px;color:#243f66;margin:0 0 6px;line-height:1.6}
+.cancellation-flow-copy p,.cancellation-flow-parking p{font-size:14px;line-height:1.85;margin:0}
+.cancellation-flow .button{width:100%;margin-top:12px;font-size:14px;white-space:normal;overflow-wrap:anywhere}
+.cancellation-flow-parking{padding:18px;border:1px solid #dce4ed;border-radius:12px;background:#fff}
+.cancellation-contents{margin:20px 0 28px;border-block:1px solid #e1e9f1}
+.cancellation-contents summary{padding:14px 4px;min-height:48px;cursor:pointer;font-size:14px;color:#365575;font-weight:700}
+.cancellation-contents .procedure-index{margin:0;border:0}
+.trouble-emergency{margin:22px 0;padding:20px 18px;background:#fff8ee;border:1px solid #e9d9bf;border-radius:12px}
+.trouble-emergency h2{font-size:18px;line-height:1.6;color:#5b472e;margin:0 0 10px}
+.trouble-emergency p{font-size:14px;line-height:1.85;margin:10px 0}
+.trouble-emergency .button{width:100%;margin:6px 0 12px;font-size:16px;white-space:normal}
+.trouble-contact-hours{margin:0;padding:0;font-size:13px;line-height:1.8}
+.trouble-contact-hours dt{font-weight:700;margin-top:9px}
+.trouble-contact-hours dd{margin:0;color:#536477}
+.trouble-step summary:focus-visible,.trouble-close:focus-visible{outline:2px solid #365575;outline-offset:3px}
 .is-detail .footer{width:100%;max-width:460px;background:#fff;padding:22px 20px 110px;margin:0 auto;color:#7384a6;font-size:10px}
 .is-detail #bottomNav{position:fixed;bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:460px;margin:0;border-radius:0;border:0;border-top:1px solid #e6f1fb;background:#fffffff7;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 .is-detail #bottomNav a{font-size:11px;color:#4a68b0}

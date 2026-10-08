@@ -1,8 +1,9 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261007-night-1';
-import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261007-procedures-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261007-night-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261008-contact-1';
+import { mountCancellationFlow } from './cancellation.js?v=20261008-flow-1';
+import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261007-intro-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261008-procedures-1';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261007-procedures-1';
+import { mountHome, initHeader } from './home.js?v=20261007-intro-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -106,37 +107,59 @@ function appendGrid(title, description, items, className) {
   if (!items.length) grid.append(element('p', 'status', 'この物件で公開されている案内はありません。'));
   section.append(grid); main.append(section);
 }
-function helpBanner() {
+function helpBanner(context) {
   const banner = element('aside', 'support-banner');
   const text = element('div');
-  text.append(element('h2', '', '解決しませんでしたか？'), element('p', '', '入居のしおりWebで解決しない場合は、くらさぽコネクトからお問い合わせください。'));
-  banner.append(text, link('くらさぽコネクトで問い合わせる →', guideHref('/kurasapo/'), 'button'));
+  const guidance = {
+    intro: ['入居時のご案内で不明な点がある場合', '入居時の準備や手続きについて分からないことがある場合は、くらさぽコネクトから管理会社へお問い合わせください。'],
+    equipment: ['設備について不明な点や不具合がある場合', '設備の使い方やお手入れで分からないこと、故障・不具合がある場合は、くらさぽコネクトから管理会社へお問い合わせください。'],
+    procedures: ['手続きで不明な点がある場合', '申請方法や費用について分からないことは、くらさぽコネクトから管理会社へご相談ください。'],
+    cancellation: ['解約・退去の手続きを確認したい場合', '申請先や手続きについて不明な点は、管理会社へご相談ください。通常のお問い合わせを送信するだけでは、解約申請が完了したとは限りません。'],
+    expenses: ['費用負担について確認したい場合', '原因や使用状況、契約条件によって判断が異なります。状況が分かる写真などを添えて、管理会社へご相談ください。'],
+    usac: ['USACの利用について不明な点がある場合', '加入状況や利用条件は、契約時の書類とパンフレットをご確認ください。分からないことは管理会社へお問い合わせください。'],
+    kurasapo_connect: ['利用開始・お問い合わせの方法', 'アプリの登録からお問い合わせまでの操作は、使い方の案内をご確認ください。']
+  }[context];
+  text.append(element('h2', '', guidance?.[0] || '解決しませんでしたか？'), element('p', '', guidance?.[1] || '入居のしおりWebで解決しない場合は、くらさぽコネクトからお問い合わせください。'));
+  banner.append(text, link(guidance ? 'くらさぽコネクトの使い方を見る →' : 'くらさぽコネクトで問い合わせる →', guideHref('/kurasapo/'), 'button'));
   return banner;
 }
 function renderHome() { mountHome(main, guide, { element, link, icon, card }); }
 
 function renderGuideList(route) {
   const descriptions = {
-    intro: '入居後にまず確認していただきたい案内です。',
-    equipment: 'お部屋や設備の案内をお選びください。',
+    intro: '入居直後の確認から、電気・ガス・水道、アプリの準備まで、順番にご確認ください。',
+    equipment: '設備の使い方・お手入れ・不具合時の案内をご確認ください。',
     trash: 'ゴミの出し方や収集日の案内をご確認ください。',
     rules: '暮らしのルールをお選びください。',
-    procedures: '解約・費用・お問い合わせなどの案内です。'
+    procedures: '解約・費用の確認、管理会社への連絡、サポートの案内です。'
   };
   main.append(element('p', 'trouble-intro', descriptions[route]));
   const list = element('nav', 'trouble-list');
   list.setAttribute('aria-label', routes[route] + 'の案内');
-  for (const key of guideGroups[route]) {
+  const procedureGroups = [
+    ['解約・費用', ['cancellation', 'expenses']],
+    ['連絡・サポート', ['kurasapo_connect', 'usac']],
+    [/アンケート/.test(guide.sections.management_other?.label || '') ? 'アンケート' : 'その他のご案内', ['management_other']]
+  ];
+  const keys = route === 'procedures' ? procedureGroups.flatMap(([, keys]) => keys) : guideGroups[route];
+  for (const key of keys) {
     const section = guide.sections[key];
     if (!section) continue;
+    if (route === 'procedures') {
+      const [groupLabel, groupKeys] = procedureGroups.find(([, keys]) => keys.includes(key));
+      if (groupKeys.find(key => guide.sections[key]) === key) list.append(element('h2', 'procedure-group-title', groupLabel));
+    }
     const fallbackSymbol = { key: 'key', mailbox: 'mailbox', room_equipment: 'equipment', moving: 'moving', heater: 'radiator', toilet: 'toilet', drainage: 'faucet', ventilation: 'fan', pets: 'paw', bike_parking: 'motorcycle', car_parking: 'car', sales: 'visitor', expenses: 'procedures', kurasapo_connect: 'kurasapo', usac: 'support' }[key] || 'rules';
     const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', fallbackSymbol];
-    const title = sectionTitle(key, section);
+    const title = route === 'intro' && key === 'moving' ? '入居直後の確認・引っ越しの注意' : sectionTitle(key, section);
     const row = link('', '#section/' + key, 'trouble-item');
     const pictogram = element('span', 'icon ' + (color || ''));
     pictogram.innerHTML = icon(symbol);
     const copy = element('span', 'trouble-item-copy');
-    copy.append(element('strong', '', title), element('small', '', sectionDescriptions[key] || description));
+    const introDescriptions = { moving: '設備の動作確認・入居時点検への登録・搬入時の注意', electricity: '使用開始・電気料金の確認', gas: '使用開始・給湯の確認', water: '使用開始・水道料金の確認', key: '受け取った鍵の確認・管理', mailbox: '郵便受けの場所・開錠方法', internet: '接続方法・Wi-Fiの準備', kurasapo_connect: 'アプリの利用開始・入居時の登録', special_note: 'この物件で確認しておくこと' };
+    const procedureDescriptions = { cancellation: '申請・退去までの準備・精算', expenses: '修理や退去時の費用を確認', kurasapo_connect: '利用開始・管理会社へのお問い合わせ', usac: '生活サポートの内容・利用条件' };
+    if (/アンケート/.test(section.label)) procedureDescriptions.management_other = '入居後の感想を回答する';
+    copy.append(element('strong', '', title), element('small', '', route === 'intro' ? introDescriptions[key] || description : route === 'procedures' ? procedureDescriptions[key] || description : sectionDescriptions[key] || description));
     const arrow = element('span', 'trouble-arrow', '›');
     arrow.setAttribute('aria-hidden', 'true');
     row.append(pictogram, copy, arrow);
@@ -144,7 +167,7 @@ function renderGuideList(route) {
   }
   if (list.childElementCount) main.append(list);
   else main.append(element('p', 'status', 'この物件で公開されている案内はありません。'));
-  main.append(helpBanner());
+  main.append(helpBanner(route));
 }
 
 function render() {
@@ -175,7 +198,25 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route.startsWith('section/')) {
-      main.append(renderBody(guide.sections[sectionKey], sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey) }), helpBanner());
+      const sectionBody = renderBody(guide.sections[sectionKey], sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses' });
+      if (sectionKey === 'cancellation') {
+        mountCancellationFlow(main, guide.sections[sectionKey], { element, link });
+        const contents = element('details', 'cancellation-contents');
+        contents.append(element('summary', '', '詳しい案内の目次を開く'));
+        const index = element('nav', 'procedure-index');
+        index.setAttribute('aria-label', '解約・退去の案内目次');
+        sectionBody.querySelectorAll('.moving-guide-item h2,.moving-guide-item h3').forEach((heading, i) => {
+          heading.id = 'procedure-topic-' + i;
+          const jump = element('button', 'procedure-jump', heading.textContent);
+          jump.type = 'button';
+          jump.addEventListener('click', () => { heading.tabIndex = -1; heading.focus({ preventScroll: true }); heading.scrollIntoView({ behavior: 'auto', block: 'start' }); });
+          index.append(jump);
+        });
+        if (index.childElementCount) { contents.append(index); main.append(contents); }
+      }
+      main.append(sectionBody);
+      const survey = sectionKey === 'management_other' && /アンケート/.test(guide.sections[sectionKey]?.label || '');
+      if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : undefined));
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {

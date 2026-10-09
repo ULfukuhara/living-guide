@@ -1,9 +1,9 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261008-contact-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261009-utilities-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261008-flow-1';
-import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261007-intro-1';
+import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261009-utilities-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261008-procedures-1';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261007-intro-1';
+import { mountHome, initHeader } from './home.js?v=20261009-utilities-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -14,7 +14,7 @@ const routes = {
   trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '手続き・サポート', rules: '暮らしのルール', faq: 'よくある質問',
   ...Object.fromEntries(troubleItems.map(({ route, title }) => [route, title]))
 };
-const troubleRoutes = new Set(troubleItems.map(item => item.route));
+const troubleRoutes = new Set(troubleItems.map(item => item.route).filter(route => !route.startsWith('section/')));
 const icons = {
   home: '<path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/>',
   trouble: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 3v1"/>',
@@ -127,7 +127,7 @@ function renderHome() { mountHome(main, guide, { element, link, icon, card }); }
 
 function renderGuideList(route) {
   const descriptions = {
-    intro: '入居直後の確認から、電気・ガス・水道、アプリの準備まで、順番にご確認ください。',
+    intro: 'くらさぽコネクトの準備から、電気・ガス・水道、入居直後の確認へ、順番にご確認ください。',
     equipment: '設備の使い方・お手入れ・不具合時の案内をご確認ください。',
     trash: 'ゴミの出し方や収集日の案内をご確認ください。',
     rules: '暮らしのルールをお選びください。',

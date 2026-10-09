@@ -110,3 +110,4 @@ body.is-home{--home-navy:#183651;background:#f3f6f8;color:var(--home-navy)}
 .is-home .home-search{min-height:58px;padding-block:5px;margin-top:6px;margin-bottom:10px}
 .is-home .v4-photo{background-image:none;background-color:#edf2f6}
 .is-home .v4-photo.photo-ready{background-image:url('./home-scenes.png')}
+.is-home .casa-home .v4-photo{background-image:url('./home-scenes.webp')}

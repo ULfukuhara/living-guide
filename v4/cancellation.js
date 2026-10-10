@@ -1,5 +1,5 @@
 // Form destinations stay in the selected property's sheet-managed blocks.
-export function mountCancellationFlow(main, section, { element: el, link }) {
+export function mountCancellationFlow(main, section, { element: el, link, isCasa = false }) {
   const flow = el('section', 'cancellation-flow');
   flow.setAttribute('aria-labelledby', 'cancellation-flow-title');
   const title = el('h2', '', '退去までの流れ');
@@ -20,7 +20,13 @@ export function mountCancellationFlow(main, section, { element: el, link }) {
     const number = el('span', 'cancellation-flow-number', String(i + 1));
     number.setAttribute('aria-hidden', 'true');
     const copy = el('div', 'cancellation-flow-copy');
-    copy.append(el('h3', '', heading), el('p', '', text));
+    copy.append(el('h3', '', heading));
+    if (isCasa && i === 3) {
+      const checklist = el('ul', 'cancellation-preparation-list');
+      for (const task of ['荷物をすべて搬出する', '室内を清掃する', '設備の不具合は退去前にくらさぽから連絡する', 'ご自身で契約したサービスの停止・住所変更をする']) checklist.append(el('li', '', task));
+      copy.append(checklist);
+    } else copy.append(el('p', '', text));
+    if (isCasa && i === 3) copy.append(el('p', '', 'この物件の電気と備え付けインターネット（0net）は、停止・解約手続きが不要です。電気の最終使用分は退去後に精算します。ご自身で別途契約した回線は、契約先で手続きしてください。'));
     const action = match && actions.find(block => match.test(block.actionLabel));
     if (action) {
       const button = link(action.actionLabel, action.actionUrl, 'button');

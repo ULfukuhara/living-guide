@@ -1,5 +1,5 @@
-import { groupedSections, sectionTitle } from './navigation.js?v=20261009-utilities-1';
-import { troubleItems } from './trouble.js?v=20261009-utilities-1';
+import { groupedSections, sectionTitle } from './navigation.js?v=20261010-navigation-sync-1';
+import { troubleItems } from './trouble.js?v=20261010-navigation-sync-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}
 const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','手続き・サポート','解約・費用・相談','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
@@ -30,13 +30,13 @@ export function mountHome(main,guide,{element:el,link,icon}){
  const results=el('section','home-results');results.id='homeSearchResults';results.hidden=true;const status=el('p','home-search-status');status.setAttribute('role','status');home.append(status,results);
  const normalize=text=>text.normalize('NFKC').toLowerCase().replace(/[\sー−‐-]/g,'').replace(/ごみ/g,'ゴミ');const aliases={trash:'ごみ ゴミ 分別 収集日',internet:'Wi-Fi wifi ネット 接続',gas:'お湯が出ない 給湯器',heater:'暖房 暖房器具',cancellation:'解約 退去',delivery_box:'宅配BOX 宅配ボックス',key:'鍵 紛失'};
  const symptoms={
-  'section/electricity':'停電 電気つかない 電気使えない ブレーカー',
-  'no-hot-water':'お湯でない お湯出ない 給湯器 エラー',
-  'water-leak':'漏水 水もれ 水漏れ',
-  'toilet-trouble':'トイレ 詰まり つまる 流れない 水が止まらない 便座',
-  'air-conditioner-trouble':'エアコン 冷えない 暖まらない 動かない 異音 水漏れ',
-  'lost-key':'鍵 紛失 なくした 入れない',
-  'internet-trouble':'Wi-Fi wifi ネット 接続できない つながらない',
+  'section/electricity':'停電 電気つかない 電気がつかない 電気使えない 電気が使えない ブレーカー 部屋が暗い 部屋暗い 暗い 照明 照明がつかない 照明つかない 電灯がつかない 電球が切れた 電球切れた ライトがつかない',
+  'no-hot-water':'お湯でない お湯出ない お湯がでない 水しか出ない 給湯器 エラー',
+  'water-leak':'漏水 水もれ 水漏れ 水が漏れる 水が漏れている 水がもれる',
+  'toilet-trouble':'トイレ 詰まり つまる 流れない 水が止まらない 便座 トイレが詰まった トイレ詰まった トイレがつまった トイレが流れない',
+  'air-conditioner-trouble':'エアコン 冷えない 暖まらない 動かない 異音 水漏れ エアコンが冷えない エアコンが暖まらない エアコンが動かない',
+  'lost-key':'鍵 紛失 なくした 入れない 鍵なくした 鍵を失くした 鍵を無くした カギなくした かぎをなくした 家に入れない',
+  'internet-trouble':'Wi-Fi wifi ネット 接続できない つながらない 繋がらない ネットが使えない wifiがつながらない Wi-Fiが繋がらない インターネットが使えない',
   'noise-trouble':'騒音 うるさい 音',
   'other-trouble':'その他 相談 困りごと'
  };
@@ -54,6 +54,7 @@ export function mountHome(main,guide,{element:el,link,icon}){
   const hits=Object.entries(guide.sections).filter(([key,s])=>matches(sectionTitle(key,s)+' '+(s.body||'')+' '+(aliases[key]||''))&&!troubleHits.some(item=>item.route==='section/'+key));
   const count=troubleHits.length+hits.length;
   status.textContent=count?`${count}件の案内が見つかりました`:'該当する案内がありません。別の言葉でお試しください。';
+  if (!count) results.append(link('困ったときの一覧から探す ›', '#trouble'));
   troubleHits.forEach(item=>results.append(link(item.title+' ›','#'+item.route)));
   hits.forEach(([key,s])=>results.append(link(sectionTitle(key,s)+' ›','#section/'+key)));
  });

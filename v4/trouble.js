@@ -58,6 +58,17 @@ function mountEmergencyContact(main, guide, { element: el, link }) {
   main.append(panel);
 }
 
+function appendEmergencyJump(main, safety, el, label = '急ぎの連絡先を確認する ↓') {
+  const jump = el('button', 'trouble-contact-jump', label);
+  jump.type = 'button';
+  jump.addEventListener('click', () => {
+    const contact = main.querySelector('.trouble-emergency');
+    contact?.focus({ preventScroll: true });
+    contact?.scrollIntoView({ behavior: 'auto', block: 'start' });
+  });
+  safety.append(jump);
+}
+
 const additionalNotes = {
   gas: 'まだガスの利用開始手続きがお済みでない場合は、ガスの案内をご確認ください。利用中の不具合は、エラー表示とガスメーターの状態を控えてご相談ください。',
   toilet: '詰まり・水漏れがある場合は使用を控え、症状を記録してください。日常の使い方はトイレの案内をご確認ください。',
@@ -113,7 +124,8 @@ function mountContact(main, guide, { element: el, link }, message, action) {
   if (!action) {
     help.append(el('p', '', '通常のお問い合わせは、くらさぽコネクトの「お問い合わせ」から、発生場所・日時・症状をお送りください。入居時の傷・汚れの登録とは窓口が異なります。'));
   }
-  help.append(link(action?.actionLabel || 'くらさぽコネクトの使い方を見る', action?.actionUrl || guideHref('/kurasapo/'), 'button'));
+  const requestGuide = guideHref('/kurasapo/') + (urgent ? '#request' : '');
+  help.append(link(action?.actionLabel || (urgent ? 'くらさぽで相談する方法を見る' : 'くらさぽコネクトの使い方を見る'), action?.actionUrl || requestGuide, 'button'));
   main.append(help);
   if (urgent) mountEmergencyContact(main, guide, { element: el, link });
 }
@@ -151,14 +163,7 @@ export function mountAirConditionerTrouble(main, guide, helpers) {
   main.append(el('p', 'trouble-intro', '当てはまる症状を開いてご確認ください。'));
   if (String(guide.propertyNo) === '11300') {
     const safety = el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わないでください。火災の場合は安全な場所へ避難し、119番へ通報してください。');
-    const jump = el('button', 'trouble-contact-jump', '設備の急ぎの連絡先を確認する ↓');
-    jump.type = 'button';
-    jump.addEventListener('click', () => {
-      const contact = main.querySelector('.trouble-emergency');
-      contact?.focus({ preventScroll: true });
-      contact?.scrollIntoView({ behavior: 'auto', block: 'start' });
-    });
-    safety.append(jump);
+    appendEmergencyJump(main, safety, el, '設備の急ぎの連絡先を確認する ↓');
     main.append(safety);
   } else main.append(el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わず、くらさぽコネクトの案内からご相談ください。'));
   mountChecks(main, guide, helpers, [
@@ -234,7 +239,14 @@ export const otherTroubleGuides = {
 export function mountOtherTrouble(main, guide, helpers, route) {
   const { element: el } = helpers;
   const baseInfo = otherTroubleGuides[route];
-  const info = route === 'other-trouble' && String(guide.propertyNo) === '11300'
+  const info = route === 'lost-key' && String(guide.propertyNo) === '11300'
+    ? { ...baseInfo, checks: [
+        ['部屋に入れない', baseInfo.checks[1][1]],
+        ['部屋には入れるが、鍵をなくした', baseInfo.checks[2][1]],
+        ['鍵を探すときに確認すること', baseInfo.checks[0][1]],
+        baseInfo.checks[3]
+      ] }
+    : route === 'other-trouble' && String(guide.propertyNo) === '11300'
     ? { ...baseInfo,
         checks: [...baseInfo.checks.slice(0, -1), ['この物件の設備・連絡方法の案内', []]],
         sections: ['room_equipment', 'kurasapo_connect'],
@@ -251,8 +263,10 @@ export function mountOtherTrouble(main, guide, helpers, route) {
       : baseInfo;
   if (!info) return;
   main.append(el('p', 'trouble-intro', 'まず以下の内容をご確認ください。'));
-  main.append(el('p', 'trouble-safety', info.note));
-  mountChecks(main, guide, helpers, info.checks, info.sections, info.missing);
+  const safety = el('p', 'trouble-safety', info.note);
+  if (route === 'water-leak' && String(guide.propertyNo) === '11300') appendEmergencyJump(main, safety, el);
+  main.append(safety);
+  mountChecks(main, guide, helpers, info.checks, info.sections, info.missing, route === 'lost-key' && String(guide.propertyNo) === '11300');
   const providerContact = route === 'internet-trouble' && String(guide.propertyNo) === '11300'
     ? guide.sections.internet?.blocks?.find(block => block.type === 'button' && block.actionUrl?.startsWith('tel:'))
     : undefined;

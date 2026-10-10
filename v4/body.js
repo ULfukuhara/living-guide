@@ -1,4 +1,5 @@
 import { safeWebUrl } from './content.js';
+import { guideHref } from '/assets/site-links.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
 import { createStoreIcon } from './store-icons.js?v=20261010-store-icons-1';
 
@@ -19,13 +20,18 @@ function element(tag, className, text) {
 
 function webLink(label, href, className) {
   const a = element('a', className, label);
-  a.href = href;
+  const url = new URL(href, 'https://guide.univ-life.com/');
+  const internalGuide = url.origin === 'https://guide.univ-life.com'
+    && ['/v4/', '/kurasapo/'].includes(url.pathname);
+  // Only guide pages receive the current property/room context.
+  const context = window.location.search || (url.searchParams.has('propertyNo') ? '?propertyNo=' + encodeURIComponent(url.searchParams.get('propertyNo')) : '');
+  a.href = internalGuide ? guideHref(url.pathname, context) + url.hash : href;
   if (className?.split(/\s+/).includes('button')) {
     const icon = createStoreIcon(href);
     if (icon) a.prepend(icon);
     if (!icon) decorateExternalLink(a);
   }
-  if (!href.startsWith('tel:')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+  if (!internalGuide && !href.startsWith('tel:')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   return a;
 }
 
@@ -109,7 +115,10 @@ export function renderBody(section, title, options = {}) {
         }
       }
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
-      if (block.type === 'text') appendText(wrapper, block.content, { bulletLists: options.procedureExamples });
+      if (block.type === 'text') {
+        const text = options.redundantContact ? block.content.replace(/\[くらさぽコネクトの案内を見る\]\(https:\/\/guide\.univ-life\.com\/kurasapo\/[^)]*\)/g, '').trim() : block.content;
+        appendText(wrapper, text, { bulletLists: options.procedureExamples });
+      }
       if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);
       if (block.type === 'image') {

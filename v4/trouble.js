@@ -21,10 +21,10 @@ export function mountTrouble(main, guide, { element: el, link, icon }) {
   const list = el('nav', 'trouble-list');
   list.setAttribute('aria-label', 'お困りごとの種類');
   for (const item of troubleItems) {
-    if (['gas-smell', 'gas-trouble'].includes(item.route) && (String(guide.propertyNo) !== '11300' || !guide.sections.gas)) continue;
+    if (['gas-smell', 'gas-trouble'].includes(item.route) && !guide.sections.gas) continue;
     if (item.route === 'electricity-trouble' && !guide.sections.electricity) continue;
     if (item.route.startsWith('section/') && !guide.sections[item.route.slice(8)]) continue;
-    const destination = item.route === 'electricity-trouble' && String(guide.propertyNo) !== '11300' ? 'section/electricity' : item.route;
+    const destination = item.route;
     const row = link('', '#' + destination, 'trouble-item');
     const symbol = el('span', 'icon ' + (item.color || ''));
     symbol.innerHTML = icon(item.icon);
@@ -83,7 +83,7 @@ const additionalNotes = {
 };
 
 function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, missingMessage, symptoms = false) {
-  symptoms = symptoms || String(guide.propertyNo) === '11300';
+  symptoms = true;
   const steps = el(symptoms ? 'div' : 'ol', 'trouble-steps' + (symptoms ? ' trouble-symptoms' : ''));
   checks.forEach(([title, messages], index) => {
     const step = el(symptoms && messages.length ? 'details' : symptoms ? 'section' : 'li', 'panel trouble-step');
@@ -131,8 +131,8 @@ function mountContact(main, guide, { element: el, link }, message, action) {
   if (!action) {
     help.append(el('p', '', '通常のお問い合わせは、くらさぽコネクトの「お問い合わせ」から、発生場所・日時・症状をお送りください。入居時の傷・汚れの登録とは窓口が異なります。'));
   }
-  const requestGuide = guideHref('/kurasapo/') + (urgent ? '#request' : '');
-  help.append(link(action?.actionLabel || (urgent ? 'くらさぽで相談する方法を見る' : 'くらさぽコネクトの使い方を見る'), action?.actionUrl || requestGuide, 'button'));
+  const requestGuide = guideHref('/kurasapo/') + '#request';
+  help.append(link(action?.actionLabel || 'くらさぽで相談する方法を見る', action?.actionUrl || requestGuide, 'button'));
   main.append(help);
   if (urgent) mountEmergencyContact(main, guide, { element: el, link });
 }
@@ -304,7 +304,7 @@ export function mountElectricityTrouble(main, guide, helpers) {
   if (breakerBlocks.length) tripped.append(renderBody({ ...section, blocks: breakerBlocks, hidePanelTitle: true }, 'ブレーカーの確認', { hideContactAction: true }));
   else tripped.append(link('電気・ブレーカーの案内を見る →', '#section/electricity', 'trouble-guide-link'));
   const payment = el('details', 'panel trouble-step');
-  payment.append(el('summary', '', 'ブレーカーが上がっていても電気がつかない'), el('p', '', '電気料金の支払い状況をご確認ください。支払い状況が分からない場合や、支払い済みでも電気がつかない場合は、管理会社へご相談ください。'), link('電気料金の案内を見る →', '#section/electricity', 'trouble-guide-link'));
+  payment.append(el('summary', '', 'ブレーカーが上がっていても電気がつかない'), el('p', '', String(guide.propertyNo) === '11300' ? '電気料金の支払い状況をご確認ください。支払い状況が分からない場合や、支払い済みでも電気がつかない場合は、管理会社へご相談ください。' : '電気料金の支払い状況と契約先の案内をご確認ください。支払い済みでも電気がつかない場合は、契約先へお問い合わせください。設備の不具合は管理会社へご相談ください。'), link('電気料金の案内を見る →', '#section/electricity', 'trouble-guide-link'));
   const breaker = el('details', 'panel trouble-step');
   breaker.append(el('summary', '', 'ブレーカーが上がらない'), el('p', '', 'ブレーカーの故障や漏電などの可能性があります。無理に繰り返し操作せず、管理会社へご相談ください。'));
   symptoms.append(lighting, tripped, payment, breaker);
@@ -342,9 +342,11 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
   const parts = splitGasGuide(guide.sections.gas);
   if (smell) {
     main.append(el('p', 'trouble-safety', '火気を使用せず、換気扇・電気のスイッチを操作しないでください。速やかにガス会社の緊急窓口へご連絡ください。'));
+    if (String(guide.propertyNo) === '11300') {
     const official = link('ガスもれ時の対応・連絡先を見る', 'https://network.osakagas.co.jp/emergent/gasleak.html', 'button');
     official.target = '_blank'; official.rel = 'noopener noreferrer';
     main.append(official);
+    } else main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
     if (parts.smell.blocks.length) main.append(renderBody(parts.smell, 'ガスのにおいがする場合', { hideContactAction: true }));
     return;
   }
@@ -353,6 +355,7 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
   main.append(safety);
   if (parts.interruption.blocks.length) main.append(renderBody(parts.interruption, 'ガスが使えない場合', { hideContactAction: true }));
   else main.append(el('p', '', 'ガスメーターの表示を控え、ご契約のガス会社へお問い合わせください。復帰操作は、ガス会社の案内に従ってください。'));
+  main.append(el('p', '', '復帰操作をしても使えない場合は、ご契約のガス会社へお問い合わせください。契約先は、契約書や請求書でご確認ください。'));
 
 }
 

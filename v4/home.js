@@ -1,4 +1,4 @@
-import { groupedSections, sectionTitle } from './navigation.js?v=20261010-next-seven-1';
+import { groupedSections, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261010-next-seven-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}

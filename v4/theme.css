@@ -50,3 +50,9 @@ body.is-home,body.is-detail,body.is-trouble{
 .is-home .home-search input{font-size:16px}
 .is-home .home-results a{min-height:44px;display:flex;align-items:center}
 .is-home .home-search-status:empty{display:none}
+
+.moving-scene{margin:12px 0 18px;max-width:360px}
+.moving-scene img{display:block;width:100%;height:auto;border-radius:10px}
+.moving-scene figcaption{font-size:12px;color:#607184;margin-top:4px}
+
+.is-detail .button.external-procedure-link{border:1px solid #a9bdd5;text-decoration:underline;text-underline-offset:3px}

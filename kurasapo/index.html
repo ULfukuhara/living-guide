@@ -103,6 +103,11 @@
         <i data-lucide="camera" class="w-6 h-6 text-emerald-700" aria-hidden="true"></i>
         <h2 id="photos" class="text-lg font-semibold">写真があると確認がスムーズです</h2>
         <p class="text-sm text-slate-700 leading-relaxed">設備の故障や破損の場合は、次のような写真を添付していただくと、状況確認がしやすくなります。</p>
+        <figure id="photoReportImage" hidden style="margin:12px 0">
+          <img src="./photo-report-image.jpg" width="960" height="640" loading="lazy" decoding="async" alt="壁の傷をスマートフォンで撮影するイメージ" style="display:block;width:100%;height:auto;border-radius:10px" />
+          <figcaption style="font-size:12px;color:#607184;margin-top:4px">撮影イメージ</figcaption>
+        </figure>
+
         <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-700">
           <li class="rounded-xl bg-slate-50 p-3">不具合箇所全体</li><li class="rounded-xl bg-slate-50 p-3">問題が起きている部分</li><li class="rounded-xl bg-slate-50 p-3">型番や品番</li><li class="rounded-xl bg-slate-50 p-3">エラー表示</li>
         </ul>
@@ -127,6 +132,9 @@
   <footer id="siteFooter"></footer>
   <script type="module">
     import { renderFooter } from "/assets/site-footer.js";
+    import { db } from "/assets/firebase-init.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { resolvePhotoPropertyNo } from "/v4/photo-context.js?v=20261010-next-seven-1";
     import { KURASAPO_LINKS, MANAGEMENT_CONTACT_EMAIL, guideHref } from "/assets/site-links.js";
 
     renderFooter(document.getElementById("siteFooter"), {
@@ -169,6 +177,9 @@
       link.append(icon);
       document.getElementById("appLinks").append(link);
     }
+    resolvePhotoPropertyNo(location.search, token => getDoc(doc(db, 'postdials', token)))
+      .then(propertyNo => { document.getElementById('photoReportImage').hidden = propertyNo !== '11300'; })
+      .catch(() => { document.getElementById('photoReportImage').hidden = true; });
     window.lucide?.createIcons();
   </script>
 </body>

@@ -1,14 +1,23 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble } from './trouble.js?v=20261010-navigation-sync-1';
-import { mountCancellationFlow } from './cancellation.js?v=20261010-navigation-sync-1';
-import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261010-navigation-sync-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261008-procedures-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261010-next-seven-1';
+import { mountCancellationFlow } from './cancellation.js?v=20261010-next-seven-1';
+import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261010-next-seven-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261010-external-links-1';
 import { BRAND } from './config.js';
-import { mountHome, initHeader } from './home.js?v=20261010-navigation-sync-1';
+import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
+import { mountHome, initHeader } from './home.js?v=20261010-next-seven-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
 const main = document.querySelector('#main');
 let guide;
+let sectionOrigin = null;
+function rememberSectionOrigin(oldURL) {
+  const previous = new URL(oldURL).hash.slice(1) || 'home';
+  const requested = location.hash.slice(1) || 'home';
+  const key = requested.startsWith('section/') ? requested.slice(8) : '';
+  sectionOrigin = String(guide.propertyNo) === '11300' && guideGroups[previous]?.includes(key)
+    ? { route: previous, key } : null;
+}
 const routes = {
   home: 'ホーム', ...groupTitles, property: '物件情報', equipment: 'お部屋・設備', trouble: '困ったとき', heater: 'お湯・給湯器', 'no-hot-water': 'お湯が出ない', 'toilet-trouble': 'トイレのトラブル', 'air-conditioner-trouble': 'エアコンが効かない',
   trash: 'ゴミの出し方', kurasapo: 'くらさぽコネクト', procedures: '手続き・サポート', rules: '暮らしのルール', faq: 'よくある質問',
@@ -34,7 +43,7 @@ function element(tag, className, text) {
   return node;
 }
 function link(label, href, className = '') {
-  const a = element('a', className, label); a.href = href; return a;
+  const a = element('a', className, label); a.href = href; return decorateExternalLink(a);
 }
 function card(route, title, description, color, symbol = route) {
   const a = link('', `#${route}`, 'card');
@@ -112,7 +121,13 @@ function helpBanner(context) {
   const text = element('div');
   const guidance = {
     intro: ['入居時のご案内で不明な点がある場合', '入居時の準備や手続きについて分からないことがある場合は、くらさぽコネクトから管理会社へお問い合わせください。'],
+    trash: ['ゴミの案内で不明な点がある場合', '収集日や分別は、本文の自治体の案内をご確認ください。物件のゴミ置き場については、管理会社へお問い合わせください。'],
+    rules: ['暮らしのルールで不明な点がある場合', '物件のルールについて分からないことは、管理会社へお問い合わせください。'],
     equipment: ['設備について不明な点や不具合がある場合', '設備の使い方やお手入れで分からないこと、故障・不具合がある場合は、くらさぽコネクトから管理会社へお問い合わせください。'],
+    electricity: ['電気の案内で不明な点がある場合', '利用開始や電気料金について分からないことは、管理会社へご確認ください。'],
+    gas: ['ガスの案内で不明な点がある場合', '開栓・契約については、ご契約のガス会社へご確認ください。物件の案内について不明な点は、管理会社へお問い合わせください。'],
+    water: ['水道の案内で不明な点がある場合', String(guide?.propertyNo) === '11300' ? '利用開始・水道料金・支払い方法は、水道局へご確認ください。水漏れなど設備の不具合は、管理会社へご相談ください。' : '利用開始や水道料金について分からないことは、管理会社へご確認ください。'],
+    internet: ['インターネットの案内で不明な点がある場合', '接続方法や利用条件は、本文に記載された提供会社の案内をご確認ください。'],
     procedures: ['手続きで不明な点がある場合', '申請方法や費用について分からないことは、くらさぽコネクトから管理会社へご相談ください。'],
     cancellation: ['解約・退去の手続きを確認したい場合', '申請先や手続きについて不明な点は、管理会社へご相談ください。通常のお問い合わせを送信するだけでは、解約申請が完了したとは限りません。'],
     expenses: ['費用負担について確認したい場合', '原因や使用状況、契約条件によって判断が異なります。状況が分かる写真などを添えて、管理会社へご相談ください。'],
@@ -120,16 +135,16 @@ function helpBanner(context) {
     kurasapo_connect: ['利用開始・お問い合わせの方法', 'アプリの登録からお問い合わせまでの操作は、使い方の案内をご確認ください。']
   }[context];
   text.append(element('h2', '', guidance?.[0] || '解決しませんでしたか？'), element('p', '', guidance?.[1] || '入居のしおりWebで解決しない場合は、くらさぽコネクトからお問い合わせください。'));
-  const directRequest = String(guide?.propertyNo) === '11300' && ['procedures', 'cancellation', 'expenses', 'usac'].includes(context);
+  const directRequest = String(guide?.propertyNo) === '11300' && ['procedures', 'cancellation', 'expenses', 'usac', 'water', 'trash', 'rules'].includes(context);
   if (directRequest) {
     const checks = {
-      cancellation: '鍵の返却日時・場所・方法、スペアキーの扱い、立会いがない場合の対応は、返却前に管理会社へご確認ください。',
+      cancellation: '退去立会いの際に、スペアキーも含めてすべての鍵を返却してください。立会いがない場合は、管理会社へご連絡ください。',
       expenses: '相談時は、不具合の場所・気づいた日時・使用状況と写真をお知らせください。精算書に不明な点がある場合は、該当する項目をお知らせください。',
       usac: '依頼前に、加入状況・対応範囲・作業費・部品代をご確認ください。'
     }[context];
     if (checks) text.append(element('p', '', checks));
   }
-  banner.append(text, link(directRequest ? 'くらさぽで相談する方法を見る →' : guidance ? 'くらさぽコネクトの使い方を見る →' : 'くらさぽコネクトで問い合わせる →', guideHref('/kurasapo/') + (directRequest ? '#request' : ''), 'button'));
+  banner.append(text, link(directRequest && context === 'water' ? '設備の不具合を相談する方法を見る →' : directRequest ? 'くらさぽで相談する方法を見る →' : guidance ? 'くらさぽコネクトの使い方を見る →' : 'くらさぽコネクトで問い合わせる →', guideHref('/kurasapo/') + (directRequest ? '#request' : ''), 'button'));
   return banner;
 }
 function renderHome() { mountHome(main, guide, { element, link, icon, card }); }
@@ -170,7 +185,7 @@ function renderGuideList(route) {
     if (String(guide.propertyNo) === '11300') Object.assign(introDescriptions, { moving: '設備の動作・傷や汚れの登録・搬入時の注意', kurasapo_connect: 'アプリの登録・利用開始' });
     const procedureDescriptions = { cancellation: '申請・退去までの準備・精算', expenses: '修理や退去時の費用を確認', kurasapo_connect: '利用開始・管理会社へのお問い合わせ', usac: '生活サポートの内容・利用条件' };
     if (/アンケート/.test(section.label)) procedureDescriptions.management_other = '入居後の感想を回答する';
-    copy.append(element('strong', '', title), element('small', '', route === 'intro' ? introDescriptions[key] || description : route === 'procedures' ? procedureDescriptions[key] || description : sectionDescriptions[key] || description));
+    copy.append(element('strong', '', title), element('small', '', route === 'intro' ? introDescriptions[key] || description : route === 'procedures' ? procedureDescriptions[key] || description : key === 'key' && String(guide.propertyNo) === '11300' ? '鍵の管理・追加・返却' : sectionDescriptions[key] || description));
     const arrow = element('span', 'trouble-arrow', '›');
     arrow.setAttribute('aria-hidden', 'true');
     row.append(pictogram, copy, arrow);
@@ -186,7 +201,7 @@ function render() {
   const sectionKey = requested.startsWith('section/') ? requested.slice(8) : '';
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = sectionKey === 'key' && guide.sections.key
-    ? '鍵の管理・紛失時の対応'
+    ? (String(guide.propertyNo) === '11300' ? '鍵の管理' : '鍵の管理・紛失時の対応')
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
   document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
@@ -200,7 +215,7 @@ function render() {
   }
   if (route === 'home') renderHome();
   else {
-    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? sectionGroup(sectionKey) : 'home';
+    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? (sectionOrigin?.key === sectionKey ? sectionOrigin.route : sectionGroup(sectionKey)) : 'home';
     main.append(link(`← ${routes[parent]}`, `#${parent}`, 'back'), element('h1', '', routeTitle));
     if (route === 'property') {
       const panel = element('section', 'panel');
@@ -209,7 +224,14 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route.startsWith('section/')) {
-      const sectionBody = renderBody(guide.sections[sectionKey], sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses' });
+      const selectedSection = guide.sections[sectionKey];
+      const displayedSection = String(guide.propertyNo) === '11300' && selectedSection?.blocks?.length
+        ? sectionKey === 'gas' ? splitGasGuide(selectedSection).preparation
+          : sectionKey === 'electricity' ? splitElectricityGuide(selectedSection).preparation
+          : sectionKey === 'internet' ? splitInternetGuide(selectedSection).preparation
+          : sectionKey === 'key' ? splitKeyGuide(selectedSection).preparation : selectedSection
+        : selectedSection;
+      const sectionBody = renderBody(displayedSection, sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses' });
       if (sectionKey === 'cancellation') {
         mountCancellationFlow(main, guide.sections[sectionKey], { element, link, isCasa: String(guide.propertyNo) === '11300' });
         const contents = element('details', 'cancellation-contents');
@@ -225,9 +247,19 @@ function render() {
         });
         if (index.childElementCount) { contents.append(index); main.append(contents); }
       }
+      if (sectionKey === 'moving' && String(guide.propertyNo) === '11300') {
+        const scene = element('figure', 'moving-scene');
+        const photo = element('img');
+        photo.src = './moving-image.jpg';
+        photo.alt = '明るい室内に引っ越し用の箱を置いた入居準備のイメージ';
+        photo.width = 960; photo.height = 640;
+        photo.loading = 'lazy'; photo.decoding = 'async';
+        scene.append(photo, element('figcaption', '', '入居準備のイメージ'));
+        main.append(scene);
+      }
       main.append(sectionBody);
       const survey = sectionKey === 'management_other' && /アンケート/.test(guide.sections[sectionKey]?.label || '');
-      if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : undefined));
+      if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : ['electricity', 'gas', 'water', 'internet'].includes(sectionKey) ? sectionKey : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : sectionGroup(sectionKey) === 'rules' ? 'rules' : sectionGroup(sectionKey) === 'trash' ? 'trash' : undefined));
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {
@@ -235,6 +267,10 @@ function render() {
     } else if (route === 'heater') {
       main.append(element('p', 'muted', '症状から案内を確認できます。'));
       const cards = element('div', 'cards'); cards.append(card('no-hot-water', 'お湯が出ない', '給湯器の案内を確認する', 'orange', 'heater')); main.append(cards);
+    } else if (route === 'electricity-trouble') {
+      mountElectricityTrouble(main, guide, { element, link, renderBody });
+    } else if (route === 'gas-trouble' || route === 'gas-smell') {
+      mountGasTrouble(main, guide, { element, link, renderBody }, route === 'gas-smell');
     } else if (route === 'no-hot-water') {
       mountNoHotWater(main, guide, { element, link, renderBody });
     } else if (route === 'toilet-trouble') {
@@ -278,10 +314,10 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261006-2');
+  const { loadGuide } = await import('./data.js?v=20261010-next-seven-1');
   guide = await loadGuide(location.search);
   render();
-  window.addEventListener('hashchange', () => { render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });
+  window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });
 } catch (error) {
 
   main.replaceChildren(element('h1', '', '案内を表示できませんでした'));

@@ -1,4 +1,6 @@
 import { safeWebUrl } from './content.js';
+import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
+import { createStoreIcon } from './store-icons.js?v=20261010-store-icons-1';
 
 export const GUIDE_LAYOUT_KEYS = Object.freeze([
   'moving', 'key', 'mailbox', 'delivery_box', 'bicycle_space', 'room_equipment',
@@ -18,6 +20,11 @@ function element(tag, className, text) {
 function webLink(label, href, className) {
   const a = element('a', className, label);
   a.href = href;
+  if (className?.split(/\s+/).includes('button')) {
+    const icon = createStoreIcon(href);
+    if (icon) a.prepend(icon);
+    if (!icon) decorateExternalLink(a);
+  }
   if (!href.startsWith('tel:')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   return a;
 }

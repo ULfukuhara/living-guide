@@ -1,5 +1,5 @@
-import { groupedSections, sectionTitle } from './navigation.js?v=20261010-navigation-sync-1';
-import { troubleItems } from './trouble.js?v=20261010-navigation-sync-1';
+import { groupedSections, sectionTitle } from './navigation.js?v=20261010-next-seven-1';
+import { troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261010-next-seven-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}
 const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','手続き・サポート','解約・費用・相談','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
@@ -28,10 +28,12 @@ export function mountHome(main,guide,{element:el,link,icon}){
  }
  const search=el('label','home-search'),symbol=el('span'),copy=el('span','v4-search-copy');symbol.innerHTML=icon('search');const input=el('input');input.id='homeSearch';input.type='search';input.placeholder='何をお探しですか？';input.setAttribute('aria-label','暮らしの情報を検索');input.setAttribute('aria-controls','homeSearchResults');copy.append(input,el('small','','お湯が出ない、ゴミ、解約など'));search.append(symbol,copy,el('span','v4-chevron','›'));home.append(search);
  const results=el('section','home-results');results.id='homeSearchResults';results.hidden=true;const status=el('p','home-search-status');status.setAttribute('role','status');home.append(status,results);
- const normalize=text=>text.normalize('NFKC').toLowerCase().replace(/[\sー−‐-]/g,'').replace(/ごみ/g,'ゴミ');const aliases={trash:'ごみ ゴミ 分別 収集日',internet:'Wi-Fi wifi ネット 接続',gas:'お湯が出ない 給湯器',heater:'暖房 暖房器具',cancellation:'解約 退去',delivery_box:'宅配BOX 宅配ボックス',key:'鍵 紛失'};
+ const normalize=text=>text.normalize('NFKC').toLowerCase().replace(/[\sー−‐-]/g,'').replace(/ごみ/g,'ゴミ');const aliases={trash:'ごみ ゴミ 分別 収集日',internet:'Wi-Fi wifi ネット 接続',gas:isCasa?'開栓 ガスの使用開始 ガスの停止':'お湯が出ない 給湯器',heater:'暖房 暖房器具',cancellation:'解約 退去',delivery_box:'宅配BOX 宅配ボックス',key:isCasa?'鍵 管理 追加 返却':'鍵 紛失'};
  const symptoms={
-  'section/electricity':'停電 電気つかない 電気がつかない 電気使えない 電気が使えない ブレーカー 部屋が暗い 部屋暗い 暗い 照明 照明がつかない 照明つかない 電灯がつかない 電球が切れた 電球切れた ライトがつかない',
-  'no-hot-water':'お湯でない お湯出ない お湯がでない 水しか出ない 給湯器 エラー',
+  'gas-smell':'ガスのにおい ガス臭い ガスくさい ガスの臭い ガス漏れ ガスもれ ガスの匂い',
+  'gas-trouble':'ガスが使えない ガス使えない ガスが急に使えなくなった ガスが急に使えない ガスが止まった ガス止まった ガスメーター 復旧',
+  'electricity-trouble':'停電時はお部屋のブレーカーを確認する 建物全体が停電したとき 停電 電気つかない 電気がつかない 電気使えない 電気が使えない ブレーカー 部屋が暗い 部屋暗い 暗い 照明 照明がつかない 照明つかない 電灯がつかない 電球が切れた 電球切れた ライトがつかない',
+  'no-hot-water':'お湯でない お湯出ない お湯がでない 水しか出ない 給湯器 エラー 給湯器が動かない 給湯器動かない 給湯器のエラー',
   'water-leak':'漏水 水もれ 水漏れ 水が漏れる 水が漏れている 水がもれる',
   'toilet-trouble':'トイレ 詰まり つまる 流れない 水が止まらない 便座 トイレが詰まった トイレ詰まった トイレがつまった トイレが流れない',
   'air-conditioner-trouble':'エアコン 冷えない 暖まらない 動かない 異音 水漏れ エアコンが冷えない エアコンが暖まらない エアコンが動かない',
@@ -50,8 +52,8 @@ export function mountHome(main,guide,{element:el,link,icon}){
   const words=input.value.trim().split(/\s+/).map(normalize).filter(Boolean);
   results.replaceChildren();results.hidden=!words.length;status.textContent='';if(!words.length)return;
   const matches=text=>words.every(word=>normalize(text).includes(word));
-  const troubleHits=troubleItems.filter(item=>(!item.route.startsWith('section/')||guide.sections[item.route.slice(8)])&&matches(item.title+' '+(symptoms[item.route]||'')));
-  const hits=Object.entries(guide.sections).filter(([key,s])=>matches(sectionTitle(key,s)+' '+(s.body||'')+' '+(aliases[key]||''))&&!troubleHits.some(item=>item.route==='section/'+key));
+  const troubleHits=troubleItems.filter(item=>(!['gas-smell','gas-trouble'].includes(item.route)||guide.sections.gas)&&(!item.route.startsWith('section/')||guide.sections[item.route.slice(8)])&&matches(item.title+' '+(symptoms[item.route]||'')));
+  const hits=Object.entries(guide.sections).filter(([key,s])=>matches(sectionTitle(key,s)+' '+(key==='gas'&&s.blocks?.length ? splitGasGuide(s).preparation.body : key==='electricity'&&s.blocks?.length ? splitElectricityGuide(s).preparation.body : key==='internet'&&s.blocks?.length ? splitInternetGuide(s).preparation.body : key==='key'&&s.blocks?.length ? splitKeyGuide(s).preparation.body : s.body||'')+' '+(aliases[key]||''))&&!troubleHits.some(item=>item.route==='section/'+key));
   const count=troubleHits.length+hits.length;
   status.textContent=count?`${count}件の案内が見つかりました`:'該当する案内がありません。別の言葉でお試しください。';
   if (!count) results.append(link('困ったときの一覧から探す ›', '#trouble'));

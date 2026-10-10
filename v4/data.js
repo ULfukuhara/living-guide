@@ -46,5 +46,5 @@ export async function loadGuide(search) {
     address: String(property.address || property['住所'] || ''),
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: applyPropertyContent(propertyNo, selectSections(String(propertyNo) === '11300' ? { ...property, drainage: property.water_area } : property, String(propertyNo) === '11300' ? { ...masters, heater: masters.heater || { label_ja: '暖房器具' }, drainage: masters.plumbing || { label_ja: '水まわり全般' } } : masters, contents, blocks)), partial: results.slice(0, 3).some(result => result.status === 'rejected') };
+    sections: applyPropertyContent(propertyNo, selectSections(String(propertyNo) === '11300' ? { ...property, drainage: property.water_area } : property, String(propertyNo) === '11300' ? { ...masters, heater: masters.heater || { label_ja: '暖房器具' }, drainage: masters.plumbing || { label_ja: '水まわり全般' } } : masters, contents, blocks)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };
 }

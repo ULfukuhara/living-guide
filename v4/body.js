@@ -36,6 +36,18 @@ function webLink(label, href, className) {
 }
 
 function appendText(parent, text, options = {}) {
+  text = text.replace(/情報コンセント/g, '壁のLANケーブル差し込み口');
+  if (options.numberedSteps) {
+    let list;
+    for (const line of text.split(/\r?\n/)) {
+      const step = line.match(/^\d+\.\s*(.+)$/);
+      if (step) {
+        if (!list) { list = element('ol', 'filter-cleaning-steps'); parent.append(list); }
+        const item = element('li'); appendText(item, step[1]); list.append(item);
+      } else { list = undefined; if (line.trim()) appendText(parent, line); }
+    }
+    return;
+  }
   if (options.bulletLists && text.split(/\r?\n/).some(line => /^・/.test(line))) {
     let list;
     for (const line of text.split(/\r?\n/)) {
@@ -99,8 +111,9 @@ export function renderBody(section, title, options = {}) {
     return panel;
   }
   if (section.blocks?.length) {
-    const movingLayout = GUIDE_LAYOUT_KEYS.includes(section.key);
+    const movingLayout = !options.plainLayout && GUIDE_LAYOUT_KEYS.includes(section.key);
     if (movingLayout) panel.classList.add('moving-guide');
+    if (section.key === 'air_conditioner') panel.classList.add('air-conditioner-guide');
     let movingCard;
     for (const [index, block] of section.blocks.entries()) {
       if (movingLayout && options.hideContactAction && block.type === 'button' && block.actionUrl) {
@@ -117,13 +130,14 @@ export function renderBody(section, title, options = {}) {
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
       if (block.type === 'text') {
         const text = options.redundantContact ? block.content.replace(/\[くらさぽコネクトの案内を見る\]\(https:\/\/guide\.univ-life\.com\/kurasapo\/[^)]*\)/g, '').trim() : block.content;
-        appendText(wrapper, text, { bulletLists: options.procedureExamples });
+        appendText(wrapper, text, { bulletLists: options.procedureExamples, numberedSteps: block.id === 'air_conditioner_casa_11300_002' });
       }
       if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);
       if (block.type === 'image') {
         const photos = element('div', 'photos content-block-image');
         photos.append(image(block.imageUrl, block.alt || `${section.label}の案内画像`));
+        if (block.caption) photos.append(element('p', 'muted', block.caption));
         wrapper.append(photos);
       }
       if (block.actionLabel && block.actionUrl) {

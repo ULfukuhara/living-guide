@@ -1,5 +1,5 @@
 import { groupedSections, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
-import { troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-review-approved-1';
+import { troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-gas-region-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}
 const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','手続き・サポート','解約・費用・相談','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
@@ -21,7 +21,7 @@ export function mountHome(main,guide,{element:el,link,icon}){
   const row=el('div','v4-room-heading'),no=el('p','v4-room-number');no.append(el('strong','',guide.room||'お部屋'),el('span','',guide.room?'号室':''));
   const detail=el('button','v4-detail','詳細を見る ›');detail.type='button';detail.onclick=()=>showDetails('あなたのお部屋',values);row.append(no,detail);room.append(row);
   const hints=el('div','v4-room-hints');
-  for(const [label,symbol,entries] of [['ポスト','rules',values.slice(0,1)],['宅配BOX','box',values.slice(1,2)],['Wi-Fi','wifi',values.slice(2,4)]])if(entries.some(([,value])=>value)){
+  for(const [label,symbol,entries] of [['ポスト','mailbox',values.slice(0,1)],['宅配BOX','box',values.slice(1,2)],['Wi-Fi','wifi',values.slice(2,4)]])if(entries.some(([,value])=>value)){
    const item=el('button');item.type='button';item.setAttribute('aria-label',label+'の情報を見る');item.innerHTML=icon(symbol);item.append(el('span','',label),el('span','v4-hint-arrow','›'));item.onclick=()=>showDetails(label,entries);hints.append(item);
   }
   if(hints.childElementCount)room.append(hints);home.append(room);

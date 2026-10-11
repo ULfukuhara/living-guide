@@ -36,3 +36,9 @@ main.container{padding-top:32px}.intro{background:#eef5ee;border:1px solid #e0ea
 .moving-guide-item .content-block{margin:0}
 .moving-guide-item .body-text{margin:0;line-height:1.9;color:#3c4653;font-size:15px}
 .moving-guide-item .body-text+.body-text{margin-top:12px}
+
+/* Air-conditioner maintenance uses the same heading weight as other topics. */
+.air-conditioner-guide .moving-guide-item:first-of-type{padding:26px 4px;margin:0;border:0;border-bottom:1px solid #e9edf1;border-radius:0;background:transparent}
+.filter-cleaning-steps{display:grid;gap:14px;margin:14px 0;padding-left:26px}
+.filter-cleaning-steps li{padding-left:5px}
+.filter-cleaning-steps .body-text{line-height:1.7}

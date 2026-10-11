@@ -1,10 +1,10 @@
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-review-approved-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-gas-region-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261010-next-seven-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-review-approved-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-filter-steps-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261011-review-approved-1';
+import { mountHome, initHeader } from './home.js?v=20261011-gas-region-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -83,7 +83,7 @@ Object.assign(icons, {
   electricity: '<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
   air: '<rect x="2" y="3" width="20" height="10" rx="2"/><path d="M5 10h14M7 16v4m5-4v6m5-6v4"/>',
   key: '<circle cx="8" cy="8" r="5"/><path d="m12 12 9 9m-5-5 3-3m-1 5 3-3"/>',
-  mailbox: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>',
+  mailbox: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 7h10M7 9h10M4 12h16"/><circle cx="16" cy="16" r="1.5"/>',
   equipment: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0L21.5 5.5a6 6 0 0 1-7.9 7.9l-7.8 7.8a2.1 2.1 0 0 1-3-3l7.8-7.8a6 6 0 0 1 7.9-7.9Z"/>',
   moving: '<path d="M3 10V3h12v18H3v-6m7-3h12m-4-4 4 4-4 4"/>'
 });
@@ -322,7 +322,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261010-next-seven-1');
+  const { loadGuide } = await import('./data.js?v=20261011-gas-region-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

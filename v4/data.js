@@ -1,7 +1,7 @@
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261005-1';
-import { applyPropertyContent } from './property-content.js?v=20261005-1';
+import { applyPropertyContent } from './property-content.js?v=20261011-simple-home-floor-filter-1';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);
@@ -44,6 +44,8 @@ export async function loadGuide(search) {
   if (results[4].status === 'rejected') console.warn('block_styles_master: ' + (results[4].reason?.code || 'unavailable'));
   return { title, room, roomInfo, propertyNo,
     address: String(property.address || property['住所'] || ''),
+    // Confirm the network operator per property; never infer it from the address or retail contract.
+    gasNetworkOperator: property.gas_network_operator === 'osaka_gas_network' ? property.gas_network_operator : '',
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
     sections: applyPropertyContent(propertyNo, selectSections(String(propertyNo) === '11300' ? { ...property, drainage: property.water_area } : property, String(propertyNo) === '11300' ? { ...masters, heater: masters.heater || { label_ja: '暖房器具' }, drainage: masters.plumbing || { label_ja: '水まわり全般' } } : masters, contents, blocks)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };

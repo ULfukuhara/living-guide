@@ -1,3 +1,4 @@
+import { gasEmergencyContact, GAS_EMERGENCY_SOURCE } from './gas-emergency.js?v=20261011-gas-region-1';
 import { guideHref } from '/assets/site-links.js';
 
 // Presentation only: consume the guide already selected by loadGuide.
@@ -103,6 +104,10 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
       const sections = sectionKeys.filter(key => guide.sections[key]);
       if (sections.length) {
         for (const key of sections) {
+          if (key === 'key') {
+            step.append(link('鍵の管理・合鍵・返却の案内を見る →', '#section/key', 'trouble-guide-link'));
+            continue;
+          }
           const details = el('details', 'trouble-property-guide');
           details.append(el('summary', '', guide.sections[key].label + 'の補足案内'));
           if (additionalNotes[key]) details.append(el('p', '', additionalNotes[key]));
@@ -189,7 +194,7 @@ export const otherTroubleGuides = {
     checks: [
       ['漏れている場所', ['蛇口、排水口、配管、天井など、どこから水が出ているか確認してください。', '水が出ている場所の写真を撮れる場合は、記録してください。']],
       ['水の広がり', ['床や壁に水が広がっているか確認してください。', '下の階などにも影響しそうな場合は、早めにご相談ください。']],
-      ['使用できる設備', ['漏れている場所の水の使用を控えてください。', '止水栓の場所や操作が分からない場合は、無理に操作せずご相談ください。']],
+      ['水漏れを止めたい場合（止水栓）', ['漏れている場所の水の使用を控えてください。', '止水栓は、お部屋への水を止めるバルブです。玄関横などのPS（配管やメーターを収めたスペース）内の、水道メーター付近にある場合があります。場所は物件によって異なります。', '自分のお部屋の止水栓と閉め方が分かる場合は、閉めて水を止めてください。ほかのお部屋のバルブやガスの元栓は操作しないでください。', '場所が分からない、扉が開かない、バルブが固い場合は無理に操作せず、管理会社へご連絡ください。']],
       ['この物件の水まわりの案内', []]
     ],
     sections: ['drainage', 'water', 'toilet'],
@@ -249,7 +254,7 @@ export function mountOtherTrouble(main, guide, helpers, route) {
   const baseInfo = otherTroubleGuides[route];
   const info = route === 'lost-key' && String(guide.propertyNo) === '11300'
     ? { ...baseInfo, checks: [
-        ['部屋に入れない', baseInfo.checks[1][1]],
+        ['部屋に入れない', ['USAC会員の方は、JBRに対応を依頼できます。下の急ぎの連絡先からご相談ください。', '管理会社へお越しいただければ、顔写真付きの身分証をご提示いただき、本人確認後に鍵をお貸しできます。来社前に受付時間と対応可否をご確認ください。']],
         ['部屋には入れるが、鍵をなくした', baseInfo.checks[2][1]],
         ['鍵を探すときに確認すること', baseInfo.checks[0][1]],
         baseInfo.checks[3]
@@ -263,7 +268,7 @@ export function mountOtherTrouble(main, guide, helpers, route) {
       ? { ...baseInfo, sections: ['drainage', 'toilet'] }
       : route === 'internet-trouble' && String(guide.propertyNo) === '11300'
         ? { ...baseInfo, checks: [
-            ['有線で接続する場合', ['LANケーブルがお部屋の情報コンセントと接続機器に接続されているか確認してください。']],
+            ['有線で接続する場合', ['LANケーブルが、壁のLANケーブル差し込み口とルーター・パソコンなどにつながっているか確認してください。']],
             ['Wi-Fiで接続する場合', ['この物件にはWi-Fiルーターが設置されていません。ご自身で用意したルーターの接続とランプ表示を確認してください。', 'ルーターのAP／BRなどの動作モードは、機器の取扱説明書とこの物件のインターネット案内に沿って確認してください。', '端末のWi-Fi設定と、ご自身のルーターのネットワーク名を確認してください。']],
             ['接続できても利用できない', ['ほかの端末でも同じ症状か確認してください。', 'いつから利用できないか、表示されるエラーがあれば控えてください。']],
             ['この物件の無料インターネット（0net）案内', []]
@@ -298,10 +303,10 @@ export function mountElectricityTrouble(main, guide, helpers) {
   main.append(el('p', 'trouble-intro', '当てはまる症状を開いてご確認ください。'));
   const symptoms = el('div', 'trouble-steps trouble-symptoms');
   const lighting = el('details', 'panel trouble-step');
-  lighting.append(el('summary', '', '照明だけがつかない'), el('p', '', 'ほかの照明もつかないかご確認ください。照明だけの場合は、お使いの照明器具の取扱説明書をご確認ください。備え付けの照明で分からないことは、管理会社へご相談ください。'));
+  lighting.append(el('summary', '', '照明だけがつかない'), el('p', '', '1つの照明だけがつかない場合は、電球切れの可能性があります。交換できる電球は、適合する種類・定格のものに交換してみてください。交換前に電源を切り、電球が冷えてから作業してください。交換してもつかない場合は、照明器具の不具合も考えられます。備え付けの照明は、管理会社へご相談ください。LED一体型など電球を交換できない器具や、安全に手が届かない場所は、無理に外さないでください。'));
   const tripped = el('details', 'panel trouble-step');
   tripped.append(el('summary', '', 'ブレーカーが落ちている'));
-  if (breakerBlocks.length) tripped.append(renderBody({ ...section, blocks: breakerBlocks, hidePanelTitle: true }, 'ブレーカーの確認', { hideContactAction: true }));
+  if (breakerBlocks.length) tripped.append(renderBody({ ...section, blocks: breakerBlocks.filter(block => block.type !== 'heading'), hidePanelTitle: true }, 'ブレーカーの確認', { hideContactAction: true, plainLayout: true }));
   else tripped.append(link('電気・ブレーカーの案内を見る →', '#section/electricity', 'trouble-guide-link'));
   const payment = el('details', 'panel trouble-step');
   payment.append(el('summary', '', 'ブレーカーが上がっていても電気がつかない'), el('p', '', String(guide.propertyNo) === '11300' ? '電気料金の支払い状況をご確認ください。支払い状況が分からない場合や、支払い済みでも電気がつかない場合は、管理会社へご相談ください。' : '電気料金の支払い状況と契約先の案内をご確認ください。支払い済みでも電気がつかない場合は、契約先へお問い合わせください。設備の不具合は管理会社へご相談ください。'), link('電気料金の案内を見る →', '#section/electricity', 'trouble-guide-link'));
@@ -342,11 +347,14 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
   const parts = splitGasGuide(guide.sections.gas);
   if (smell) {
     main.append(el('p', 'trouble-safety', '火気を使用せず、換気扇・電気のスイッチを操作しないでください。速やかにガス会社の緊急窓口へご連絡ください。'));
-    if (String(guide.propertyNo) === '11300') {
-    const official = link('ガスもれ時の対応・連絡先を見る', 'https://network.osakagas.co.jp/emergent/gasleak.html', 'button');
-    official.target = '_blank'; official.rel = 'noopener noreferrer';
-    main.append(official);
-    } else main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
+    const contact = gasEmergencyContact(guide.gasNetworkOperator, guide.address);
+    if (contact) {
+      main.append(el('p', '', contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
+    }
+    if (guide.gasNetworkOperator === 'osaka_gas_network' || String(guide.propertyNo) === '11300') {
+      const official = link(contact ? '公式の地域別連絡先を確認する' : 'お住まいの地域のガスもれ連絡先を確認する', GAS_EMERGENCY_SOURCE, 'button secondary');
+      official.target = '_blank'; official.rel = 'noopener noreferrer'; main.append(official);
+    } else if (!contact) main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
     if (parts.smell.blocks.length) main.append(renderBody(parts.smell, 'ガスのにおいがする場合', { hideContactAction: true }));
     return;
   }

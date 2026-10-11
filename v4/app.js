@@ -1,5 +1,5 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
-import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261011-moving-waste-1';
+import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261011-trash-address-label-1';
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-gas-region-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261011-settlement-copy-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
@@ -326,7 +326,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261011-settlement-copy-1');
+  const { loadGuide } = await import('./data.js?v=20261011-trash-address-label-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

@@ -43,14 +43,19 @@ export function trashSettings(propertyNo, property) {
 export function trashCollection(settings, address) {
   if (settings?.collectionType !== 'municipal' || typeof address !== 'string') return null;
   const normalized=address.normalize('NFKC').replace(/\s|〒\d{3}-?\d{4}/g,'');
-  const matches=TRASH_REGIONS.filter(region => region.id === settings.regionId && region.addressPrefixes.some(prefix => normalized.startsWith(prefix) && /^[0-9一二三四五六七八九十]/.test(normalized.slice(prefix.length))));
-  return matches.length === 1 ? matches[0] : null;
+  const matches=TRASH_REGIONS.filter(region => region.id === settings.regionId).flatMap(region =>
+    region.addressPrefixes.filter(prefix => normalized.startsWith(prefix) && /^[0-9一二三四五六七八九十]/.test(normalized.slice(prefix.length)))
+      .map(prefix => ({region,prefix}))
+  );
+  if (matches.length !== 1) return null;
+  const {region,prefix}=matches[0];
+  return {...region,displayLabel:prefix.slice(region.municipality.length)};
 }
 export function mountTrashCollection(main, collection, {element,link}) {
   if(!collection)return;
   const section=element('section','panel trash-collection');section.setAttribute('aria-label','この物件のゴミ収集日');
   section.append(element('h2','','ゴミの収集日'));
-  const table=element('table','trash-schedule'),caption=element('caption','',collection.label);table.append(caption);
+  const table=element('table','trash-schedule'),caption=element('caption','',collection.displayLabel || 'この物件の収集日');table.append(caption);
   const body=element('tbody');
   for(const row of collection.schedule){const tr=element('tr'),th=element('th','',row.label);th.setAttribute('scope','row');tr.append(th,element('td','',row.days));body.append(tr);}
   table.append(body);section.append(table,element('p','muted','年末年始などの変更は、公式カレンダーをご確認ください。'));

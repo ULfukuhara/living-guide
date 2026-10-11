@@ -1,5 +1,5 @@
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
-import { trashSettings, trashCollection } from './trash-collection.js?v=20261011-moving-waste-1';
+import { trashSettings, trashCollection } from './trash-collection.js?v=20261011-trash-address-label-1';
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261005-1';

@@ -1,7 +1,8 @@
+import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261011-moving-waste-1';
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-gas-region-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261010-next-seven-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-filter-steps-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-moving-waste-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
 import { mountHome, initHeader } from './home.js?v=20261011-gas-region-1';
@@ -199,9 +200,9 @@ function renderGuideList(route) {
 
 function render() {
   const requested = location.hash.slice(1) || 'home';
-  const sectionKey = requested.startsWith('section/') ? requested.slice(8) : '';
+  const sectionKey = requested === 'trash' ? 'trash' : requested.startsWith('section/') ? requested.slice(8) : '';
   const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
-  const routeTitle = sectionKey === 'key' && guide.sections.key
+  const routeTitle = sectionKey === 'trash' ? routes.trash : sectionKey === 'key' && guide.sections.key
     ? (String(guide.propertyNo) === '11300' ? '鍵の管理' : '鍵の管理・紛失時の対応')
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
@@ -216,7 +217,7 @@ function render() {
   }
   if (route === 'home') renderHome();
   else {
-    const parent = troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? (sectionOrigin?.key === sectionKey ? sectionOrigin.route : sectionGroup(sectionKey)) : 'home';
+    const parent = sectionKey === 'trash' ? 'home' : troubleRoutes.has(route) || route === 'heater' ? 'trouble' : sectionKey ? (sectionOrigin?.key === sectionKey ? sectionOrigin.route : sectionGroup(sectionKey)) : 'home';
     main.append(link(`← ${routes[parent]}`, `#${parent}`, 'back'), element('h1', '', routeTitle));
     if (route === 'property') {
       const panel = element('section', 'panel');
@@ -224,7 +225,7 @@ function render() {
       if (guide.room) panel.append(element('p', '', guide.room + '号室'));
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
-    } else if (route.startsWith('section/')) {
+    } else if (route === 'trash' || route.startsWith('section/')) {
       const selectedSection = guide.sections[sectionKey];
       const displayedSection = String(guide.propertyNo) === '11300' && selectedSection?.blocks?.length
         ? sectionKey === 'gas' ? splitGasGuide(selectedSection).preparation
@@ -232,7 +233,8 @@ function render() {
           : sectionKey === 'internet' ? splitInternetGuide(selectedSection).preparation
           : sectionKey === 'key' ? splitKeyGuide(selectedSection).preparation : selectedSection
         : selectedSection;
-      const sectionBody = renderBody(displayedSection, sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses', redundantContact: sectionKey === 'common_area' });
+      const trashLayout = sectionKey === 'trash' && Boolean(guide.trashCollection);
+      const sectionBody = renderBody(sectionKey === 'trash' ? prepareTrashSection(displayedSection, guide.trashCollection, guide.propertyNo) : displayedSection, sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses', redundantContact: sectionKey === 'common_area', trashLayout });
       if (sectionKey === 'cancellation') {
         mountCancellationFlow(main, guide.sections[sectionKey], { element, link, isCasa: String(guide.propertyNo) === '11300' });
         const contents = element('details', 'cancellation-contents');
@@ -262,6 +264,7 @@ function render() {
       }
       if (sectionKey === 'mailbox' && guide.roomInfo?.mailbox) main.append(link('郵便受けの開錠情報はホームの「ポスト」で確認 →', '#home', 'trouble-guide-link'));
       if (sectionKey === 'delivery_box' && String(guide.propertyNo) === '11300') main.append(element('p', 'trouble-equipment-note', '暗証番号が分からない場合は配達業者へ、設備の不具合や管理会社による開錠の相談は管理会社へご連絡ください。'));
+      if (sectionKey === 'trash') mountTrashCollection(main, guide.trashCollection, { element, link });
       if (sectionKey !== 'cancellation') main.append(sectionBody);
       const symptom = {toilet: ['トイレで困ったとき →', 'toilet-trouble'], drainage: ['水漏れで困ったとき →', 'water-leak'], air_conditioner: ['エアコンが効かないとき →', 'air-conditioner-trouble'], room_equipment: ['設備の不具合で困ったとき →', 'other-trouble']}[sectionKey];
       if (symptom) main.append(link(symptom[0], '#' + symptom[1], 'trouble-guide-link'));
@@ -322,7 +325,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261011-gas-region-1');
+  const { loadGuide } = await import('./data.js?v=20261011-moving-waste-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

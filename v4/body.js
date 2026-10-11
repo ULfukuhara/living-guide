@@ -113,9 +113,11 @@ export function renderBody(section, title, options = {}) {
   if (section.blocks?.length) {
     const movingLayout = !options.plainLayout && GUIDE_LAYOUT_KEYS.includes(section.key);
     if (movingLayout) panel.classList.add('moving-guide');
+    if (options.trashLayout) panel.classList.add('trash-guide');
     if (section.key === 'air_conditioner') panel.classList.add('air-conditioner-guide');
     let movingCard;
     for (const [index, block] of section.blocks.entries()) {
+      const foldedTrash = options.trashLayout && block.type === 'heading' && block.level !== 3 && /^(資源ごみの出し方|スプレー缶・カセットボンベ|大型複雑ごみ（粗大ごみ）)$/.test(block.content);
       if (movingLayout && options.hideContactAction && block.type === 'button' && block.actionUrl) {
         const url = new URL(block.actionUrl);
         if (url.origin === 'https://guide.univ-life.com' && url.pathname === '/kurasapo/') continue;
@@ -123,7 +125,8 @@ export function renderBody(section, title, options = {}) {
       if (movingLayout && block.type === 'heading' && block.level !== 3) {
         movingCard = undefined;
         if (section.blocks[index + 1]?.type !== 'heading') {
-          movingCard = element('section', 'moving-guide-item');
+          movingCard = element(foldedTrash ? 'details' : 'section', 'moving-guide-item' + (foldedTrash ? ' trash-guide-details' : ''));
+          if (foldedTrash) movingCard.append(element('summary', '', block.content));
           panel.append(movingCard);
         }
       }
@@ -132,7 +135,7 @@ export function renderBody(section, title, options = {}) {
         const text = options.redundantContact ? block.content.replace(/\[くらさぽコネクトの案内を見る\]\(https:\/\/guide\.univ-life\.com\/kurasapo\/[^)]*\)/g, '').trim() : block.content;
         appendText(wrapper, text, { bulletLists: options.procedureExamples, numberedSteps: block.id === 'air_conditioner_casa_11300_002' });
       }
-      if (block.type === 'heading') wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
+      if (block.type === 'heading' && !foldedTrash) wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);
       if (block.type === 'image') {
         const photos = element('div', 'photos content-block-image');

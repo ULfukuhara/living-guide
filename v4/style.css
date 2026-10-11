@@ -42,3 +42,16 @@ main.container{padding-top:32px}.intro{background:#eef5ee;border:1px solid #e0ea
 .filter-cleaning-steps{display:grid;gap:14px;margin:14px 0;padding-left:26px}
 .filter-cleaning-steps li{padding-left:5px}
 .filter-cleaning-steps .body-text{line-height:1.7}
+
+.trash-schedule{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+.trash-schedule caption{text-align:left;color:#607184;margin:0 0 12px;caption-side:top}
+.trash-schedule th,.trash-schedule td{text-align:left;vertical-align:top;padding:12px 6px;border-bottom:1px solid #e9edf1;overflow-wrap:anywhere}
+.trash-schedule th{width:52%;font-weight:500}.trash-schedule td{width:48%}
+.trash-collection h2{font-size:18px;margin-top:0}.trash-collection .button{width:100%;box-sizing:border-box}
+
+.trash-guide .moving-guide-item:first-of-type{padding:22px 4px;margin:0;border:0;border-bottom:1px solid #e9edf1;border-radius:0;background:transparent}
+.trash-guide-details summary{cursor:pointer;font-size:16px;font-weight:600;line-height:1.6;min-height:44px;display:list-item;align-content:center}
+.trash-guide-details[open] summary{margin-bottom:14px}
+.trash-guide-details .body-text{font-size:14px;line-height:1.8}
+
+.trash-moving-waste h2{font-size:18px;margin-top:0}.trash-moving-waste h3{font-size:15px;margin:20px 0 8px}.trash-moving-waste p{font-size:14px;line-height:1.8}.trash-moving-waste .button{width:100%;box-sizing:border-box;margin-top:10px}

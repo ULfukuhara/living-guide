@@ -6,7 +6,7 @@ import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigati
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-moving-waste-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261011-top-polish-1';
+import { mountHome, initHeader } from './home.js?v=20261011-room-post-button-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 

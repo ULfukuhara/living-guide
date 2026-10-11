@@ -17,11 +17,11 @@ export function mountHome(main,guide,{element:el,link,icon}){
   const info=guide.roomInfo;
   const values=[['ポスト開錠番号',info.mailbox],['宅配ボックス',info.delivery],['Wi-Fi（SSID）',info.ssid],['Wi-Fiパスワード',info.wifiPassword],['駐輪場',info.bicycle]];
   const showDetails=(title,entries)=>modal(title,d=>{if(guide.room)d.append(el('h3','',guide.room+'号室'));let shown=false;for(const [label,value] of entries)if(value){shown=true;d.append(el('p','room-detail-label',label),el('p','room-detail-value',value));}if(!shown)d.append(el('p','','お部屋の詳細情報は登録されていません。'));});
-  const room=el('section','v4-room');room.setAttribute('aria-label','あなたのお部屋');room.append(el('h2','','あなたのお部屋'));
+  const room=el('section','v4-room');room.setAttribute('aria-label','お部屋の専用情報');room.append(el('h2','','お部屋の専用情報'));
   const row=el('div','v4-room-heading'),no=el('p','v4-room-number');no.append(el('strong','',guide.room||'お部屋'),el('span','',guide.room?'号室':''));
-  const detail=el('button','v4-detail','詳細を見る ›');detail.type='button';detail.onclick=()=>showDetails('あなたのお部屋',values);row.append(no,detail);room.append(row);
+  const detail=el('button','v4-detail','個別情報を見る ›');detail.type='button';detail.onclick=()=>showDetails('お部屋の専用情報',values);row.append(no,detail);room.append(row);
   const hints=el('div','v4-room-hints');
-  for(const [label,symbol,entries] of [['ポスト','mailbox',values.slice(0,1)],['宅配BOX','box',values.slice(1,2)],['Wi-Fi','wifi',values.slice(2,4)]])if(entries.some(([,value])=>value)){
+  for(const [label,symbol,entries] of [['宅配BOX','box',values.slice(1,2)],['Wi-Fi','wifi',values.slice(2,4)]])if(entries.some(([,value])=>value)){
    const item=el('button');item.type='button';item.setAttribute('aria-label',label+'の情報を見る');item.innerHTML=icon(symbol);item.append(el('span','',label),el('span','v4-hint-arrow','›'));item.onclick=()=>showDetails(label,entries);hints.append(item);
   }
   if(hints.childElementCount)room.append(hints);home.append(room);

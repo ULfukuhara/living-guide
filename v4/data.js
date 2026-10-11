@@ -1,9 +1,10 @@
+import { propertyPolicy, normalizePropertySections } from './property-settings.js?v=20261012-production-1';
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
-import { trashSettings, trashCollection } from './trash-collection.js?v=20261011-trash-address-label-1';
+import { trashSettings, trashCollection } from './trash-collection.js?v=20261012-production-1';
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
-import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261005-1';
-import { applyPropertyContent } from './property-content.js?v=20261011-settlement-copy-1';
+import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261012-production-1';
+import { applyPropertyContent } from './property-content.js?v=20261012-production-1';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);
@@ -36,7 +37,7 @@ export async function loadGuide(search) {
   if (results[0].status === 'rejected' || results.slice(1, 4).every(result => result.status === 'rejected')) {
     throw new Error('案内を読み込めませんでした。通信状況をご確認のうえ、再読み込みしてください。');
   }
-  const masters = Object.fromEntries(records(results[0].value).filter(item => (SECTION_KEYS.includes(item.id) || (String(propertyNo) === '11300' && item.id === 'plumbing'))).map(item => [item.id, item.data]));
+  const masters = Object.fromEntries(records(results[0].value).filter(item => (SECTION_KEYS.includes(item.id) || item.id === 'plumbing')).map(item => [item.id, item.data]));
   const contents = flattenGuides(...results.slice(1, 3).map(result => result.status === 'fulfilled' ? records(result.value) : []));
   const styles = normalizeBlockStyles(results[4].status === 'fulfilled' ? records(results[4].value) : []);
   const blocks = normalizeBlocks(results[3].status === 'fulfilled' ? records(results[3].value) : [], styles);
@@ -44,7 +45,8 @@ export async function loadGuide(search) {
   // Log only the error code, never the SDK message or record contents.
   if (results[3].status === 'rejected') console.warn('content_blocks: ' + (results[3].reason?.code || 'unavailable'));
   if (results[4].status === 'rejected') console.warn('block_styles_master: ' + (results[4].reason?.code || 'unavailable'));
-  return { title, room, roomInfo, propertyNo,
+  const normalized = normalizePropertySections(property, masters);
+  return { title, room, roomInfo, propertyNo, policy: propertyPolicy(property),
     cancellationFormEnabled: cancellationFormAllowed(property),
     trashCollection: trashCollection(trashSettings(propertyNo, property), String(property.address || property['住所'] || '')),
     address: String(property.address || property['住所'] || ''),
@@ -52,5 +54,5 @@ export async function loadGuide(search) {
     gasNetworkOperator: property.gas_network_operator === 'osaka_gas_network' ? property.gas_network_operator : '',
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: applyPropertyContent(propertyNo, selectSections(String(propertyNo) === '11300' ? { ...property, drainage: property.water_area } : property, String(propertyNo) === '11300' ? { ...masters, heater: masters.heater || { label_ja: '暖房器具' }, drainage: masters.plumbing || { label_ja: '水まわり全般' } } : masters, contents, blocks)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };
+    sections: applyPropertyContent(propertyNo, selectSections(normalized.property, normalized.masters, contents, blocks)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };
 }

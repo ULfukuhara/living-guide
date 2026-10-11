@@ -1,4 +1,4 @@
-import { safeWebUrl } from './content.js';
+import { safeWebUrl } from './content.js?v=20261012-production-1';
 import { guideHref } from '/assets/site-links.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
 import { createStoreIcon } from './store-icons.js?v=20261010-store-icons-1';
@@ -133,7 +133,7 @@ export function renderBody(section, title, options = {}) {
       const wrapper = element('div', `content-block content-block-${block.type} block-style-${block.style || 'default'}`);
       if (block.type === 'text') {
         const text = options.redundantContact ? block.content.replace(/\[くらさぽコネクトの案内を見る\]\(https:\/\/guide\.univ-life\.com\/kurasapo\/[^)]*\)/g, '').trim() : block.content;
-        appendText(wrapper, text, { bulletLists: options.procedureExamples, numberedSteps: block.id === 'air_conditioner_casa_11300_002' });
+        appendText(wrapper, text, { bulletLists: options.procedureExamples, numberedSteps: /^1\. /m.test(block.content || '') && /^2\. /m.test(block.content || '') });
       }
       if (block.type === 'heading' && !foldedTrash) wrapper.append(element((options.deliveryLayout || section.hidePanelTitle) && block.level !== 3 ? 'h2' : 'h3', '', block.content));
       if (block.type === 'notice') appendText(wrapper, block.content);

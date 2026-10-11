@@ -1,0 +1,26 @@
+// Public property settings only. Room secrets and internal records do not belong here.
+export const PROPERTY_POLICY_FIELDS = ['electricity_billing','water_billing','hot_water_source','cooking_source','internet_provider_key','wifi_router_provided','electricity_stop_required','internet_stop_required','key_loan_available','key_return_method','emergency_support_phone','emergency_support_hours','gas_emergency_directory','gas_network_operator','trash_collection_type','trash_region_id','cancellation_form_enabled','kurasapo_enabled','emergency_support_provider'];
+const bool=(v,fallback=false)=>v===undefined||v===null||v===''?fallback:v===true||v===1||typeof v==='string'&&['true','1','yes','on'].includes(v.trim().toLowerCase());
+const enumValue=(v,allowed,fallback='unknown')=>allowed.includes(v)?v:fallback;
+export function propertyPolicy(property={}) {
+ const phone=String(property.emergency_support_phone||'').trim();
+ const emergencyPhone=/^\+?[0-9][0-9-]{2,19}$/.test(phone)?phone:'';
+ const emergencyHours=String(property.emergency_support_hours||'').split(/\r?\n/).map(line=>line.split('：')).filter(parts=>parts.length===2&&parts.every(v=>v.trim())).map(parts=>parts.map(v=>v.trim()));
+ return {
+  electricityBilling:enumValue(property.electricity_billing,['management','provider']),
+  waterBilling:enumValue(property.water_billing,['water_utility','management']),
+  hotWaterSource:enumValue(property.hot_water_source,['gas','electric']),cookingSource:enumValue(property.cooking_source,['ih','gas']),
+  internetProvider:enumValue(property.internet_provider_key,['zero_net','other']),
+  wifiRouterProvided:property.wifi_router_provided===undefined||property.wifi_router_provided===''?null:bool(property.wifi_router_provided),
+  electricityStopRequired:bool(property.electricity_stop_required,true),internetStopRequired:bool(property.internet_stop_required,true),
+  keyLoanAvailable:bool(property.key_loan_available),keyReturnMethod:enumValue(property.key_return_method,['inspection_or_contact']),
+  emergencyPhone,emergencyHours,emergencyProvider:enumValue(property.emergency_support_provider,['jbr','other']),gasEmergencyDirectory:enumValue(property.gas_emergency_directory,['osaka_gas_network']),
+  kurasapoEnabled:bool(property.kurasapo_enabled,!!property.kurasapo_connect&&!['false','0','off','no'].includes(String(property.kurasapo_connect).trim().toLowerCase()))
+ };
+}
+// Legacy column aliases are shared, and an explicit new FALSE always wins.
+export function normalizePropertySections(property,masters) {
+ const normalized={...property};
+ if(!Object.hasOwn(property,'drainage')||property.drainage===undefined||property.drainage===null||property.drainage==='')normalized.drainage=property.water_area;
+ return {property:normalized,masters:{...masters,drainage:masters.drainage||masters.plumbing||{label_ja:'水まわり全般'},heater:masters.heater||{label_ja:'暖房器具'}}};
+}

@@ -73,6 +73,7 @@ export function normalizeBlocks(records, styles = {}) {
       order: Number.isFinite(order) ? order : 0, type, content, style,
       imageUrl: type === 'image' ? imageUrl : null,
       alt: String(data.alt_text || '').trim(),
+      caption: type === 'image' ? content : undefined,
       actionLabel, actionUrl
     });
   }

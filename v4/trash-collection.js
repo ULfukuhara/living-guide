@@ -33,12 +33,10 @@ export const TRASH_REGIONS = [
     ]
   }
 ];
-const localSettings = { '11300': { collectionType: 'municipal', regionId: 'suita_fe373dd63605' } };
 export function trashSettings(propertyNo, property) {
   const explicit = ['trash_collection_type','trash_region_id'].some(key => Object.hasOwn(property,key));
   if (explicit) return {collectionType: property.trash_collection_type,regionId: property.trash_region_id};
-  // Initial setting confirmed by the existing public Casa trash guide; migrate to the property sheet.
-  return localSettings[String(propertyNo)] || {};
+  return {};
 }
 export function trashCollection(settings, address) {
   if (settings?.collectionType !== 'municipal' || typeof address !== 'string') return null;

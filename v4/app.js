@@ -1,11 +1,12 @@
+import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261011-moving-waste-1';
 import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261011-gas-region-1';
-import { mountCancellationFlow } from './cancellation.js?v=20261010-next-seven-1';
+import { mountCancellationFlow } from './cancellation.js?v=20261011-settlement-copy-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261011-moving-waste-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261011-gas-region-1';
+import { mountHome, initHeader } from './home.js?v=20261011-top-polish-1';
 import { SECTION_KEYS } from './content.js';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -226,7 +227,7 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route === 'trash' || route.startsWith('section/')) {
-      const selectedSection = guide.sections[sectionKey];
+      const selectedSection = sectionKey === 'cancellation' ? prepareCancellationSection(guide.sections[sectionKey], guide.cancellationFormEnabled === true) : guide.sections[sectionKey];
       const displayedSection = String(guide.propertyNo) === '11300' && selectedSection?.blocks?.length
         ? sectionKey === 'gas' ? splitGasGuide(selectedSection).preparation
           : sectionKey === 'electricity' ? splitElectricityGuide(selectedSection).preparation
@@ -236,7 +237,7 @@ function render() {
       const trashLayout = sectionKey === 'trash' && Boolean(guide.trashCollection);
       const sectionBody = renderBody(sectionKey === 'trash' ? prepareTrashSection(displayedSection, guide.trashCollection, guide.propertyNo) : displayedSection, sectionKey === 'bike_parking' ? 'バイク置き場' : undefined, { deliveryLayout: sectionKey === 'delivery_box', hideContactAction: GUIDE_LAYOUT_KEYS.includes(sectionKey), procedureExamples: sectionKey === 'expenses', redundantContact: sectionKey === 'common_area', trashLayout });
       if (sectionKey === 'cancellation') {
-        mountCancellationFlow(main, guide.sections[sectionKey], { element, link, isCasa: String(guide.propertyNo) === '11300' });
+        mountCancellationFlow(main, displayedSection, { element, link, isCasa: String(guide.propertyNo) === '11300', cancellationFormEnabled: guide.cancellationFormEnabled === true });
         const contents = element('details', 'cancellation-contents');
         contents.append(element('summary', '', '詳しい案内を開く'));
         const index = element('nav', 'procedure-index');
@@ -325,7 +326,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261011-moving-waste-1');
+  const { loadGuide } = await import('./data.js?v=20261011-settlement-copy-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

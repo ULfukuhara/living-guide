@@ -114,3 +114,10 @@ body.is-home{--home-navy:#183651;background:#f3f6f8;color:var(--home-navy)}
 
 /* Update only the shower and parcel-locker scenes; retain the existing trash image. */
 .is-home .v4-photo.shower.photo-ready,.is-home .v4-photo.lockers.photo-ready,.is-home .casa-home .v4-photo.shower,.is-home .casa-home .v4-photo.lockers{background-image:url('./home-scenes-simple-v3.jpg')}
+
+/* Identify the guide first, followed by the selected property. */
+.is-home .v4-property .v4-guide-title{font-size:24px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.is-home .v4-property .v4-property-name{font-size:17px;font-weight:600;line-height:1.5;color:#172b46;margin-bottom:4px;overflow-wrap:anywhere}
+
+/* Align the visible logo with the home title; retain the original image and menu layout. */
+.is-home .home-header #brandLogo{object-position:left center;transform:translateX(-6.5px)}

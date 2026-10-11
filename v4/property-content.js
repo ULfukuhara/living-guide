@@ -1,6 +1,14 @@
 // Approved Casa copy amendments pending management-sheet synchronization.
 // Exact before-text matching prevents overriding later source corrections.
 const approvedCopy = {
+  "cancellation_casa_11300_011": {
+    "before": "退去後に精算書をお送りします",
+    "after": "退去後の精算"
+  },
+  "cancellation_casa_11300_012": {
+    "before": "退去後、原状回復費用・日割家賃・敷金などを精算し、精算書をお送りします。\n費用負担の判断が難しい場合は、管理会社が確認してご案内します。",
+    "after": "敷金がある場合や、修繕費用・未払い費用などがある場合は、退去後に精算します。\n敷金がなく、修繕費用・未払い費用などもない場合は、精算書の発行はありません。\n費用負担の判断が難しい場合は、管理会社が確認してご案内します。"
+  },
   "room_equipment_casa_11300_010": {
     "before": "浴室乾燥機や換気扇がある場合は、適宜使用してください。",
     "after": "湿気や結露を防ぐため、浴室換気扇を適宜使用し、こまめな換気を心がけてください。"

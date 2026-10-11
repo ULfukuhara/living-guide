@@ -1,8 +1,9 @@
+import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { trashSettings, trashCollection } from './trash-collection.js?v=20261011-moving-waste-1';
 import { db } from '/assets/firebase-init.js';
 import { doc, getDoc, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 import { flattenGuides, normalizeBlocks, normalizeBlockStyles, selectSections, roomDetails, safeWebUrl, normalizeBool, SECTION_KEYS } from './content.js?v=20261005-1';
-import { applyPropertyContent } from './property-content.js?v=20261011-simple-home-floor-filter-1';
+import { applyPropertyContent } from './property-content.js?v=20261011-settlement-copy-1';
 
 export async function loadGuide(search) {
   const params = new URLSearchParams(search);
@@ -44,6 +45,7 @@ export async function loadGuide(search) {
   if (results[3].status === 'rejected') console.warn('content_blocks: ' + (results[3].reason?.code || 'unavailable'));
   if (results[4].status === 'rejected') console.warn('block_styles_master: ' + (results[4].reason?.code || 'unavailable'));
   return { title, room, roomInfo, propertyNo,
+    cancellationFormEnabled: cancellationFormAllowed(property),
     trashCollection: trashCollection(trashSettings(propertyNo, property), String(property.address || property['住所'] || '')),
     address: String(property.address || property['住所'] || ''),
     // Confirm the network operator per property; never infer it from the address or retail contract.

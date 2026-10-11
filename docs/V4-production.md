@@ -46,3 +46,6 @@ node tools/guide-sync.mjs apply 入力.json 差分.json
 shiori_enabled=TRUEで公開する入力は、確認・承認後に--publishを付ける。追加アクセスが必要な場合は既存の正規ログインを使い、別の認証情報へ切り替えない。Firebase CLIの既存ログインとランタイムを使用する。実行環境が変わった場合はFIREBASE_TOOLS_LIBにインストール済みFirebase CLIのlibを指定する。同期後のHosting公開は別操作。
 
 V4公開前チェックの補助表は次物件用のひな型。11300の今回の検証結果は実行レポートに記録している。
+
+## V1との分離
+旧項目はV1用。V4専用のv4_section_variants列に項目名と本文variantのJSONを保存する。V4は専用設定を優先し、未指定の項目のみ旧項目を参照。V1用項目をV4量産のために上書きしない。暖房器具の旧値が不明な物件は推測しない。

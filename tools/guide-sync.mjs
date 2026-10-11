@@ -5,7 +5,7 @@ import {inspectPublicGuide} from './guide-preflight.mjs';
 import {SECTION_KEYS,normalizeBool} from '../v4/content.js';
 import {PROPERTY_POLICY_FIELDS} from '../v4/property-settings.js';
 // Scoped, additive synchronization. Existing rules and omitted fields never change.
-const allowed=new Set(['doc_id','propertyNo','canonicalName','propertyName','address','variant_key','shiori_enabled','shiori_slug','photo_url','image_url','propertyPhotoUrl','water_area',...SECTION_KEYS,...PROPERTY_POLICY_FIELDS]);
+const allowed=new Set(['doc_id','propertyNo','canonicalName','propertyName','address','variant_key','shiori_enabled','shiori_slug','photo_url','image_url','propertyPhotoUrl','water_area','v4_section_variants',...SECTION_KEYS,...PROPERTY_POLICY_FIELDS]);
 const blockFields=['block_id','section_key','variant_key','block_order','block_type','content','image_url','alt_text','action_label','action_url','style_key','enabled'];
 const booleans=new Set(['shiori_enabled','wifi_router_provided','electricity_stop_required','internet_stop_required','key_loan_available','cancellation_form_enabled','kurasapo_enabled']);
 const [mode,inputFile,planFile,...options]=process.argv.slice(2);

@@ -1,3 +1,4 @@
+import { SECTION_KEYS } from './content.js?v=20261012-production-1';
 // Public property settings only. Room secrets and internal records do not belong here.
 export const PROPERTY_POLICY_FIELDS = ['electricity_billing','water_billing','hot_water_source','cooking_source','internet_provider_key','wifi_router_provided','electricity_stop_required','internet_stop_required','key_loan_available','key_return_method','emergency_support_phone','emergency_support_hours','gas_emergency_directory','gas_network_operator','trash_collection_type','trash_region_id','cancellation_form_enabled','kurasapo_enabled','emergency_support_provider'];
 const bool=(v,fallback=false)=>v===undefined||v===null||v===''?fallback:v===true||v===1||typeof v==='string'&&['true','1','yes','on'].includes(v.trim().toLowerCase());
@@ -21,6 +22,11 @@ export function propertyPolicy(property={}) {
 // Legacy column aliases are shared, and an explicit new FALSE always wins.
 export function normalizePropertySections(property,masters) {
  const normalized={...property};
- if(!Object.hasOwn(property,'drainage')||property.drainage===undefined||property.drainage===null||property.drainage==='')normalized.drainage=property.water_area;
+ if(property.v4_section_variants){
+  const settings=typeof property.v4_section_variants==='string'?JSON.parse(property.v4_section_variants):property.v4_section_variants;
+  if(!settings||Array.isArray(settings)||typeof settings!=='object')throw new Error('V4本文設定の形式を確認してください。');
+  for(const [key,value] of Object.entries(settings))if(SECTION_KEYS.includes(key)&&['string','boolean','number'].includes(typeof value))normalized[key]=value;
+ }
+ if(!Object.hasOwn(normalized,'drainage')||normalized.drainage===undefined||property.drainage===null||property.drainage==='')normalized.drainage=property.water_area;
  return {property:normalized,masters:{...masters,drainage:masters.drainage||masters.plumbing||{label_ja:'水まわり全般'},heater:masters.heater||{label_ja:'暖房器具'}}};
 }

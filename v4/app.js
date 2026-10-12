@@ -1,13 +1,13 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261012-production-1';
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-production-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-lost-key-common-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261012-production-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-production-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
 import { mountHome, initHeader } from './home.js?v=20261012-production-1';
-import { SECTION_KEYS } from './content.js?v=20261012-production-1';
+import { SECTION_KEYS } from './content.js?v=20261012-expenses-trouble-1';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
 const main = document.querySelector('#main');
@@ -184,13 +184,14 @@ function renderGuideList(route) {
     }
     const fallbackSymbol = { key: 'key', mailbox: 'mailbox', room_equipment: 'equipment', moving: 'moving', heater: 'radiator', toilet: 'toilet', drainage: 'faucet', ventilation: 'fan', pets: 'paw', bike_parking: 'motorcycle', car_parking: 'car', sales: 'visitor', expenses: 'procedures', kurasapo_connect: 'kurasapo', usac: 'support' }[key] || 'rules';
     const [, , description, symbol, color] = categories.find(item => item[0] === key) || [key, section.label, 'ご案内を確認する', fallbackSymbol];
-    const title = route === 'intro' && key === 'moving' ? ('お部屋の確認・引っ越し') : sectionTitle(key, section);
+    const title = route === 'intro' && key === 'moving'
+      ? (section.variant === 'v4_move_check' ? 'お部屋の確認' : 'お部屋の確認・引っ越し') : sectionTitle(key, section);
     const row = link('', '#section/' + key, 'trouble-item');
     const pictogram = element('span', 'icon ' + (color || ''));
     pictogram.innerHTML = icon(symbol);
     const copy = element('span', 'trouble-item-copy');
     const introDescriptions = { moving: '設備の動作確認・入居時点検への登録・搬入時の注意', electricity: '使用開始・電気料金の確認', gas: '使用開始・給湯の確認', water: '使用開始・水道料金の確認', key: '受け取った鍵の確認・管理', mailbox: '郵便受けの場所・開錠方法', internet: '接続方法・Wi-Fiの準備', kurasapo_connect: 'アプリの利用開始・入居時の登録', special_note: 'この物件で確認しておくこと' };
-    Object.assign(introDescriptions, { moving: '設備の動作・傷や汚れの登録・搬入時の注意', kurasapo_connect: 'アプリの登録・利用開始' });
+    Object.assign(introDescriptions, { moving: section.variant === 'v4_move_check' ? '設備の動作・傷や汚れの登録' : '設備の動作・傷や汚れの登録・搬入時の注意', kurasapo_connect: 'アプリの登録・利用開始' });
     const procedureDescriptions = { cancellation: '申請・退去までの準備・精算', expenses: '修理や退去時の費用を確認', kurasapo_connect: '利用開始・管理会社へのお問い合わせ', usac: '生活サポートの内容・利用条件' };
     if (/アンケート/.test(section.label)) procedureDescriptions.management_other = '入居後の感想を回答する';
     copy.append(element('strong', '', title), element('small', '', route === 'intro' ? introDescriptions[key] || description : route === 'procedures' ? procedureDescriptions[key] || description : key === 'key' ? '鍵の管理・合鍵・返却' : sectionDescriptions[key] || description));
@@ -331,7 +332,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261012-v1-separation-1');
+  const { loadGuide } = await import('./data.js?v=20261012-lost-key-policy-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

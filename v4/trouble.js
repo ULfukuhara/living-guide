@@ -171,11 +171,9 @@ export function mountToiletTrouble(main, guide, helpers) {
 export function mountAirConditionerTrouble(main, guide, helpers) {
   const { element: el } = helpers;
   main.append(el('p', 'trouble-intro', '当てはまる症状を開いてご確認ください。'));
-  if (guide.policy?.emergencyPhone) {
-    const safety = el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わないでください。火災の場合は安全な場所へ避難し、119番へ通報してください。');
-    appendEmergencyJump(main, safety, el, '設備の急ぎの連絡先を確認する ↓');
-    main.append(safety);
-  } else main.append(el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わず、くらさぽコネクトの案内からご相談ください。'));
+  const safety = el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わないでください。火災の場合は安全な場所へ避難し、119番へ通報してください。');
+  if (guide.policy?.emergencyPhone) appendEmergencyJump(main, safety, el, '設備の急ぎの連絡先を確認する ↓');
+  main.append(safety);
   mountChecks(main, guide, helpers, [
     ['運転しない', ['リモコンの表示と電池、運転モードを確認してください。', 'ブレーカーが切れていないか確認してください。繰り返し切れる場合は、無理に入れ直さずご相談ください。']],
     ['冷えない・暖まらない', ['冷房・暖房の運転モードと設定温度を確認してください。', 'フィルターや室内機・室外機の吹き出し口がふさがれていないか確認してください。']],
@@ -199,7 +197,7 @@ export const otherTroubleGuides = {
     contact: '漏れている場所と水の広がり、確認した内容を控えて、くらさぽコネクトの案内からお問い合わせ方法をご確認ください。'
   },
   'lost-key': {
-    note: '鍵をなくした場合は、無理にドアを開けようとせず、契約時に案内された連絡先もご確認ください。',
+    note: '',
     checks: [
       ['鍵の所在', ['最後に鍵を使用した場所や、持ち物の中を確認してください。', '予備の鍵がある場合は、利用できるか確認してください。']],
       ['室内に入れない場合', ['契約時に案内された連絡先をご確認ください。対応時間や解錠の費用は、連絡先に確認してください。']],
@@ -249,7 +247,16 @@ export const otherTroubleGuides = {
 export function mountOtherTrouble(main, guide, helpers, route) {
   const { element: el } = helpers;
   const baseInfo = otherTroubleGuides[route];
-  const info = route === 'lost-key' && guide.policy?.keyLoanAvailable
+  const confirmedLostKeyPolicy = guide.policy?.lostKeyPolicy === 'usac_paid_loan_week';
+  let info = route === 'lost-key' && confirmedLostKeyPolicy
+    ? { ...baseInfo, checks: [
+        ['部屋に入れない場合の開錠サービス', ['USAC会員の方は、開錠サービスをご利用いただけます。' + (guide.policy?.emergencyPhone ? '下の急ぎの連絡先からご相談ください。' : '契約時に案内されたUSACの連絡先へご相談ください。'), '非会員の方も、有償で対応可能です。依頼時に費用や対応条件をご確認ください。']],
+        ['営業時間内に管理会社で鍵を借りる', ['管理会社の営業時間内にお越しいただければ、顔写真付きの身分証をご提示いただき、本人確認後に鍵をお貸しできます。来社前に受付時間と対応可否をご確認ください。']],
+        ['借りた鍵は1週間以内に返却する', ['貸出日から1週間以内に、管理会社へ鍵をご返却ください。', '返却がない場合は追加発行として扱い、費用をご請求します。']],
+        ['紛失後はシリンダー交換をおすすめします', ['防犯上、鍵を紛失した場合はシリンダー（鍵穴部分）の交換をおすすめしています。交換の手配や費用は、管理会社へご相談ください。']],
+        ['退去時はお渡しした本数分を返却する', ['退去時は、お渡しした鍵の本数分をご返却ください。スペアキーや、ご自身で複製した合鍵もすべて返却が必要です。']],
+      ] }
+    : route === 'lost-key' && guide.policy?.keyLoanAvailable
     ? { ...baseInfo, checks: [
         ['部屋に入れない', [...(guide.sections.usac && guide.policy?.emergencyProvider === 'jbr' && guide.policy?.emergencyPhone ? ['USAC会員の方は、JBRに対応を依頼できます。下の急ぎの連絡先からご相談ください。'] : []), '管理会社へお越しいただければ、顔写真付きの身分証をご提示いただき、本人確認後に鍵をお貸しできます。来社前に受付時間と対応可否をご確認ください。']],
         ['部屋には入れるが、鍵をなくした', baseInfo.checks[2][1]],
@@ -272,12 +279,15 @@ export function mountOtherTrouble(main, guide, helpers, route) {
           ] }
       : baseInfo;
   if (!info) return;
+  if (route === 'internet-trouble' && guide.policy?.internetProvider === 'other') info = { ...info, contact: '接続状況と確認した内容を控えて、ご契約の回線事業者へお問い合わせください。回線工事や建物側の設備については、管理会社へご相談ください。' };
   main.append(el('p', 'trouble-intro', 'まず以下の内容をご確認ください。'));
-  const safety = el('p', 'trouble-safety', info.note);
-  if (route === 'water-leak' && guide.policy?.emergencyPhone) appendEmergencyJump(main, safety, el);
-  main.append(safety);
+  if (info.note) {
+    const safety = el('p', 'trouble-safety', info.note);
+    if (route === 'water-leak' && guide.policy?.emergencyPhone) appendEmergencyJump(main, safety, el);
+    main.append(safety);
+  }
   mountChecks(main, guide, helpers, info.checks, info.sections, info.missing, route === 'lost-key' && guide.policy?.keyLoanAvailable);
-  if (route === 'lost-key' && guide.policy?.keyLoanAvailable && helpers.renderBody) {
+  if (route === 'lost-key' && !confirmedLostKeyPolicy && guide.policy?.keyLoanAvailable && helpers.renderBody) {
     const lost = splitKeyGuide(guide.sections.key).trouble;
     if (lost.blocks.length) {
       const details = el('details', 'trouble-property-guide');

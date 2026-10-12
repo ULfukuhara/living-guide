@@ -90,7 +90,21 @@ export function selectSections(property, masters, contents, blocks = []) {
     // Finish selecting the property's variant before falling back to base.
     // A base block must not override a variant-specific legacy guide.
     for (const selectedVariant of new Set([variant, 'base'])) {
-      const selectedBlocks = blocks.filter(item => item.key === key && item.variant === selectedVariant);
+      let selectedBlocks = blocks.filter(item => item.key === key && item.variant === selectedVariant);
+      // Only explicitly opted-in equipment/common-area variants compose common and property details.
+      if (["key","mailbox","delivery_box","room_equipment","heater","air_conditioner","toilet","drainage","ventilation","common_area","electricity","gas"].includes(key) && /^v4_eq_property_\d+$/.test(selectedVariant) && selectedBlocks.length) {
+        const shared = blocks.filter(item => item.key === key && item.variant === 'v4_eq_common');
+        if (!shared.length) continue;
+        selectedBlocks = [...shared, ...selectedBlocks].sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+      }
+
+      // Only the opted-in V4 moving variants compose shared checks with equipment-specific guidance.
+      // Existing property/legacy variants retain their original selection and fallback order.
+      if (key === 'moving' && selectedVariant === 'v4_move_autolock' && selectedBlocks.length) {
+        const shared = blocks.filter(item => item.key === key && item.variant === 'v4_move_check');
+        if (!shared.length) continue;
+        selectedBlocks = [...shared, ...selectedBlocks].sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+      }
       const content = contents.find(item => item.key === key && item.variant === selectedVariant);
       if (selectedBlocks.length) {
         result[key] = { key, variant: selectedVariant, blocks: selectedBlocks,

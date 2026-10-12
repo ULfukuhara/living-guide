@@ -1,6 +1,6 @@
 import { SECTION_KEYS } from './content.js?v=20261012-production-1';
 // Public property settings only. Room secrets and internal records do not belong here.
-export const PROPERTY_POLICY_FIELDS = ['electricity_billing','water_billing','hot_water_source','cooking_source','internet_provider_key','wifi_router_provided','electricity_stop_required','internet_stop_required','key_loan_available','key_return_method','emergency_support_phone','emergency_support_hours','gas_emergency_directory','gas_network_operator','trash_collection_type','trash_region_id','cancellation_form_enabled','kurasapo_enabled','emergency_support_provider'];
+export const PROPERTY_POLICY_FIELDS = ['electricity_billing','water_billing','hot_water_source','cooking_source','internet_provider_key','wifi_router_provided','electricity_stop_required','internet_stop_required','lost_key_policy','key_loan_available','key_return_method','emergency_support_phone','emergency_support_hours','gas_emergency_directory','gas_network_operator','trash_collection_type','trash_region_id','cancellation_form_enabled','kurasapo_enabled','emergency_support_provider'];
 const bool=(v,fallback=false)=>v===undefined||v===null||v===''?fallback:v===true||v===1||typeof v==='string'&&['true','1','yes','on'].includes(v.trim().toLowerCase());
 const enumValue=(v,allowed,fallback='unknown')=>allowed.includes(v)?v:fallback;
 export function propertyPolicy(property={}) {
@@ -14,7 +14,7 @@ export function propertyPolicy(property={}) {
   internetProvider:enumValue(property.internet_provider_key,['zero_net','other']),
   wifiRouterProvided:property.wifi_router_provided===undefined||property.wifi_router_provided===''?null:bool(property.wifi_router_provided),
   electricityStopRequired:bool(property.electricity_stop_required,true),internetStopRequired:bool(property.internet_stop_required,true),
-  keyLoanAvailable:bool(property.key_loan_available),keyReturnMethod:enumValue(property.key_return_method,['inspection_or_contact']),
+  lostKeyPolicy:enumValue(property.lost_key_policy,['usac_paid_loan_week']),keyLoanAvailable:bool(property.key_loan_available),keyReturnMethod:enumValue(property.key_return_method,['inspection_or_contact']),
   emergencyPhone,emergencyHours,emergencyProvider:enumValue(property.emergency_support_provider,['jbr','other']),gasEmergencyDirectory:enumValue(property.gas_emergency_directory,['osaka_gas_network']),
   kurasapoEnabled:bool(property.kurasapo_enabled,!!property.kurasapo_connect&&!['false','0','off','no'].includes(String(property.kurasapo_connect).trim().toLowerCase()))
  };

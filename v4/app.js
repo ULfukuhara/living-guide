@@ -1,12 +1,12 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261012-production-1';
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-gas-address-contact-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-other-expanded-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261012-production-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-breaker-accordion-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261012-urgent-ih-1';
+import { mountHome, initHeader } from './home.js?v=20261012-other-expanded-1';
 import { SECTION_KEYS } from './content.js?v=20261012-expenses-trouble-1';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -121,10 +121,10 @@ function appendGrid(title, description, items, className) {
 function helpBanner(context) {
   if (context === 'electricity' && guide.policy?.electricityBilling === 'provider') {
     const panel = element('section', 'panel help-banner');
-    panel.append(element('h2', '', '電気の手続き・料金について'), element('p', '', '使用開始・停止、電気料金や支払いについては、ご契約の電力会社へお問い合わせください。'), element('p', '', 'ブレーカーや備え付けの設備の不具合は、管理会社へご相談ください。'), link('設備の不具合を相談する方法を見る →', guide.policy?.kurasapoEnabled === false ? (guide.sections.management_other ? '#section/management_other' : '#procedures') : guideHref('/kurasapo/') + '#request', 'button'));
+    panel.append(element('h2', '', '電気の手続き・料金について'), element('p', '', '使用開始・停止、電気料金や支払いについては、ご契約の電力会社へお問い合わせください。'), element('p', '', 'ブレーカーや備え付けの設備の不具合は、管理会社へご相談ください。'));
     return panel;
   }
-  if (guide?.policy && !guide.policy.kurasapoEnabled) {
+  if (guide?.policy && !guide.policy.kurasapoEnabled && !['gas', 'water', 'internet', 'mailbox'].includes(context)) {
     const panel=element('section','panel help-banner');
     panel.append(element('h2','','管理会社への連絡'),element('p','','相談先は、契約時の書類やこの物件の管理会社の案内をご確認ください。'),link('管理会社の案内を確認する →',guide.sections.management_other?'#section/management_other':'#procedures','button'));
     return panel;
@@ -140,6 +140,7 @@ function helpBanner(context) {
     electricity: ['電気の案内で不明な点がある場合', '利用開始や電気料金について分からないことは、管理会社へご確認ください。'],
     gas: ['ガスの案内で不明な点がある場合', '開栓・契約については、ご契約のガス会社へご確認ください。物件の案内について不明な点は、管理会社へお問い合わせください。'],
     water: ['水道の案内で不明な点がある場合', guide.policy?.waterBilling === 'water_utility' ? '利用開始・水道料金・支払い方法は、水道局へご確認ください。水漏れなど設備の不具合は、管理会社へご相談ください。' : '利用開始や水道料金について分からないことは、管理会社へご確認ください。'],
+    mailbox: ['郵便受けの案内で不明な点がある場合', '開錠方法や郵便受けの不具合については、管理会社へご相談ください。'],
     internet: ['インターネットの案内で不明な点がある場合', '接続方法や利用条件は、本文に記載された提供会社の案内をご確認ください。'],
     procedures: ['手続きで不明な点がある場合', '申請方法や費用について分からないことは、くらさぽコネクトから管理会社へご相談ください。'],
     cancellation: ['解約・退去の手続きを確認したい場合', '申請先や手続きについて不明な点は、管理会社へご相談ください。通常のお問い合わせを送信するだけでは、解約申請が完了したとは限りません。'],
@@ -148,6 +149,16 @@ function helpBanner(context) {
     kurasapo_connect: ['利用開始・お問い合わせの方法', 'アプリの登録からお問い合わせまでの操作は、使い方の案内をご確認ください。']
   }[context];
   text.append(element('h2', '', guidance?.[0] || '解決しませんでしたか？'), element('p', '', guidance?.[1] || '入居のしおりWebで解決しない場合は、くらさぽコネクトからお問い合わせください。'));
+  if (context === 'gas') {
+    const panel = element('section', 'panel help-banner');
+    panel.append(...text.children);
+    return panel;
+  }
+  if (['water', 'internet', 'mailbox'].includes(context)) {
+    const panel = element('section', 'panel help-banner');
+    panel.append(...text.children);
+    return panel;
+  }
   const directRequest = guide.policy?.kurasapoEnabled === true && ['key', 'procedures', 'cancellation', 'expenses', 'usac', 'water', 'trash', 'rules'].includes(context);
   if (directRequest) {
     const checks = {
@@ -228,11 +239,12 @@ function renderGuideList(route) {
 function render() {
   const requested = location.hash.slice(1) || 'home';
   const sectionKey = requested === 'trash' ? 'trash' : requested.startsWith('section/') ? requested.slice(8) : '';
-  const route = requested === 'gas-trouble' && guide.policy?.cookingSource === 'ih' ? 'no-hot-water' : sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
+  const route = requested === 'gas-trouble' && guide.policy?.cookingSource !== 'gas' ? 'no-hot-water' : sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = sectionKey === 'trash' ? routes.trash : sectionKey === 'key' && guide.sections.key
     ? ('鍵の管理')
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
   document.body.classList.toggle('is-home', route === 'home');
+  document.body.classList.toggle('is-other-trouble', route === 'other-trouble');
   document.body.classList.toggle('is-trouble', route === 'trouble' || troubleRoutes.has(route));
   document.body.classList.toggle('is-detail', route === 'kurasapo' || route === 'trouble' || troubleRoutes.has(route) || Object.hasOwn(guideGroups, route) || (sectionKey && Object.values(guideGroups).some(keys => keys.includes(sectionKey))));
   main.replaceChildren();
@@ -297,7 +309,7 @@ function render() {
       if (symptom) main.append(link(symptom[0], '#' + symptom[1], 'trouble-guide-link'));
       if (sectionKey === 'key') main.append(link('鍵をなくしたとき →', '#lost-key', 'trouble-guide-link'));
       const survey = sectionKey === 'management_other' && /アンケート/.test(guide.sections[sectionKey]?.label || '');
-      if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : ['key', 'electricity', 'gas', 'water', 'internet'].includes(sectionKey) ? sectionKey : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : sectionGroup(sectionKey) === 'rules' ? 'rules' : sectionGroup(sectionKey) === 'trash' ? 'trash' : undefined));
+      if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : ['key', 'electricity', 'gas', 'water', 'internet', 'mailbox'].includes(sectionKey) ? sectionKey : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : sectionGroup(sectionKey) === 'rules' ? 'rules' : sectionGroup(sectionKey) === 'trash' ? 'trash' : undefined));
     } else if (route === 'trouble') {
       mountTrouble(main, guide, { element, link, icon });
     } else if (Object.hasOwn(guideGroups, route)) {
@@ -352,7 +364,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261012-cooking-v1-1');
+  const { loadGuide } = await import('./data.js?v=20261012-gas-base-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

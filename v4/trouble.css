@@ -97,3 +97,14 @@ body.is-detail{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc;
 
 /* Area-wide outage: normal-weight summary, consistent inline guidance. */
 .trouble-symptoms .trouble-step.trouble-step-plain summary{font-weight:400}
+
+/* Compact the always-visible other-trouble guide without affecting accordions. */
+.is-other-trouble .trouble-intro{margin-bottom:12px}
+.is-other-trouble .trouble-steps{margin:8px 0 14px}
+.is-detail.is-other-trouble .trouble-step{padding:12px 4px}
+.is-other-trouble .trouble-step h2{margin-bottom:6px;font-size:16px}
+.is-other-trouble .trouble-step ul{margin:0;font-size:14px;line-height:1.8}
+.is-other-trouble .trouble-step li+li{margin-top:4px}
+.is-detail.is-other-trouble .trouble-help{margin-top:14px;padding:16px}
+.is-other-trouble .trouble-help h2{font-size:17px;margin:0 0 8px}
+.is-other-trouble .trouble-help p{margin:0 0 12px}

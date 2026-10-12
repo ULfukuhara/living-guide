@@ -1,4 +1,4 @@
-import { propertyPolicy, normalizePropertySections } from './property-settings.js?v=20261012-cooking-v1-1';
+import { propertyPolicy, normalizePropertySections, applyEquipmentConditions } from './property-settings.js?v=20261012-gas-base-1';
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { trashSettings, trashCollection } from './trash-collection.js?v=20261012-production-1';
 import { db } from '/assets/firebase-init.js';
@@ -54,5 +54,5 @@ export async function loadGuide(search) {
     gasNetworkOperator: property.gas_network_operator === 'osaka_gas_network' ? property.gas_network_operator : '',
     // Optional property photograph only; never substitute an unrelated property photograph.
     photo: safeWebUrl(property.photo_url || property.image_url || property.propertyPhotoUrl || ''),
-    sections: applyPropertyContent(propertyNo, selectSections(normalized.property, normalized.masters, contents, blocks)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };
+    sections: applyEquipmentConditions(applyPropertyContent(propertyNo, selectSections(normalized.property, normalized.masters, contents, blocks)), propertyPolicy(property)), partial: results.slice(0, 4).some(result => result.status === 'rejected') };
 }

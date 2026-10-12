@@ -7,7 +7,7 @@ export const troubleItems = [
   { route: 'gas-smell', title: 'ガスのにおいがする', description: 'ガスもれ時の対応・緊急窓口', icon: 'heater', color: 'orange' },
   { route: 'electricity-trouble', title: '停電・電気が使えない', description: '停電時・ブレーカーの案内を確認', icon: 'electricity', color: 'orange' },
   { route: 'no-hot-water', title: 'お湯が出ない', description: '給湯器やガスを確認', icon: 'heater', color: 'orange' },
-  { route: 'gas-trouble', title: 'ガスが使えない', description: 'ガスメーター・ガス会社の案内', icon: 'heater', color: 'orange' },
+  { route: 'gas-trouble', title: 'コンロが点かない', description: 'ガスコンロの点火・電池を確認', icon: 'heater', color: 'orange' },
   { route: 'water-leak', title: '水漏れ', description: '漏れている場所と状況を確認', icon: 'water' },
   { route: 'toilet-trouble', title: 'トイレのトラブル', description: '症状ごとの確認事項を見る', icon: 'toilet' },
   { route: 'air-conditioner-trouble', title: 'エアコンが効かない', description: '設定や運転状況を確認', icon: 'air' },
@@ -18,7 +18,7 @@ export const troubleItems = [
 ];
 
 export function troubleItemAvailable(item, guide) {
-  if (item.route === 'gas-trouble' && guide.policy?.cookingSource === 'ih') return false;
+  if (item.route === 'gas-trouble' && guide.policy?.cookingSource !== 'gas') return false;
   if (['gas-smell','gas-trouble'].includes(item.route) && !guide.sections.gas) return false;
   if (item.route === 'electricity-trouble' && !guide.sections.electricity) return false;
   return !item.route.startsWith('section/') || !!guide.sections[item.route.slice(8)];
@@ -99,7 +99,7 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
   symptoms = true;
   const steps = el(symptoms ? 'div' : 'ol', 'trouble-steps' + (symptoms ? ' trouble-symptoms' : ''));
   checks.forEach(([title, messages], index) => {
-    const step = el(symptoms && messages.length ? 'details' : symptoms ? 'section' : 'li', 'panel trouble-step');
+    const step = el(symptoms && messages.length && location.hash !== '#other-trouble' ? 'details' : symptoms ? 'section' : 'li', 'panel trouble-step');
     const heading = el(step.tagName === 'DETAILS' ? 'summary' : 'h2');
     if (!symptoms && messages.length) {
       const number = el('span', 'trouble-step-number', String(index + 1));
@@ -120,11 +120,16 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
             step.append(link('鍵の管理・合鍵・返却の案内を見る →', '#section/key', 'trouble-guide-link'));
             continue;
           }
+          if (key === 'toilet' && location.hash === '#toilet-trouble') {
+            if (additionalNotes[key]) step.append(el('p', '', additionalNotes[key]));
+            step.append(link(guide.sections[key].label + 'の詳しい案内を見る →', '#section/' + key, 'trouble-guide-link'));
+            continue;
+          }
           const details = el('details', 'trouble-property-guide');
           details.append(el('summary', '', guide.sections[key].label + 'の補足案内'));
           if (additionalNotes[key]) details.append(el('p', '', additionalNotes[key]));
           const gasTrouble = key === 'gas';
-          details.append(link(gasTrouble ? (guide.policy?.cookingSource === 'ih' ? 'お湯が出ないときの案内を見る →' : 'ガスが使えないときの案内を見る →') : guide.sections[key].label + 'の詳しい案内を見る →', gasTrouble ? (guide.policy?.cookingSource === 'ih' ? '#no-hot-water' : '#gas-trouble') : '#section/' + key, 'trouble-guide-link'));
+          details.append(link(gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? 'お湯が出ないときの案内を見る →' : 'コンロが点かないときの案内を見る →') : guide.sections[key].label + 'の詳しい案内を見る →', gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? '#no-hot-water' : '#gas-trouble') : '#section/' + key, 'trouble-guide-link'));
           const close = el('button', 'trouble-close', 'この案内を閉じる');
           close.type = 'button';
           close.addEventListener('click', () => { details.open = false; details.querySelector('summary').focus(); });
@@ -290,7 +295,7 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   more.append(el('summary', '', 'まだつながらない場合'));
   const further = el('ul');
   for (const message of ['Wi-Fiの名前（SSID）とパスワードが、ご自身の機器や契約先から案内されたものと一致するか確認してください。', ...(zeroNet && noRouter ? ['ルーターの動作モード（AP／BRなど）は、この物件のインターネット案内と機器の説明に従って確認してください。'] : []), ...(!zeroNet ? ['ご自身で契約している場合は、利用開始の手続きや料金の支払い・契約状況をご確認ください。'] : []), '回線事業者・プロバイダの公式サイトで、障害や工事の情報をご確認ください。']) further.append(el('li', '', message));
-  more.append(further);main.append(more);
+  more.append(further);steps.append(more);
   const help = el('section', 'panel trouble-help');
   help.append(el('h2', '', '解決しない場合の問い合わせ'));
   help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
@@ -327,7 +332,7 @@ export function mountOtherTrouble(main, guide, helpers, route) {
       ] }
     : route === 'other-trouble'
     ? { ...baseInfo,
-        checks: [...baseInfo.checks.slice(0, -1), ['事故・けがなどがある場合', ['安全を確保し、状況に応じた緊急窓口へご連絡ください。通常のお問い合わせの返答を待たないでください。']], ['この物件の設備・連絡方法の案内', []]],
+        checks: [...baseInfo.checks.slice(0, -1), ['事故・けがなどがある場合', ['安全を確保し、状況に応じた緊急窓口へご連絡ください。通常のお問い合わせの返答を待たないでください。']]],
         sections: ['room_equipment', 'kurasapo_connect'],
         missing: '設備や連絡方法に関する追加の案内は、現在掲載されていません。' }
     : route === 'water-leak' && guide.policy?.waterBilling === 'water_utility'
@@ -384,7 +389,7 @@ export function mountElectricityTrouble(main, guide, helpers) {
   symptoms.append(lighting, tripped, payment, breaker);
   main.append(symptoms);
   if (blocks.length) {
-    const area = el('details', 'panel trouble-step trouble-step-plain');
+    const area = el('details', 'panel trouble-step');
     area.append(el('summary', '', '建物全体・周辺も停電している'), renderBody({ ...section, blocks: blocks.filter(block => block.type !== 'heading'), hidePanelTitle: true }, '周辺の停電案内', { hideContactAction: true, plainLayout: true, inlineLayout: true }));
     symptoms.append(area);
   }
@@ -428,7 +433,7 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
       if (conditionalContact) main.append(el('p', 'trouble-equipment-note', '大阪ガスネットワークの都市ガスをご利用の場合の連絡先です。LPガス（プロパンガス）などをご利用の場合は、契約先の緊急窓口へご連絡ください。'));
       main.append(el('p', '', '大阪ガスネットワーク ' + contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
     }
-    if (configuredOperator === 'osaka_gas_network' || contact) {
+    if (!contact && configuredOperator === 'osaka_gas_network') {
       const official = link(contact ? '公式の地域別連絡先を確認する' : 'お住まいの地域のガスもれ連絡先を確認する', GAS_EMERGENCY_SOURCE, 'button secondary');
       official.target = '_blank'; official.rel = 'noopener noreferrer'; main.append(official);
     } else if (!contact) main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
@@ -438,12 +443,27 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
   const safety = el('p', 'trouble-equipment-note', 'ガスのにおいがある場合は、点火や復帰操作をせず、ガスのにおいの案内をご確認ください。');
   safety.append(' ', link('ガスもれの案内を見る →', '#gas-smell'));
   main.append(safety);
+  const symptoms = el('div', 'trouble-steps trouble-symptoms');
+  main.append(symptoms);
   if (guide.policy?.cookingSource === 'gas') {
     const cooker = el('details', 'panel trouble-step');
-    cooker.append(el('summary', '', 'ガスコンロだけ点火しない（においがしない場合）'), el('p', '', 'においがある場合は確認を中断し、ガスのにおいの案内をご確認ください。電池交換の表示がある、点火音が弱いなどの場合は、使用を止めて機種指定の電池を確認してください。電池切れは点火不良の原因の一つです。'));
-    main.append(cooker);
+    cooker.append(el('summary', '', 'ガスコンロだけ点火しない（においがしない場合）'));
+    const checks = el('ol', '');
+    for (const [title, text] of [
+      ['まず電池切れを確認', '電池式のコンロは、まず電池切れを確認してください。電池交換の表示がある、点火音が弱いなどの場合は、操作を止め、電池ケースや本体の表示で電池の種類と＋・−の向きを確認し、新しい電池に交換してください。電池の種類や交換場所が分からない場合は、管理会社へご相談ください。'],
+      ['汚れ・吹きこぼれを確認', '吹きこぼれや油汚れが、火の出る部分や点火する部分に付くと、点火しないことがあります。操作を止め、ガス栓を閉め、コンロが十分冷めてから、柔らかい布で表面の汚れや水分を拭き取ってください。点火する部分を強くこすったり、曲げたりしないでください。'],
+      ['清掃後の水分を確認', '吹きこぼれや清掃でぬれた部品は、十分に乾かしてください。'],
+      ['部品の取り付けを確認', '清掃後に点かなくなった場合は、バーナーキャップ（火の出る部分のふた）が浮いたり、ずれたりしていないか確認してください。取り付け方が分からない場合は、無理に動かさず管理会社へご相談ください。']
+    ]) { const item = el('li', ''); item.append(el('strong', '', title), el('p', '', text)); checks.append(item); }
+    cooker.append(checks, el('p', '', '確認しても点かない場合は、繰り返し点火操作をせず、備え付けのコンロは管理会社へ、ご自身で用意したコンロはメーカーや購入店へご相談ください。'));
+    symptoms.append(cooker);
   }
-  if (parts.interruption.blocks.length) main.append(renderBody(parts.interruption, 'ガスが使えない場合', { hideContactAction: true }));
+  if (parts.interruption.blocks.length) {
+    const both = el('details', 'panel trouble-step');
+    both.append(el('summary', '', 'コンロとお湯の両方が使えない場合'));
+    both.append(renderBody({ ...parts.interruption, blocks: parts.interruption.blocks.filter(block => block.type !== 'heading') }, '', { hideContactAction: true, inlineLayout: true }));
+    symptoms.append(both);
+  }
   else main.append(el('p', '', 'ガスメーターの表示を控え、ご契約のガス会社へお問い合わせください。復帰操作は、ガス会社の案内に従ってください。'));
   main.append(el('p', '', '復帰操作をしても使えない場合は、ご契約のガス会社へお問い合わせください。契約先は、契約書や請求書でご確認ください。'));
 

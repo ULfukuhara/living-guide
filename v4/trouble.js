@@ -129,7 +129,9 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
           details.append(el('summary', '', guide.sections[key].label + 'の補足案内'));
           if (additionalNotes[key]) details.append(el('p', '', additionalNotes[key]));
           const gasTrouble = key === 'gas';
-          details.append(link(gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? 'お湯が出ないときの案内を見る →' : 'コンロが点かないときの案内を見る →') : guide.sections[key].label + 'の詳しい案内を見る →', gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? '#no-hot-water' : '#gas-trouble') : '#section/' + key, 'trouble-guide-link'));
+          const destination = gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? '#no-hot-water' : '#gas-trouble') : '#section/' + key;
+          const currentDestination = location.hash === '#gas-trouble' && guide.policy?.cookingSource !== 'gas' ? '#no-hot-water' : location.hash;
+          if (destination !== currentDestination) details.append(link(gasTrouble ? (guide.policy?.cookingSource !== 'gas' ? 'お湯が出ないときの案内を見る →' : 'コンロが点かないときの案内を見る →') : guide.sections[key].label + 'の詳しい案内を見る →', destination, 'trouble-guide-link'));
           const close = el('button', 'trouble-close', 'この案内を閉じる');
           close.type = 'button';
           close.addEventListener('click', () => { details.open = false; details.querySelector('summary').focus(); });
@@ -165,8 +167,20 @@ export function mountNoHotWater(main, guide, helpers) {
   const ihGas=policy.cookingSource==='ih'&&policy.hotWaterSource==='gas';
   main.append(el('p','trouble-intro','まず以下の内容をご確認ください。'));
 
+  if (policy.hotWaterSource === 'electric') {
+    main.append(el('p', 'trouble-equipment-note', '本物件はオール電化で、給湯には電気温水器を使用しています。'));
+    mountChecks(main, guide, helpers, [
+      ['お湯を使い切っていないか', ['タンク内のお湯を使い切ると、お湯が出なくなることがあります。再び沸き上がるまで時間がかかります。', '沸き増し機能がある場合は、操作部の案内をご確認ください。機種や電気の契約によって、利用できる機能は異なります。']],
+      ['入居直後・停電の後ではないか', ['電気の使用開始手続きが済んでいるか確認してください。', '温水器用と表示されたブレーカーが切れていないか確認してください。繰り返し落ちる場合は、入れ直しを繰り返さず管理会社へご相談ください。', '電源を入れた直後は、すぐにお湯が使えない場合があります。']],
+      ['操作部・エラー表示を確認', ['リモコンや操作部がある場合は、表示と設定を確認してください。エラー番号があれば、番号を控えてください。']],
+      ['水漏れ・異臭・煙がある場合', ['使用を控え、管理会社へご相談ください。']]
+    ], [], '');
+    mountContact(main, guide, helpers, 'いつからお湯が出ないか、確認した内容とエラー表示を控えて、管理会社へご相談ください。');
+    return;
+  }
+
   if(ihGas)main.append(el('p','trouble-equipment-note','この物件はIHコンロですが、給湯にはガスを使用しています。'));
-  const errorNotes=splitGasGuide(guide.sections.gas).error.blocks.filter(block=>block.type==='text').flatMap(block=>block.content.split(/\r?\n/)).filter(Boolean);
+  const errorNotes=splitGasGuide(gasHeating ? guide.sections.gas : undefined).error.blocks.filter(block=>block.type==='text').flatMap(block=>block.content.split(/\r?\n/)).filter(Boolean);
   mountChecks(main,guide,helpers,[
     [errorNotes.length?'給湯器リモコン・エラー表示':'給湯器リモコン',['電源が入っているか確認してください。',...errorNotes,'エラー番号が表示されている場合は、番号を控えてください。']],
     ...(gasHeating&&policy.cookingSource==='gas'?[['ガスコンロ',['ガスのにおいがしないことを確認してから、ガスコンロが点火するか確認してください。']]]:[]),
@@ -184,7 +198,7 @@ export function mountToiletTrouble(main, guide, helpers) {
   mountChecks(main, guide, helpers, [
     ['水が流れない・詰まっている', ['続けて水を流すとあふれるおそれがあります。繰り返し流さず、便器内の水位を確認してください。', '異物を落とした場合は、何を落としたか控えてください。']],
     ['水が止まらない・漏れている', ['水があふれている、または床に漏れている場合は、使用を中止してください。','どこから水が出ているか、床への漏れがあるか確認してください。', '止水栓の場所や操作が分からない場合は、無理に操作せずご相談ください。']],
-    ['洗浄・便座が動かない', ['電源プラグやリモコンの表示を確認してください。', 'エラー表示がある場合は、その内容を控えてください。']],
+    ...(guide.policy?.washletProvided === true ? [['洗浄・便座が動かない', ['電源プラグや本体の操作部を確認してください。リモコンがある場合は、電池や表示も確認してください。', 'エラー表示がある場合は、その内容を控えてください。']]] : []),
     ['この物件のトイレ設備', []]
   ], ['toilet'], 'この物件のトイレ設備に関する追加の案内は、現在掲載されていません。設備の取扱説明書もご確認ください。', true);
   mountContact(main, guide, helpers, '症状と確認した内容を控えて、くらさぽコネクトの案内からお問い合わせ方法をご確認ください。');

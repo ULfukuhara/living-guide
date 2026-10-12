@@ -1,12 +1,12 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261012-production-1';
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-third-property-2';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-electric-hot-water-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261012-production-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-breaker-accordion-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261012-third-property-2';
+import { mountHome, initHeader } from './home.js?v=20261012-electric-hot-water-1';
 import { SECTION_KEYS } from './content.js?v=20261012-expenses-trouble-1';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 

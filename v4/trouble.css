@@ -94,3 +94,6 @@ body.is-detail{--navy:#092c83;--muted:#536f9e;--line:#deebf5;background:#f0f8fc;
 .is-detail .support-banner{display:block;background:#ecf9ff;border:0;border-radius:14px;padding:22px 18px;margin:22px 0 0;color:#092c83}
 .is-detail .support-banner p{color:#536f9e;font-size:14px;margin-bottom:16px}
 .is-detail .support-banner .button{width:100%}
+
+/* Area-wide outage: normal-weight summary, consistent inline guidance. */
+.trouble-symptoms .trouble-step.trouble-step-plain summary{font-weight:400}

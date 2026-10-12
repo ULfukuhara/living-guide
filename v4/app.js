@@ -1,12 +1,12 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261012-production-1';
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-lost-key-common-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-gas-address-contact-1';
 import { mountCancellationFlow } from './cancellation.js?v=20261012-production-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
-import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-production-1';
+import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-breaker-accordion-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261012-production-1';
+import { mountHome, initHeader } from './home.js?v=20261012-urgent-ih-1';
 import { SECTION_KEYS } from './content.js?v=20261012-expenses-trouble-1';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -119,6 +119,11 @@ function appendGrid(title, description, items, className) {
   section.append(grid); main.append(section);
 }
 function helpBanner(context) {
+  if (context === 'electricity' && guide.policy?.electricityBilling === 'provider') {
+    const panel = element('section', 'panel help-banner');
+    panel.append(element('h2', '', '電気の手続き・料金について'), element('p', '', '使用開始・停止、電気料金や支払いについては、ご契約の電力会社へお問い合わせください。'), element('p', '', 'ブレーカーや備え付けの設備の不具合は、管理会社へご相談ください。'), link('設備の不具合を相談する方法を見る →', guide.policy?.kurasapoEnabled === false ? (guide.sections.management_other ? '#section/management_other' : '#procedures') : guideHref('/kurasapo/') + '#request', 'button'));
+    return panel;
+  }
   if (guide?.policy && !guide.policy.kurasapoEnabled) {
     const panel=element('section','panel help-banner');
     panel.append(element('h2','','管理会社への連絡'),element('p','','相談先は、契約時の書類やこの物件の管理会社の案内をご確認ください。'),link('管理会社の案内を確認する →',guide.sections.management_other?'#section/management_other':'#procedures','button'));
@@ -154,6 +159,21 @@ function helpBanner(context) {
   }
   banner.append(text, link(directRequest && context === 'water' ? '設備の不具合を相談する方法を見る →' : directRequest ? 'くらさぽで相談する方法を見る →' : guidance ? 'くらさぽコネクトの使い方を見る →' : 'くらさぽコネクトで問い合わせる →', guideHref('/kurasapo/') + (directRequest ? '#request' : ''), 'button'));
   return banner;
+}
+// Provider-billed homes share the choice guidance; management-metered homes retain their own copy.
+function prepareElectricityStart(section, policy) {
+  if (policy?.electricityBilling !== 'provider' || !section?.blocks?.length) return section;
+  let start = false;
+  const blocks = section.blocks.map(block => {
+    if (block.type === 'heading') {
+      start = /^電気の使用開始/.test(block.content || '');
+      return start ? { ...block, content: '電気の使用開始はご自身で申込み' } : block;
+    }
+    if (start && block.type === 'text' && /電気の使用開始/.test(block.content || '')) return { ...block, content: '入居者様ご自身で、選んだ電力会社へ使用開始をお申し込みください。電力自由化により、電力会社や料金プランを選べます。' };
+    if (start && block.type === 'button' && (block.actionUrl || '').startsWith('https://kepco.jp/')) return { ...block, actionLabel: '関西電力の使用開始・手続き（電力会社の一例）' };
+    return block;
+  });
+  return { ...section, blocks };
 }
 function renderHome() { mountHome(main, guide, { element, link, icon, card }); }
 
@@ -208,7 +228,7 @@ function renderGuideList(route) {
 function render() {
   const requested = location.hash.slice(1) || 'home';
   const sectionKey = requested === 'trash' ? 'trash' : requested.startsWith('section/') ? requested.slice(8) : '';
-  const route = sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
+  const route = requested === 'gas-trouble' && guide.policy?.cookingSource === 'ih' ? 'no-hot-water' : sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = sectionKey === 'trash' ? routes.trash : sectionKey === 'key' && guide.sections.key
     ? ('鍵の管理')
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
@@ -233,7 +253,7 @@ function render() {
       panel.append(element('p', 'muted', '掲載内容と契約条件が異なる場合は、賃貸借契約書の内容が優先されます。'));
       main.append(panel);
     } else if (route === 'trash' || route.startsWith('section/')) {
-      const selectedSection = sectionKey === 'cancellation' ? prepareCancellationSection(guide.sections[sectionKey], guide.cancellationFormEnabled === true) : guide.sections[sectionKey];
+      const selectedSection = sectionKey === 'cancellation' ? prepareCancellationSection(guide.sections[sectionKey], guide.cancellationFormEnabled === true) : sectionKey === 'electricity' ? prepareElectricityStart(guide.sections[sectionKey], guide.policy) : guide.sections[sectionKey];
       const displayedSection = selectedSection?.blocks?.length
         ? sectionKey === 'gas' ? splitGasGuide(selectedSection).preparation
           : sectionKey === 'electricity' ? splitElectricityGuide(selectedSection).preparation
@@ -332,7 +352,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261012-lost-key-policy-1');
+  const { loadGuide } = await import('./data.js?v=20261012-cooking-v1-1');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

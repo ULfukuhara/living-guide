@@ -1,4 +1,4 @@
-import { propertyPolicy, normalizePropertySections } from './property-settings.js?v=20261012-lost-key-policy-1';
+import { propertyPolicy, normalizePropertySections } from './property-settings.js?v=20261012-cooking-v1-1';
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { trashSettings, trashCollection } from './trash-collection.js?v=20261012-production-1';
 import { db } from '/assets/firebase-init.js';

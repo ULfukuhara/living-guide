@@ -1,5 +1,5 @@
 import { groupedSections, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
-import { troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-production-1';
+import { troubleItemAvailable, troubleItems, splitGasGuide, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-urgent-ih-1';
 import { guideHref } from '/assets/site-links.js';
 export function initHeader(){const b=document.querySelector('#homeMenuButton'),m=document.querySelector('#homeMenu');const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','メニューを開く');};b.onclick=()=>{m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));b.setAttribute('aria-label',m.hidden?'メニューを開く':'メニューを閉じる');};m.onclick=e=>{if(e.target.closest('a'))close();};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!m.hidden){close();b.focus();}});}
 const menus=[['intro','はじめに','入居後まず確認','orange','home'],['equipment','お部屋・設備','使い方・お手入れ','blue','equipment'],['trash','ゴミの出し方','分別・収集日','green','trash'],['rules','暮らしのルール','生活のマナー','pink','rules'],['procedures','手続き・サポート','解約・費用・相談','purple','procedures'],['trouble','困ったとき','トラブル・相談','red','trouble']];
@@ -45,7 +45,7 @@ export function mountHome(main,guide,{element:el,link,icon}){
   const words=input.value.trim().split(/\s+/).map(normalize).filter(Boolean);
   results.replaceChildren();results.hidden=!words.length;status.textContent='';if(!words.length)return;
   const matches=text=>words.every(word=>normalize(text).includes(word));
-  const troubleHits=troubleItems.filter(item=>(!['gas-smell','gas-trouble'].includes(item.route)||guide.sections.gas)&&(item.route!=='electricity-trouble'||guide.sections.electricity)&&(!item.route.startsWith('section/')||guide.sections[item.route.slice(8)])&&matches(item.title+' '+(symptoms[item.route]||'')));
+  const troubleHits=troubleItems.filter(item=>troubleItemAvailable(item,guide)&&matches(item.title+' '+(symptoms[item.route]||'')));
   const hits=Object.entries(guide.sections).filter(([key,s])=>matches(sectionTitle(key,s)+' '+(key==='gas'&&s.blocks?.length ? splitGasGuide(s).preparation.body : key==='electricity'&&s.blocks?.length ? splitElectricityGuide(s).preparation.body : key==='internet'&&s.blocks?.length ? splitInternetGuide(s).preparation.body : key==='key'&&s.blocks?.length ? splitKeyGuide(s).preparation.body : s.body||'')+' '+(aliases[key]||''))&&!troubleHits.some(item=>item.route==='section/'+key));
   const count=troubleHits.length+hits.length;
   status.textContent=count?`${count}件の案内が見つかりました`:'該当する案内がありません。別の言葉でお試しください。';

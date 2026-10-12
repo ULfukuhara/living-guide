@@ -102,7 +102,7 @@ function appendDeliveryText(parent, text) {
 }
 
 export function renderBody(section, title, options = {}) {
-  const panel = element('section', 'panel');
+  const panel = options.inlineLayout ? element('div', 'trouble-step-body') : element('section', 'panel');
   const label = title || section?.label || 'ご案内';
   if (options.deliveryLayout || section?.hidePanelTitle) panel.setAttribute('aria-label', label);
   else panel.append(element('h2', '', label));
@@ -151,7 +151,8 @@ export function renderBody(section, title, options = {}) {
       if (movingLayout && block.type === 'button') {
         panel.append(wrapper);
         movingCard = undefined;
-      } else (movingCard || panel).append(wrapper);
+      } else if (options.inlineLayout) panel.append(...wrapper.children);
+      else (movingCard || panel).append(wrapper);
     }
     return panel;
   }

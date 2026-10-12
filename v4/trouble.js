@@ -17,12 +17,19 @@ export const troubleItems = [
   { route: 'other-trouble', title: 'その他のお困りごと', description: '状況と管理会社の案内を確認', icon: 'faq', color: 'purple' }
 ];
 
+export function troubleItemAvailable(item, guide) {
+  if (item.route === 'gas-trouble' && guide.policy?.cookingSource === 'ih') return false;
+  if (['gas-smell','gas-trouble'].includes(item.route) && !guide.sections.gas) return false;
+  if (item.route === 'electricity-trouble' && !guide.sections.electricity) return false;
+  return !item.route.startsWith('section/') || !!guide.sections[item.route.slice(8)];
+}
+
 export function mountTrouble(main, guide, { element: el, link, icon }) {
   main.append(el('p', 'trouble-intro', 'どのようなことでお困りですか？'));
   const list = el('nav', 'trouble-list');
   list.setAttribute('aria-label', 'お困りごとの種類');
   for (const item of troubleItems) {
-    if (['gas-smell', 'gas-trouble'].includes(item.route) && !guide.sections.gas) continue;
+    if (!troubleItemAvailable(item, guide)) continue;
     if (item.route === 'electricity-trouble' && !guide.sections.electricity) continue;
     if (item.route.startsWith('section/') && !guide.sections[item.route.slice(8)]) continue;
     const destination = item.route;
@@ -41,10 +48,19 @@ export function mountTrouble(main, guide, { element: el, link, icon }) {
 
 function mountEmergencyContact(main, guide, { element: el, link }) {
   if (!guide.policy?.emergencyPhone) return;
+  const conditions = {
+    'water-leak': ['水が止まらない・漏れが広がっている場合', '水を止められない、床や下の階へ漏れが広がっている場合は、お電話でご相談ください。'],
+    'toilet-trouble': ['水があふれる・トイレが使えない場合', '水があふれる、止まらない、詰まってトイレが使えない場合は、お電話でご相談ください。'],
+    'lost-key': ['鍵をなくして部屋に入れない場合', '鍵をなくして入室できず、開錠などの対応が必要な場合は、お電話でご相談ください。']
+  };
+  const condition = conditions[location.hash.slice(1)];
+  if (!condition) return;
+  const entry = el('details', 'panel trouble-step');
+  entry.append(el('summary', '', condition[0]));
   const panel = el('aside', 'trouble-emergency');
   panel.tabIndex = -1;
   panel.setAttribute('aria-label', '急ぎの対応が必要な場合の連絡先');
-  panel.append(el('h2', '', '急ぎの対応が必要な場合'), el('p', '', '水漏れの拡大・鍵の紛失で入室できないなど、お急ぎの場合はお電話ください。'));
+  panel.append(el('h2', '', '急ぎの対応が必要な場合'), el('p', '', condition[1]));
   panel.append(link(guide.policy.emergencyPhone + ' に電話する', 'tel:' + guide.policy.emergencyPhone.replace(/-/g,''), 'button'));
   const hours = el('dl', 'trouble-contact-hours');
   for (const [time, destination] of guide.policy.emergencyHours) {
@@ -57,7 +73,7 @@ function mountEmergencyContact(main, guide, { element: el, link }) {
     membership.append(' ', link('USACの利用条件を見る', '#section/usac'));
     panel.append(hours, membership);
   } else panel.append(hours);
-  main.append(panel);
+  entry.append(panel); main.append(entry);
 }
 
 function appendEmergencyJump(main, safety, el, label = '急ぎの連絡先を確認する ↓') {
@@ -108,7 +124,7 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
           details.append(el('summary', '', guide.sections[key].label + 'の補足案内'));
           if (additionalNotes[key]) details.append(el('p', '', additionalNotes[key]));
           const gasTrouble = key === 'gas';
-          details.append(link(gasTrouble ? 'ガスが使えないときの案内を見る →' : guide.sections[key].label + 'の詳しい案内を見る →', gasTrouble ? '#gas-trouble' : '#section/' + key, 'trouble-guide-link'));
+          details.append(link(gasTrouble ? (guide.policy?.cookingSource === 'ih' ? 'お湯が出ないときの案内を見る →' : 'ガスが使えないときの案内を見る →') : guide.sections[key].label + 'の詳しい案内を見る →', gasTrouble ? (guide.policy?.cookingSource === 'ih' ? '#no-hot-water' : '#gas-trouble') : '#section/' + key, 'trouble-guide-link'));
           const close = el('button', 'trouble-close', 'この案内を閉じる');
           close.type = 'button';
           close.addEventListener('click', () => { details.open = false; details.querySelector('summary').focus(); });
@@ -125,7 +141,7 @@ function mountChecks(main, guide, { element: el, link }, checks, sectionKeys, mi
 function mountContact(main, guide, { element: el, link }, message, action) {
   const route = location.hash.slice(1);
   const heading = { 'noise-trouble': '騒音について相談したい場合', 'lost-key': '鍵が見つからない・室内に入れない場合', 'other-trouble': '管理会社に相談する場合' }[route] || '確認しても改善しない場合';
-  const urgent = Boolean(guide.policy?.emergencyPhone) && ['no-hot-water', 'water-leak', 'toilet-trouble', 'air-conditioner-trouble', 'lost-key', 'other-trouble'].includes(route);
+  const urgent = Boolean(guide.policy?.emergencyPhone) && ['water-leak', 'toilet-trouble', 'lost-key'].includes(route);
   const help = el(urgent ? 'details' : 'section', 'panel trouble-help' + (urgent ? ' trouble-routine-contact' : ''));
   const conciseMessage = guide.policy?.kurasapoEnabled === false && !action ? '確認した症状や日時、写真などを控え、契約時に案内された管理会社の連絡先へご相談ください。' : action ? message : message.replace(/、?くらさぽコネクトの案内から(?:お問い合わせ方法|相談方法)をご確認ください。$/, 'ご相談ください。');
   help.append(el(urgent ? 'summary' : 'h2', '', urgent ? '急ぎでない相談・写真を送る場合' : heading), el('p', '', conciseMessage));
@@ -143,13 +159,14 @@ export function mountNoHotWater(main, guide, helpers) {
   const gasHeating=policy.hotWaterSource==='gas';
   const ihGas=policy.cookingSource==='ih'&&policy.hotWaterSource==='gas';
   main.append(el('p','trouble-intro','まず以下の内容をご確認ください。'));
-  main.append(el('p','trouble-safety',gasHeating?'ガスのにおいがする場合は、点火や電気のスイッチ操作をせず、ご契約のガス会社の緊急窓口へご連絡ください。':'異臭・煙・水漏れがある場合は使用を控え、管理会社へご相談ください。'));
+
   if(ihGas)main.append(el('p','trouble-equipment-note','この物件はIHコンロですが、給湯にはガスを使用しています。'));
   const errorNotes=splitGasGuide(guide.sections.gas).error.blocks.filter(block=>block.type==='text').flatMap(block=>block.content.split(/\r?\n/)).filter(Boolean);
   mountChecks(main,guide,helpers,[
     [errorNotes.length?'給湯器リモコン・エラー表示':'給湯器リモコン',['電源が入っているか確認してください。',...errorNotes,'エラー番号が表示されている場合は、番号を控えてください。']],
     ...(gasHeating&&policy.cookingSource==='gas'?[['ガスコンロ',['ガスのにおいがしないことを確認してから、ガスコンロが点火するか確認してください。']]]:[]),
-    ...(gasHeating?[['ガスメーター',['安全装置が作動していないか、表示を確認してください。','復帰操作は、ご契約のガス会社の案内に従ってください。']]]:[]),
+    ...(gasHeating?[['ガスメーター',['ガスのにおいがする場合は、復帰操作をせず、ガス会社の緊急窓口へご連絡ください。','安全装置が作動していないか、表示を確認してください。','復帰操作は、ご契約のガス会社の案内に従ってください。']]]:[]),
+    ...(!gasHeating?[['異臭・煙・水漏れがある場合',['使用を控え、管理会社へご相談ください。']]]:[]),
     ['その他・この物件の給湯設備',[]]
   ],gasHeating?['gas']:['room_equipment'],'この物件の給湯設備に関する追加の案内は、現在掲載されていません。設備の取扱説明書もご確認ください。');
   mountContact(main,guide,helpers,'確認した内容と、表示されているエラー番号を控えて、管理会社へご相談ください。');
@@ -158,10 +175,10 @@ export function mountNoHotWater(main, guide, helpers) {
 export function mountToiletTrouble(main, guide, helpers) {
   const { element: el } = helpers;
   main.append(el('p', 'trouble-intro', '当てはまる症状を開いてご確認ください。'));
-  main.append(el('p', 'trouble-safety', '水があふれている、または床に漏れている場合は、トイレの使用を中止し、周囲に水が広がらないようにしてください。'));
+
   mountChecks(main, guide, helpers, [
     ['水が流れない・詰まっている', ['続けて水を流すとあふれるおそれがあります。繰り返し流さず、便器内の水位を確認してください。', '異物を落とした場合は、何を落としたか控えてください。']],
-    ['水が止まらない・漏れている', ['どこから水が出ているか、床への漏れがあるか確認してください。', '止水栓の場所や操作が分からない場合は、無理に操作せずご相談ください。']],
+    ['水が止まらない・漏れている', ['水があふれている、または床に漏れている場合は、使用を中止してください。','どこから水が出ているか、床への漏れがあるか確認してください。', '止水栓の場所や操作が分からない場合は、無理に操作せずご相談ください。']],
     ['洗浄・便座が動かない', ['電源プラグやリモコンの表示を確認してください。', 'エラー表示がある場合は、その内容を控えてください。']],
     ['この物件のトイレ設備', []]
   ], ['toilet'], 'この物件のトイレ設備に関する追加の案内は、現在掲載されていません。設備の取扱説明書もご確認ください。', true);
@@ -171,13 +188,11 @@ export function mountToiletTrouble(main, guide, helpers) {
 export function mountAirConditionerTrouble(main, guide, helpers) {
   const { element: el } = helpers;
   main.append(el('p', 'trouble-intro', '当てはまる症状を開いてご確認ください。'));
-  const safety = el('p', 'trouble-safety', '焦げたにおいや煙、水漏れがある場合は運転を止め、無理に使わないでください。火災の場合は安全な場所へ避難し、119番へ通報してください。');
-  if (guide.policy?.emergencyPhone) appendEmergencyJump(main, safety, el, '設備の急ぎの連絡先を確認する ↓');
-  main.append(safety);
   mountChecks(main, guide, helpers, [
     ['運転しない', ['リモコンの表示と電池、運転モードを確認してください。', 'ブレーカーが切れていないか確認してください。繰り返し切れる場合は、無理に入れ直さずご相談ください。']],
     ['冷えない・暖まらない', ['冷房・暖房の運転モードと設定温度を確認してください。', 'フィルターや室内機・室外機の吹き出し口がふさがれていないか確認してください。']],
     ['異音・水漏れ・エラー表示', ['いつからどのような症状が出ているか確認してください。', 'エラー番号が表示されている場合は、番号を控えてください。水漏れがある場合は運転を止めてください。']],
+    ['焦げたにおい・煙がある', ['運転を止め、使用を控えて管理会社へご相談ください。火災の場合は安全な場所へ避難し、119番へ通報してください。']],
     ['この物件のエアコン設備', []]
   ], ['air_conditioner'], 'この物件のエアコン設備に関する追加の案内は、現在掲載されていません。設備の取扱説明書もご確認ください。', true);
   mountContact(main, guide, helpers, '症状と確認した内容、エラー番号を控えて、くらさぽコネクトの案内からお問い合わせ方法をご確認ください。');
@@ -185,10 +200,10 @@ export function mountAirConditionerTrouble(main, guide, helpers) {
 
 export const otherTroubleGuides = {
   'water-leak': {
-    note: '水が広がっている場合は、水の使用を止めてください。濡れている電気設備には触れず、早めにご相談ください。',
+    note: '',
     checks: [
-      ['漏れている場所', ['蛇口、排水口、配管、天井など、どこから水が出ているか確認してください。', '水が出ている場所の写真を撮れる場合は、記録してください。']],
-      ['水の広がり', ['床や壁に水が広がっているか確認してください。', '下の階などにも影響しそうな場合は、早めにご相談ください。']],
+      ['漏れている場所', ['漏れている場所の水の使用を控えてください。','蛇口、排水口、配管、天井など、どこから水が出ているか確認してください。', '水が出ている場所の写真を撮れる場合は、記録してください。']],
+      ['水の広がり', ['濡れている電気設備には触れないでください。','床や壁に水が広がっているか確認してください。', '下の階などにも影響しそうな場合は、早めにご相談ください。']],
       ['水漏れを止めたい場合（止水栓）', ['漏れている場所の水の使用を控えてください。', '止水栓は、お部屋への水を止めるバルブです。玄関横などのPS（配管やメーターを収めたスペース）内の、水道メーター付近にある場合があります。場所は物件によって異なります。', '自分のお部屋の止水栓と閉め方が分かる場合は、閉めて水を止めてください。ほかのお部屋のバルブやガスの元栓は操作しないでください。', '場所が分からない、扉が開かない、バルブが固い場合は無理に操作せず、管理会社へご連絡ください。']],
       ['この物件の水まわりの案内', []]
     ],
@@ -209,7 +224,7 @@ export const otherTroubleGuides = {
     contact: '鍵をなくした状況を控えて、くらさぽコネクトの案内からお問い合わせ方法をご確認ください。'
   },
   'internet-trouble': {
-    note: '通信機器や配線を無理に分解せず、契約内容と機器の案内に沿って確認してください。',
+    note: '',
     checks: [
       ['接続できない', ['端末のWi-Fi設定と、接続先のネットワーク名を確認してください。', 'ルーターなどの通信機器のランプ表示を確認してください。']],
       ['接続できても利用できない', ['ほかの端末でも同じ症状か確認してください。', 'いつから利用できないか、表示されるエラーがあれば控えてください。']],
@@ -221,10 +236,11 @@ export const otherTroubleGuides = {
     contact: '接続状況と確認した内容を控えて、くらさぽコネクトの案内からお問い合わせ方法をご確認ください。'
   },
   'noise-trouble': {
-    note: '相手の住戸を直接訪ねるなど、対立につながる行動は避けてください。',
+    note: '',
     checks: [
       ['発生した日時', ['音が聞こえた日時と、続いた時間を控えてください。']],
       ['音の状況', ['どのような音か、どの場所で聞こえるかを確認してください。', '音の発生元を推測だけで決めつけないようにしてください。']],
+      ['相談するときの注意', ['相手の住戸へ直接訪ねず、日時と音の状況を管理会社へお知らせください。']],
       ['この物件の生活ルール', []]
     ],
     sections: ['noise'],
@@ -232,7 +248,7 @@ export const otherTroubleGuides = {
     contact: '日時と音の状況を控えて、くらさぽコネクトの案内から相談方法をご確認ください。'
   },
   'other-trouble': {
-    note: '事故やけがなど緊急の場合は、安全を確保し、状況に応じた緊急窓口へご連絡ください。',
+    note: '',
     checks: [
       ['困っている内容', ['設備、共用部分、手続きなど、何について困っているか整理してください。']],
       ['発生場所・時期', ['いつ、どこで起きたかを控えてください。', '写真やエラー表示がある場合は、記録してください。']],
@@ -244,7 +260,53 @@ export const otherTroubleGuides = {
   }
 };
 
+function mountInternetTrouble(main, guide, { element: el, link }) {
+  const policy = guide.policy || {};
+  const section = guide.sections.internet;
+  const zeroNet = policy.internetProvider === 'zero_net';
+  const noRouter = policy.wifiRouterProvided === false;
+  const providerContact = zeroNet ? section?.blocks?.find(block => block.type === 'button' && /^tel:[+\d\s()-]+$/.test(block.actionUrl || '')) : undefined;
+  const property = el('section', 'panel trouble-internet-property');
+  property.append(el('h2', '', 'この物件のインターネット'));
+  property.append(el('p', '', zeroNet ? '無料インターネット（0net）をご利用いただけます。' : '利用方法や契約先は、この物件のインターネット案内をご確認ください。ご自身で契約している場合は、契約先が問い合わせ窓口です。'));
+  if (noRouter) property.append(el('p', '', 'Wi-Fiルーターは備え付けではありません。Wi-Fiを使う場合は、ご自身で用意したルーターをご確認ください。'));
+  if (section) property.append(link('利用方法・設備の案内を見る →', '#section/internet', 'trouble-guide-link'));
+  main.append(property, el('h2', '', 'まず確認すること'));
+  const steps = el('div', 'trouble-steps trouble-symptoms');
+  const checks = [
+    ['1. 電源・ケーブルを確認', ['ルーターなどの電源が入っているか、ランプが消えていないか確認してください。ランプの色や点滅は機種によって意味が異なります。', zeroNet ? '壁のLANケーブル差し込み口と、ルーター・パソコンの間のLANケーブルに抜けやゆるみがないか確認してください。' : 'お部屋の接続口と通信機器の間のケーブルに、抜けやゆるみがないか確認してください。光ケーブルは抜かず、折り曲げないでください。']],
+    ['2. 機器を再起動する', [zeroNet && noRouter ? 'ご自身のルーターの電源を切り、機器の案内に従って入れ直してください。ランプが落ち着くまでお待ちください。' : '機器・契約先の案内に従って電源を入れ直してください。ONU（光回線の機器）やモデムがある場合は、その機器が起動してからルーターの電源を入れてください。', 'リセットボタン（初期化）は押さないでください。接続設定が消えてしまいます。', '停電から復旧した後も、再起動で改善する場合があります。']],
+    ['3. 他の端末でも確認', ['スマホ・パソコンなど、他の端末でもつながらないか確認してください。', '1台だけの場合は、その端末の機内モードを解除し、Wi-Fiのオン・オフや端末の再起動を試してください。']]
+  ];
+  for (const [title, messages] of checks) {
+    const details = el('details', 'panel trouble-step');
+    details.append(el('summary', '', title));
+    const list = el('ul');
+    for (const message of messages) list.append(el('li', '', message));
+    details.append(list);steps.append(details);
+  }
+  main.append(steps);
+  const more = el('details', 'panel trouble-step');
+  more.append(el('summary', '', 'まだつながらない場合'));
+  const further = el('ul');
+  for (const message of ['Wi-Fiの名前（SSID）とパスワードが、ご自身の機器や契約先から案内されたものと一致するか確認してください。', ...(zeroNet && noRouter ? ['ルーターの動作モード（AP／BRなど）は、この物件のインターネット案内と機器の説明に従って確認してください。'] : []), ...(!zeroNet ? ['ご自身で契約している場合は、利用開始の手続きや料金の支払い・契約状況をご確認ください。'] : []), '回線事業者・プロバイダの公式サイトで、障害や工事の情報をご確認ください。']) further.append(el('li', '', message));
+  more.append(further);main.append(more);
+  const help = el('section', 'panel trouble-help');
+  help.append(el('h2', '', '解決しない場合の問い合わせ'));
+  help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
+  if (providerContact) help.append(link(providerContact.actionLabel, providerContact.actionUrl, 'button'));
+  else if (zeroNet && section) help.append(link('0netの問い合わせ先を確認する →', '#section/internet', 'button'));
+  const report = el('details', 'trouble-property-guide');
+  report.append(el('summary', '', '問い合わせ時に伝えること'));
+  const reportList = el('ul');
+  for (const message of ['物件名・部屋番号', 'いつから、どの端末でつながらないか', '機器のランプの色・点滅', '再起動など、試した内容', '有線でつながるか（確認できる場合）']) reportList.append(el('li', '', message));
+  report.append(reportList);help.append(report);
+  if (!zeroNet || !providerContact) help.append(link(policy.kurasapoEnabled === false ? '管理会社の案内を確認する' : '管理会社に相談する方法を見る', policy.kurasapoEnabled === false ? (guide.sections.management_other ? '#section/management_other' : '#procedures') : guideHref('/kurasapo/') + '#request', 'trouble-guide-link'));
+  main.append(help);
+}
+
 export function mountOtherTrouble(main, guide, helpers, route) {
+  if (route === 'internet-trouble') { mountInternetTrouble(main, guide, helpers); return; }
   const { element: el } = helpers;
   const baseInfo = otherTroubleGuides[route];
   const confirmedLostKeyPolicy = guide.policy?.lostKeyPolicy === 'usac_paid_loan_week';
@@ -265,7 +327,7 @@ export function mountOtherTrouble(main, guide, helpers, route) {
       ] }
     : route === 'other-trouble'
     ? { ...baseInfo,
-        checks: [...baseInfo.checks.slice(0, -1), ['この物件の設備・連絡方法の案内', []]],
+        checks: [...baseInfo.checks.slice(0, -1), ['事故・けがなどがある場合', ['安全を確保し、状況に応じた緊急窓口へご連絡ください。通常のお問い合わせの返答を待たないでください。']], ['この物件の設備・連絡方法の案内', []]],
         sections: ['room_equipment', 'kurasapo_connect'],
         missing: '設備や連絡方法に関する追加の案内は、現在掲載されていません。' }
     : route === 'water-leak' && guide.policy?.waterBilling === 'water_utility'
@@ -313,7 +375,7 @@ export function mountElectricityTrouble(main, guide, helpers) {
   lighting.append(el('summary', '', '照明だけがつかない'), el('p', '', '1つの照明だけがつかない場合は、電球切れの可能性があります。交換できる電球は、適合する種類・定格のものに交換してみてください。交換前に電源を切り、電球が冷えてから作業してください。交換してもつかない場合は、照明器具の不具合も考えられます。備え付けの照明は、管理会社へご相談ください。LED一体型など電球を交換できない器具や、安全に手が届かない場所は、無理に外さないでください。'));
   const tripped = el('details', 'panel trouble-step');
   tripped.append(el('summary', '', 'ブレーカーが落ちている'));
-  if (breakerBlocks.length) tripped.append(renderBody({ ...section, blocks: breakerBlocks.filter(block => block.type !== 'heading'), hidePanelTitle: true }, 'ブレーカーの確認', { hideContactAction: true, plainLayout: true }));
+  if (breakerBlocks.length) tripped.append(renderBody({ ...section, blocks: breakerBlocks.filter(block => block.type !== 'heading'), hidePanelTitle: true }, 'ブレーカーの確認', { hideContactAction: true, plainLayout: true, inlineLayout: true }));
   else tripped.append(link('電気・ブレーカーの案内を見る →', '#section/electricity', 'trouble-guide-link'));
   const payment = el('details', 'panel trouble-step');
   payment.append(el('summary', '', 'ブレーカーが上がっていても電気がつかない'), el('p', '', guide.policy?.electricityBilling === 'management' ? '電気料金の支払い状況をご確認ください。支払い状況が分からない場合や、支払い済みでも電気がつかない場合は、管理会社へご相談ください。' : '電気料金の支払い状況と契約先の案内をご確認ください。支払い済みでも電気がつかない場合は、契約先へお問い合わせください。設備の不具合は管理会社へご相談ください。'), link('電気料金の案内を見る →', '#section/electricity', 'trouble-guide-link'));
@@ -322,8 +384,8 @@ export function mountElectricityTrouble(main, guide, helpers) {
   symptoms.append(lighting, tripped, payment, breaker);
   main.append(symptoms);
   if (blocks.length) {
-    const area = el('details', 'panel trouble-step');
-    area.append(el('summary', '', '建物全体・周辺も停電している'), renderBody({ ...section, blocks, hidePanelTitle: true }, '周辺の停電案内', { hideContactAction: true }));
+    const area = el('details', 'panel trouble-step trouble-step-plain');
+    area.append(el('summary', '', '建物全体・周辺も停電している'), renderBody({ ...section, blocks: blocks.filter(block => block.type !== 'heading'), hidePanelTitle: true }, '周辺の停電案内', { hideContactAction: true, plainLayout: true, inlineLayout: true }));
     symptoms.append(area);
   }
   const contact = el('section', 'panel trouble-help');
@@ -353,21 +415,34 @@ export function splitGasGuide(section) {
 export function mountGasTrouble(main, guide, { element: el, link, renderBody }, smell = false) {
   const parts = splitGasGuide(guide.sections.gas);
   if (smell) {
-    main.append(el('p', 'trouble-safety', '火気を使用せず、換気扇・電気のスイッチを操作しないでください。速やかにガス会社の緊急窓口へご連絡ください。'));
-    const contact = gasEmergencyContact(guide.gasNetworkOperator, guide.address);
+    const steps = el('section', 'panel trouble-gas-actions');
+    steps.append(el('h2', '', 'まず行うこと'));
+    const list = el('ol');
+    for (const message of ['ガス機器の使用を止め、火を使わないでください。', '室内では窓や戸を開けて換気してください。換気扇・電気のスイッチやコンセントは操作しないでください。', 'ガス栓の場所と操作が分かり、安全に閉められる場合は閉めてください。', 'ガス会社のガスもれ窓口へ連絡し、屋外など安全な場所で案内を受けてください。']) list.append(el('li', '', message));
+    steps.append(list); main.append(steps);
+    const configuredOperator = guide.gasNetworkOperator || (guide.policy?.gasEmergencyDirectory === 'osaka_gas_network' ? 'osaka_gas_network' : '');
+    // Unknown supply: offer an explicitly conditional city-gas contact, never infer the property's supplier from its address.
+    const conditionalContact = !configuredOperator;
+    const contact = gasEmergencyContact(configuredOperator || 'osaka_gas_network', guide.address);
     if (contact) {
-      main.append(el('p', '', contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
+      if (conditionalContact) main.append(el('p', 'trouble-equipment-note', '大阪ガスネットワークの都市ガスをご利用の場合の連絡先です。LPガス（プロパンガス）などをご利用の場合は、契約先の緊急窓口へご連絡ください。'));
+      main.append(el('p', '', '大阪ガスネットワーク ' + contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
     }
-    if (guide.gasNetworkOperator === 'osaka_gas_network' || guide.policy?.gasEmergencyDirectory === 'osaka_gas_network') {
+    if (configuredOperator === 'osaka_gas_network' || contact) {
       const official = link(contact ? '公式の地域別連絡先を確認する' : 'お住まいの地域のガスもれ連絡先を確認する', GAS_EMERGENCY_SOURCE, 'button secondary');
       official.target = '_blank'; official.rel = 'noopener noreferrer'; main.append(official);
     } else if (!contact) main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
-    if (parts.smell.blocks.length) main.append(renderBody(parts.smell, 'ガスのにおいがする場合', { hideContactAction: true }));
+
     return;
   }
-  const safety = el('p', 'trouble-safety', 'ガスのにおいがする場合は、復帰操作をしないでください。');
+  const safety = el('p', 'trouble-equipment-note', 'ガスのにおいがある場合は、点火や復帰操作をせず、ガスのにおいの案内をご確認ください。');
   safety.append(' ', link('ガスもれの案内を見る →', '#gas-smell'));
   main.append(safety);
+  if (guide.policy?.cookingSource === 'gas') {
+    const cooker = el('details', 'panel trouble-step');
+    cooker.append(el('summary', '', 'ガスコンロだけ点火しない（においがしない場合）'), el('p', '', 'においがある場合は確認を中断し、ガスのにおいの案内をご確認ください。電池交換の表示がある、点火音が弱いなどの場合は、使用を止めて機種指定の電池を確認してください。電池切れは点火不良の原因の一つです。'));
+    main.append(cooker);
+  }
   if (parts.interruption.blocks.length) main.append(renderBody(parts.interruption, 'ガスが使えない場合', { hideContactAction: true }));
   else main.append(el('p', '', 'ガスメーターの表示を控え、ご契約のガス会社へお問い合わせください。復帰操作は、ガス会社の案内に従ってください。'));
   main.append(el('p', '', '復帰操作をしても使えない場合は、ご契約のガス会社へお問い合わせください。契約先は、契約書や請求書でご確認ください。'));

@@ -3,6 +3,13 @@ import { SECTION_KEYS } from './content.js?v=20261012-production-1';
 export const PROPERTY_POLICY_FIELDS = ['electricity_billing','water_billing','hot_water_source','cooking_source','internet_provider_key','wifi_router_provided','electricity_stop_required','internet_stop_required','lost_key_policy','key_loan_available','key_return_method','emergency_support_phone','emergency_support_hours','gas_emergency_directory','gas_network_operator','trash_collection_type','trash_region_id','cancellation_form_enabled','kurasapo_enabled','emergency_support_provider'];
 const bool=(v,fallback=false)=>v===undefined||v===null||v===''?fallback:v===true||v===1||typeof v==='string'&&['true','1','yes','on'].includes(v.trim().toLowerCase());
 const enumValue=(v,allowed,fallback='unknown')=>allowed.includes(v)?v:fallback;
+// Only explicit V1 equipment variants are evidence of a cooking appliance type.
+function cookingSource(property) {
+ const setting=property.cooking_source;
+ if(setting!==undefined && setting!==null && setting!=='')return enumValue(setting,['ih','gas']);
+ const legacy=String(property.gas||'').trim().toLowerCase().replace(/\s+/g,' ');
+ return legacy==='ih'?'ih':legacy==='gas stove'?'gas':'unknown';
+}
 export function propertyPolicy(property={}) {
  const phone=String(property.emergency_support_phone||'').trim();
  const emergencyPhone=/^\+?[0-9][0-9-]{2,19}$/.test(phone)?phone:'';
@@ -10,7 +17,7 @@ export function propertyPolicy(property={}) {
  return {
   electricityBilling:enumValue(property.electricity_billing,['management','provider']),
   waterBilling:enumValue(property.water_billing,['water_utility','management']),
-  hotWaterSource:enumValue(property.hot_water_source,['gas','electric']),cookingSource:enumValue(property.cooking_source,['ih','gas']),
+  hotWaterSource:enumValue(property.hot_water_source,['gas','electric']),cookingSource:cookingSource(property),
   internetProvider:enumValue(property.internet_provider_key,['zero_net','other']),
   wifiRouterProvided:property.wifi_router_provided===undefined||property.wifi_router_provided===''?null:bool(property.wifi_router_provided),
   electricityStopRequired:bool(property.electricity_stop_required,true),internetStopRequired:bool(property.internet_stop_required,true),

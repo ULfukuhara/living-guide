@@ -1,12 +1,12 @@
 import { prepareCancellationSection } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { mountTrashCollection, prepareTrashSection } from './trash-collection.js?v=20261012-production-1';
-import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-other-expanded-1';
+import { troubleItems, otherTroubleGuides, mountTrouble, mountNoHotWater, mountToiletTrouble, mountAirConditionerTrouble, mountOtherTrouble, mountElectricityTrouble, splitGasGuide, mountGasTrouble, splitElectricityGuide, splitInternetGuide, splitKeyGuide } from './trouble.js?v=20261012-third-property-2';
 import { mountCancellationFlow } from './cancellation.js?v=20261012-production-1';
 import { guideGroups, groupTitles, sectionGroup, sectionTitle } from './navigation.js?v=20261011-key-equipment-1';
 import { renderBody, GUIDE_LAYOUT_KEYS } from './body.js?v=20261012-breaker-accordion-1';
 import { BRAND } from './config.js';
 import { decorateExternalLink } from './link-icons.js?v=20261010-external-links-1';
-import { mountHome, initHeader } from './home.js?v=20261012-other-expanded-1';
+import { mountHome, initHeader } from './home.js?v=20261012-third-property-2';
 import { SECTION_KEYS } from './content.js?v=20261012-expenses-trouble-1';
 import { guideHref, KURASAPO_LINKS } from '/assets/site-links.js';
 
@@ -239,7 +239,7 @@ function renderGuideList(route) {
 function render() {
   const requested = location.hash.slice(1) || 'home';
   const sectionKey = requested === 'trash' ? 'trash' : requested.startsWith('section/') ? requested.slice(8) : '';
-  const route = requested === 'gas-trouble' && guide.policy?.cookingSource !== 'gas' ? 'no-hot-water' : sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
+  const route = requested === 'gas-smell' && !guide.sections.gas ? 'trouble' : requested === 'gas-trouble' && guide.policy?.cookingSource !== 'gas' ? 'no-hot-water' : sectionKey && SECTION_KEYS.includes(sectionKey) ? requested : Object.hasOwn(routes, requested) ? requested : 'home';
   const routeTitle = sectionKey === 'trash' ? routes.trash : sectionKey === 'key' && guide.sections.key
     ? ('鍵の管理')
     : guide.sections[sectionKey] ? sectionTitle(sectionKey, guide.sections[sectionKey]) : routes[route] || 'ご案内';
@@ -364,7 +364,7 @@ if (BRAND.logoSrc) {
   logo.addEventListener('load', () => { logo.hidden = false; document.querySelector('#brandText').hidden = true; });
 }
 try {
-  const { loadGuide } = await import('./data.js?v=20261012-gas-base-1');
+  const { loadGuide } = await import('./data.js?v=20261012-third-property-2');
   guide = await loadGuide(location.search);
   render();
   window.addEventListener('hashchange', event => { rememberSectionOrigin(event.oldURL); render(); main.focus({ preventScroll: true }); window.scrollTo(0, 0); });

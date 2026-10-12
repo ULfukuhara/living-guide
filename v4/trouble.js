@@ -269,11 +269,13 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const policy = guide.policy || {};
   const section = guide.sections.internet;
   const zeroNet = policy.internetProvider === 'zero_net';
+  const baycom = policy.internetProvider === 'baycom';
+  const sharedProvider = zeroNet || baycom;
   const noRouter = policy.wifiRouterProvided === false;
-  const providerContact = zeroNet ? section?.blocks?.find(block => block.type === 'button' && /^tel:[+\d\s()-]+$/.test(block.actionUrl || '')) : undefined;
+  const providerContact = sharedProvider ? section?.blocks?.find(block => block.type === 'button' && /^tel:[+\d\s()-]+$/.test(block.actionUrl || '')) : undefined;
   const property = el('section', 'panel trouble-internet-property');
   property.append(el('h2', '', 'この物件のインターネット'));
-  property.append(el('p', '', zeroNet ? '無料インターネット（0net）をご利用いただけます。' : '利用方法や契約先は、この物件のインターネット案内をご確認ください。ご自身で契約している場合は、契約先が問い合わせ窓口です。'));
+  property.append(el('p', '', zeroNet ? '無料インターネット（0net）をご利用いただけます。' : baycom ? 'ベイコムの無料インターネットをご利用いただけます。利用開始や機器の案内はベイコムへご確認ください。' : '利用方法や契約先は、この物件のインターネット案内をご確認ください。ご自身で契約している場合は、契約先が問い合わせ窓口です。'));
   if (noRouter) property.append(el('p', '', 'Wi-Fiルーターは備え付けではありません。Wi-Fiを使う場合は、ご自身で用意したルーターをご確認ください。'));
   if (section) property.append(link('利用方法・設備の案内を見る →', '#section/internet', 'trouble-guide-link'));
   main.append(property, el('h2', '', 'まず確認すること'));
@@ -294,11 +296,11 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const more = el('details', 'panel trouble-step');
   more.append(el('summary', '', 'まだつながらない場合'));
   const further = el('ul');
-  for (const message of ['Wi-Fiの名前（SSID）とパスワードが、ご自身の機器や契約先から案内されたものと一致するか確認してください。', ...(zeroNet && noRouter ? ['ルーターの動作モード（AP／BRなど）は、この物件のインターネット案内と機器の説明に従って確認してください。'] : []), ...(!zeroNet ? ['ご自身で契約している場合は、利用開始の手続きや料金の支払い・契約状況をご確認ください。'] : []), '回線事業者・プロバイダの公式サイトで、障害や工事の情報をご確認ください。']) further.append(el('li', '', message));
+  for (const message of ['Wi-Fiの名前（SSID）とパスワードが、ご自身の機器や契約先から案内されたものと一致するか確認してください。', ...(zeroNet && noRouter ? ['ルーターの動作モード（AP／BRなど）は、この物件のインターネット案内と機器の説明に従って確認してください。'] : []), ...(!sharedProvider ? ['ご自身で契約している場合は、利用開始の手続きや料金の支払い・契約状況をご確認ください。'] : []), '回線事業者・プロバイダの公式サイトで、障害や工事の情報をご確認ください。']) further.append(el('li', '', message));
   more.append(further);steps.append(more);
   const help = el('section', 'panel trouble-help');
   help.append(el('h2', '', '解決しない場合の問い合わせ'));
-  help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
+  help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : baycom ? 'ベイコムのサポート窓口へ、接続状況と試した内容をお知らせください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
   if (providerContact) help.append(link(providerContact.actionLabel, providerContact.actionUrl, 'button'));
   else if (zeroNet && section) help.append(link('0netの問い合わせ先を確認する →', '#section/internet', 'button'));
   const report = el('details', 'trouble-property-guide');
@@ -306,7 +308,7 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const reportList = el('ul');
   for (const message of ['物件名・部屋番号', 'いつから、どの端末でつながらないか', '機器のランプの色・点滅', '再起動など、試した内容', '有線でつながるか（確認できる場合）']) reportList.append(el('li', '', message));
   report.append(reportList);help.append(report);
-  if (!zeroNet || !providerContact) help.append(link(policy.kurasapoEnabled === false ? '管理会社の案内を確認する' : '管理会社に相談する方法を見る', policy.kurasapoEnabled === false ? (guide.sections.management_other ? '#section/management_other' : '#procedures') : guideHref('/kurasapo/') + '#request', 'trouble-guide-link'));
+  if (!sharedProvider || !providerContact) help.append(link(policy.kurasapoEnabled === false ? '管理会社の案内を確認する' : '管理会社に相談する方法を見る', policy.kurasapoEnabled === false ? (guide.sections.management_other ? '#section/management_other' : '#procedures') : guideHref('/kurasapo/') + '#request', 'trouble-guide-link'));
   main.append(help);
 }
 

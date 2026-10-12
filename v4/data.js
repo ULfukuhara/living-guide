@@ -1,4 +1,4 @@
-import { propertyPolicy, normalizePropertySections, applyEquipmentConditions } from './property-settings.js?v=20261012-gas-base-1';
+import { propertyPolicy, normalizePropertySections, applyEquipmentConditions } from './property-settings.js?v=20261012-third-property-2';
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { trashSettings, trashCollection } from './trash-collection.js?v=20261012-production-1';
 import { db } from '/assets/firebase-init.js';

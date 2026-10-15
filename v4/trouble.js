@@ -1,4 +1,4 @@
-import { gasEmergencyContact, GAS_EMERGENCY_SOURCE } from './gas-emergency.js?v=20261011-gas-region-1';
+import { gasEmergencyContact, GAS_EMERGENCY_SOURCE } from './gas-emergency.js?v=20261015-customer-regions-1';
 import { guideHref } from '/assets/site-links.js';
 
 // Presentation only: consume the guide already selected by loadGuide.
@@ -434,6 +434,10 @@ export function splitGasGuide(section) {
 }
 
 export function mountGasTrouble(main, guide, { element: el, link, renderBody }, smell = false) {
+  if (!guide.sections.gas || guide.policy?.hotWaterSource === 'electric') {
+    main.append(el('p', '', 'この物件のガス案内はありません。お湯が出ない場合は、給湯の案内をご確認ください。'), link('お湯が出ないときの案内を見る →', '#no-hot-water', 'button secondary'));
+    return;
+  }
   const parts = splitGasGuide(guide.sections.gas);
   if (smell) {
     const steps = el('section', 'panel trouble-gas-actions');
@@ -441,18 +445,22 @@ export function mountGasTrouble(main, guide, { element: el, link, renderBody }, 
     const list = el('ol');
     for (const message of ['ガス機器の使用を止め、火を使わないでください。', '室内では窓や戸を開けて換気してください。換気扇・電気のスイッチやコンセントは操作しないでください。', 'ガス栓の場所と操作が分かり、安全に閉められる場合は閉めてください。', 'ガス会社のガスもれ窓口へ連絡し、屋外など安全な場所で案内を受けてください。']) list.append(el('li', '', message));
     steps.append(list); main.append(steps);
-    const configuredOperator = guide.gasNetworkOperator || (guide.policy?.gasEmergencyDirectory === 'osaka_gas_network' ? 'osaka_gas_network' : '');
-    // Unknown supply: offer an explicitly conditional city-gas contact, never infer the property's supplier from its address.
-    const conditionalContact = !configuredOperator;
-    const contact = gasEmergencyContact(configuredOperator || 'osaka_gas_network', guide.address);
-    if (contact) {
-      if (conditionalContact) main.append(el('p', 'trouble-equipment-note', '大阪ガスネットワークの都市ガスをご利用の場合の連絡先です。LPガス（プロパンガス）などをご利用の場合は、契約先の緊急窓口へご連絡ください。'));
-      main.append(el('p', '', '大阪ガスネットワーク ' + contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
+    // Confirmed LP-gas variants use their supplier's emergency instructions.
+    if (/^(?:v4_gas_lp_|lp_)/.test(guide.sections.gas?.variant || '')) {
+      main.append(renderBody(parts.smell));
+      return;
     }
-    if (!contact && configuredOperator === 'osaka_gas_network') {
-      const official = link(contact ? '公式の地域別連絡先を確認する' : 'お住まいの地域のガスもれ連絡先を確認する', GAS_EMERGENCY_SOURCE, 'button secondary');
+    // Only a confirmed network operator enables address-based emergency routing.
+    const configuredOperator = guide.gasNetworkOperator || '';
+    const contact = gasEmergencyContact(configuredOperator, guide.address);
+    if (contact) {
+      main.append(el('p', '', '大阪ガスネットワーク ' + contact.region + '（' + contact.municipality + '）・' + contact.hours), link(contact.phone + ' に電話する（ガスもれ通報専用）', contact.href, 'button'));
+    } else if (configuredOperator === 'osaka_gas_network') {
+      const official = link('大阪ガスネットワークの地域別ガスもれ連絡先を確認する', GAS_EMERGENCY_SOURCE, 'button secondary');
       official.target = '_blank'; official.rel = 'noopener noreferrer'; main.append(official);
-    } else if (!contact) main.append(el('p', '', '契約書やガス会社からの案内に記載された緊急窓口へご連絡ください。'));
+    } else {
+      main.append(el('p', '', 'ガス会社からの案内やガスメーター付近の表示で、供給会社とガスもれの緊急連絡先を確認し、屋外など安全な場所からご連絡ください。'));
+    }
 
     return;
   }

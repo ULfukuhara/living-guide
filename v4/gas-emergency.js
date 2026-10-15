@@ -1,7 +1,7 @@
 // Municipality routing from Osaka Gas Network's gas-leak emergency list.
 // Addresses do not identify gas suppliers: require an explicitly configured network operator.
-export const GAS_EMERGENCY_SOURCE = 'https://network.osakagas.co.jp/contact/index.html#gasleak';
-export const GAS_EMERGENCY_CHECKED_ON = '2026-10-11';
+export const GAS_EMERGENCY_SOURCE = 'https://network.osakagas.co.jp/contact/';
+export const GAS_EMERGENCY_CHECKED_ON = '2026-10-15';
 const groups = [
   {
     "region": "大阪事業部",
@@ -174,14 +174,54 @@ const groups = [
     }
   }
 ];
-export function gasEmergencyContact(operator, address) {
-  if (operator !== 'osaka_gas_network' || typeof address !== 'string') return null;
+// The same municipal boundaries are listed separately for retail customer service.
+// Looking up a retail office never confirms the property's gas supplier.
+function addressRegion(address) {
+  if (typeof address !== 'string') return null;
   const normalized = address.normalize('NFKC').replace(/\s|〒\d{3}-?\d{4}/g, '');
   const matches = [];
   for (const group of groups) for (const [prefecture, municipalities] of Object.entries(group.areas)) {
     if (!normalized.startsWith(prefecture)) continue;
     const local = normalized.slice(prefecture.length);
-    for (const municipality of municipalities) if (local.startsWith(municipality) || new RegExp('^[^市町村]+郡' + municipality).test(local)) matches.push({operator, prefecture, municipality, region:group.region, phone:group.phone, href:'tel:'+group.phone.replace(/-/g,''), hours:'24時間・365日', source:GAS_EMERGENCY_SOURCE, checkedOn:GAS_EMERGENCY_CHECKED_ON});
+    for (const municipality of municipalities) if (local.startsWith(municipality) || new RegExp('^[^市町村]+郡' + municipality).test(local)) matches.push({ group, prefecture, municipality });
   }
   return matches.length === 1 ? matches[0] : null;
+}
+export function gasEmergencyContact(operator, address) {
+  if (operator !== 'osaka_gas_network') return null;
+  const found = addressRegion(address);
+  if (!found) return null;
+  const { group, prefecture, municipality } = found;
+  return {operator, prefecture, municipality, region:group.region, phone:group.phone, href:'tel:'+group.phone.replace(/-/g,''), hours:'24時間・365日', source:GAS_EMERGENCY_SOURCE, checkedOn:GAS_EMERGENCY_CHECKED_ON};
+}
+export const GAS_CUSTOMER_SOURCE = 'https://www.osakagas.co.jp/info/contact.html';
+export const GAS_CUSTOMER_CHECKED_ON = '2026-10-15';
+const customerOffices = {
+  '大阪事業部': {office:'大阪事務所',phone:'0120-0-94817'},
+  '南部事業部': {office:'南部事務所',phone:'0120-3-94817'},
+  '北東部事業部': {office:'北部事務所',phone:'0120-5-94817'},
+  '兵庫事業部': {office:'兵庫事務所',phone:'0120-7-94817'},
+  '京滋事業部': {office:'京都事務所',phone:'0120-8-94817'}
+};
+export function gasCustomerContact(address) {
+  const found = addressRegion(address);
+  if (!found) return null;
+  const office = customerOffices[found.group.region];
+  return {...office, municipality:found.municipality, href:'tel:'+office.phone.replace(/-/g,''), hours:'月〜土 9:00〜19:00／日・祝 9:00〜17:00', source:GAS_CUSTOMER_SOURCE, checkedOn:GAS_CUSTOMER_CHECKED_ON};
+}
+export function prepareGasCustomerSection(section, address, policy = {}) {
+  if (!section?.blocks?.length || policy.hotWaterSource === 'electric' || /^(?:v4_gas_lp_|lp_)/.test(section.variant || '') || /LPガス|プロパンガス/.test(section.body || '')) return section;
+  const contact = gasCustomerContact(address);
+  const knownPhones = new Set(Object.values(customerOffices).map(x=>'tel:'+x.phone.replace(/-/g,'')));
+  const existing = section.blocks.some(b=>knownPhones.has(b.actionUrl));
+  const blocks = section.blocks.map(b=>knownPhones.has(b.actionUrl) ? {...b,actionLabel:contact ? contact.phone+'に電話する' : '大阪ガスの地域別お問い合わせ先を確認する',actionUrl:contact ? contact.href : GAS_CUSTOMER_SOURCE} : b);
+  if (!existing) {
+    const common = {key:'gas',variant:section.variant,style:'default'};
+    blocks.push(
+      {...common,id:'gas_customer_heading',type:'heading',content:'大阪ガスで契約する場合（使用開始・中止）'},
+      {...common,id:'gas_customer_note',type:'text',content:'大阪ガスで契約する場合は、大阪ガスお客さまセンター'+(contact ? '（'+contact.office+'）' : '')+'へお問い合わせください。\n受付時間：月〜土 9:00〜19:00／日・祝 9:00〜17:00\n大阪ガス以外で契約している場合は、契約先へお問い合わせください。'},
+      {...common,id:'gas_customer_phone',type:'button',content:'',actionLabel:contact ? contact.phone+'に電話する' : '大阪ガスの地域別お問い合わせ先を確認する',actionUrl:contact ? contact.href : GAS_CUSTOMER_SOURCE}
+    );
+  }
+  return {...section,blocks,body:blocks.map(b=>b.content || b.actionLabel || '').join('\n')};
 }

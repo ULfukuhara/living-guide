@@ -35,6 +35,8 @@ export function normalizePropertySections(property,masters) {
   if(!settings||Array.isArray(settings)||typeof settings!=='object')throw new Error('V4本文設定の形式を確認してください。');
   for(const [key,value] of Object.entries(settings))if(SECTION_KEYS.includes(key)&&['string','boolean','number'].includes(typeof value))normalized[key]=value;
  }
+ // The equipment source column takes priority over a V4 content selection.
+ if(String(property.mailbox ?? '').trim().toLowerCase()==='no_post')normalized.mailbox=false;
  if(!Object.hasOwn(normalized,'drainage')||normalized.drainage===undefined||property.drainage===null||property.drainage==='')normalized.drainage=property.water_area;
  return {property:normalized,masters:{...masters,drainage:masters.drainage||masters.plumbing||{label_ja:'水まわり全般'},heater:masters.heater||{label_ja:'暖房器具'}}};
 }

@@ -121,3 +121,7 @@ body.is-home{--home-navy:#183651;background:#f3f6f8;color:var(--home-navy)}
 
 /* Align the visible logo consistently across V4 pages; retain the image and menu layout. */
 .home-header #brandLogo{object-position:left center;transform:translateX(-6.5px)}
+
+/* Replace the parcel-locker card with available equipment guidance on TOP. */
+.is-home .casa-home .v4-photo.air-care{background-image:url('./air-conditioner-indoor-v1.webp');background-size:cover;background-position:center}
+.is-home .casa-home .v4-photo.room-care{background-image:url('./cleaning-image.jpg');background-size:cover;background-position:center}

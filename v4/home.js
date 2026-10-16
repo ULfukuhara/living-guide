@@ -54,7 +54,18 @@ export function mountHome(main,guide,{element:el,link,icon}){
   hits.forEach(([key,s])=>results.append(link(sectionTitle(key,s)+' ›','#section/'+key)));
  });
  const quick=el('nav','quick-menu-grid');quick.setAttribute('aria-label','主要メニュー');for(const [route,title,description,color,symbol] of menus){const a=link('','#'+route,'v4-menu '+color);const glyph=el('span','v4-icon');glyph.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[symbol]}</svg>`;a.append(glyph,el('strong','',title),el('small','',description));quick.append(a);}home.append(quick);
- const popular=el('section','popular-info'),heading=el('div','home-section-heading'),h=el('h2'),flame=el('span','v4-flame');flame.innerHTML=icon('heater');h.append('よく見られる情報');const all=el('button','v4-all','すべての案内 ›');all.type='button';all.onclick=()=>modal('すべてのご案内',d=>{for(const group of groupedSections(guide.sections)){d.append(el('h3','',group.title));for(const key of group.keys){const a=link(sectionTitle(key,guide.sections[key])+' ›','#section/'+key,'room-guide-link');a.onclick=()=>d.close();d.append(a);}}if(!Object.keys(guide.sections).length)d.append(el('p','','この物件のご案内は準備中です。'));});heading.append(h,all);popular.append(heading);const grid=el('div','popular-grid');for(const [keys,title,photo] of [[['gas'],'お湯が出ない','shower'],[['trash'],'ゴミの出し方','bins'],[['delivery_box'],'宅配ボックス','lockers']]){if(photo==='lockers'&&!guide.sections.delivery_box)continue;const k=keys.find(k=>guide.sections[k]),a=photo==='shower'?link('','#no-hot-water','popular-card'):photo==='bins'?link('','#trash','popular-card'):k?link('','#section/'+k,'popular-card'):el('div','popular-card unavailable'),visual=el('span','v4-photo '+photo);visual.setAttribute('aria-hidden','true');a.append(visual,el('strong','',title));if(!k&&photo==='lockers')a.append(el('small','','案内準備中'));grid.append(a);}if(grid.childElementCount<3)grid.style.gridTemplateColumns='repeat('+grid.childElementCount+',minmax(0,1fr))';popular.append(grid);home.append(popular);
+ const popular=el('section','popular-info'),heading=el('div','home-section-heading'),h=el('h2'),flame=el('span','v4-flame');flame.innerHTML=icon('heater');h.append('よく見られる情報');const all=el('button','v4-all','すべての案内 ›');all.type='button';all.onclick=()=>modal('すべてのご案内',d=>{for(const group of groupedSections(guide.sections)){d.append(el('h3','',group.title));for(const key of group.keys){const a=link(sectionTitle(key,guide.sections[key])+' ›','#section/'+key,'room-guide-link');a.onclick=()=>d.close();d.append(a);}}if(!Object.keys(guide.sections).length)d.append(el('p','','この物件のご案内は準備中です。'));});heading.append(h,all);popular.append(heading);const grid=el('div','popular-grid');
+ const equipmentCard=guide.sections.air_conditioner
+  ? ['エアコン','air-care','#section/air_conditioner']
+  : ['お部屋・設備','room-care','#equipment'];
+ const thirdCard=guide.sections.delivery_box
+  ? ['宅配ボックス','lockers','#section/delivery_box']
+  : equipmentCard;
+ for(const [title,photo,href] of [['お湯が出ない','shower','#no-hot-water'],['ゴミの出し方','bins','#trash'],thirdCard]){
+  const a=link('',href,'popular-card'),visual=el('span','v4-photo '+photo);
+  visual.setAttribute('aria-hidden','true');a.append(visual,el('strong','',title));grid.append(a);
+ }
+ popular.append(grid);home.append(popular);
  if(guide.policy?.kurasapoEnabled !== false){const cta=link('',guideHref('/kurasapo/'),'kurasapo-cta'),phone=el('span','v4-phone'),text=el('span','v4-cta-copy');phone.innerHTML=icon('kurasapo');text.append(el('strong','','くらさぽコネクト'),el('small','','管理会社への連絡・アプリの使い方'));cta.append(phone,text,el('span','v4-chevron','›'));home.append(cta);}main.append(home);
 
 }

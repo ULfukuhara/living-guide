@@ -1,5 +1,168 @@
 // Confirmed municipal collection districts. Review before registering additional districts.
 export const TRASH_REGIONS = [
+{
+  "id": "osaka_noe4",
+  "municipality": "大阪府大阪市城東区",
+  "label": "野江4丁目",
+  "addressPrefixes": [
+    "大阪府大阪市城東区野江4丁目",
+    "大阪府大阪市城東区野江4-"
+  ],
+  "schedule": [
+    {
+      "label": "普通ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "金曜日"
+    },
+    {
+      "label": "プラスチック資源",
+      "days": "火曜日"
+    },
+    {
+      "label": "古紙・衣類",
+      "days": "地域の回収案内を確認"
+    }
+  ],
+  "calendarUrl": "https://www.city.osaka.lg.jp/contents/wdu150/trashmap/text/ward/joto.html",
+  "exceptions": "収集時間は同じ町内でも場所により異なります。公式マップと物件の掲示をご確認ください。",
+  "sourceUrl": "https://www.city.osaka.lg.jp/contents/wdu150/trashmap/text/ward/joto.html",
+  "checkedOn": "2026-10-15"
+},
+{
+  "id": "nishinomiya_atagoyama",
+  "municipality": "兵庫県西宮市",
+  "label": "愛宕山",
+  "addressPrefixes": [
+    "兵庫県西宮市愛宕山"
+  ],
+  "schedule": [
+    {
+      "label": "もやすごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "その他不燃ごみ",
+      "days": "火曜日"
+    },
+    {
+      "label": "缶・ペットボトル",
+      "days": "水曜日"
+    },
+    {
+      "label": "プラスチック資源",
+      "days": "金曜日"
+    },
+    {
+      "label": "資源（紙資源等）",
+      "days": "第1・3水曜日"
+    },
+    {
+      "label": "びん",
+      "days": "第1・3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.nishi.or.jp/homepage/gomicalendar/calendar.html?id=7",
+  "exceptions": "",
+  "sourceUrl": "https://www.nishi.or.jp/homepage/gomicalendar/calendar.html?id=7",
+  "checkedOn": "2026-10-15"
+},
+{
+  "id": "toyonaka_inazu",
+  "municipality": "大阪府豊中市",
+  "label": "稲津町",
+  "addressPrefixes": [
+    "大阪府豊中市稲津町"
+  ],
+  "schedule": [
+    {
+      "label": "可燃ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "プラスチック製容器包装",
+      "days": "月曜日"
+    },
+    {
+      "label": "粗大ごみ",
+      "days": "第1金曜日（事前申込み）"
+    },
+    {
+      "label": "不燃ごみ・再生資源",
+      "days": "公式カレンダーで確認"
+    }
+  ],
+  "calendarUrl": "https://www.city.toyonaka.osaka.jp/kurashi/gomi_risaikuru_bika/bunbetsu_dashikata/gominowakekata/r8inaducho.html",
+  "exceptions": "不燃ごみ・再生資源は月ごとに日程が異なります。年末年始は可燃ごみ・粗大ごみなども変更されます。公式カレンダーをご確認ください。",
+  "sourceUrl": "https://www.city.toyonaka.osaka.jp/kurashi/gomi_risaikuru_bika/bunbetsu_dashikata/gominowakekata/r8inaducho.html",
+  "checkedOn": "2026-10-15"
+},
+{
+  "id": "suita_kamiyamate",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/_res/projects/default_project/_page_/001/015/233/09.pdf",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "exceptions": "",
+  "checkedOn": "2026-10-15"
+},
+{
+  "id": "ibaraki_miyamotocho",
+  "municipality": "大阪府茨木市",
+  "label": "宮元町",
+  "schedule": [
+    {
+      "label": "普通ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "缶・びん・ペットボトル",
+      "days": "第1・3金曜日"
+    },
+    {
+      "label": "古紙・古布",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型粗大ごみ",
+      "days": "第2金曜日"
+    },
+    {
+      "label": "大型粗大ごみ",
+      "days": "第4金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.ibaraki.osaka.jp/material/files/group/40/wakekata2507.pdf",
+  "sourceUrl": "https://www.city.ibaraki.osaka.jp/material/files/group/40/wakekata2507.pdf",
+  "checkedOn": "2026-10-15",
+  "exceptions": "集積場所が別の町にある場合は、その町の収集日を確認してください。",
+  "addressPrefixes": [
+    "大阪府茨木市宮元町"
+  ]
+},
   {
     "id": "suita_fe373dd63605",
     "municipality": "大阪府吹田市",
@@ -35,6 +198,10 @@ export const TRASH_REGIONS = [
 ];
 export function trashSettings(propertyNo, property) {
   const explicit = ['trash_collection_type','trash_region_id'].some(key => Object.hasOwn(property,key));
+  if (!explicit && String(propertyNo) === '40100' && property.trash === 'ibaraki' && /大阪府茨木市宮元町/.test(property.address || '')) return {collectionType:'municipal',regionId:'ibaraki_miyamotocho'};
+  const reviewedRegions={'10100':'osaka_noe4','10400':'nishinomiya_atagoyama','20400':'toyonaka_inazu','27500':'suita_kamiyamate'};
+  const reviewedRegion=reviewedRegions[String(propertyNo)];
+  if(reviewedRegion && (!explicit || property.trash_collection_type === 'municipal' && !property.trash_region_id))return {collectionType:'municipal',regionId:reviewedRegion};
   if (explicit) return {collectionType: property.trash_collection_type,regionId: property.trash_region_id};
   return {};
 }
@@ -47,7 +214,7 @@ export function trashCollection(settings, address) {
   );
   if (matches.length !== 1) return null;
   const {region,prefix}=matches[0];
-  return {...region,displayLabel:prefix.slice(region.municipality.length)};
+  return {...region,displayLabel:region.id === 'osaka_noe4' ? '野江4丁目' : prefix.slice(region.municipality.length)};
 }
 export function mountTrashCollection(main, collection, {element,link}) {
   if(!collection)return;
@@ -57,6 +224,7 @@ export function mountTrashCollection(main, collection, {element,link}) {
   const body=element('tbody');
   for(const row of collection.schedule){const tr=element('tr'),th=element('th','',row.label);th.setAttribute('scope','row');tr.append(th,element('td','',row.days));body.append(tr);}
   table.append(body);section.append(table,element('p','muted','年末年始などの変更は、公式カレンダーをご確認ください。'));
+  if(collection.exceptions)section.append(element('p','muted',collection.exceptions));
   const calendar=link('収集カレンダーを確認する ↗',collection.calendarUrl,'button');calendar.target='_blank';calendar.rel='noopener noreferrer';
   section.append(calendar);main.append(section);
   mountMovingWaste(main, collection, {element,link});
@@ -64,6 +232,8 @@ export function mountTrashCollection(main, collection, {element,link}) {
 
 // Remove only exact duplicate Casa copy when a confirmed regional schedule is available.
 export function prepareTrashSection(section, collection, propertyNo) {
+  if (collection?.id === 'nishinomiya_atagoyama' && String(propertyNo) === '10400' && section?.variant === 'v4_property_10400' && section.blocks?.length) return {...section,blocks:section.blocks.filter(block=>!['trash_v4_property_10400_new_003','trash_v4_property_10400_new_004','trash_v4_property_10400_new_005'].includes(block.id))};
+  if (collection?.id === 'ibaraki_miyamotocho' && String(propertyNo) === '40100' && section?.variant === 'yous_40100' && section.blocks?.length) return {...section,blocks:section.blocks.filter(block=>!['trash_yous_40100_003','trash_yous_40100_004'].includes(block.id))};
   if (!collection || String(propertyNo) !== '11300' || section?.variant !== 'casa_11300' || !section.blocks?.length) return section;
   const amendments = {
     trash_casa_11300_002: [

@@ -117,7 +117,7 @@ export function renderBody(section, title, options = {}) {
     if (section.key === 'air_conditioner') panel.classList.add('air-conditioner-guide');
     let movingCard;
     for (const [index, block] of section.blocks.entries()) {
-      const foldedTrash = options.trashLayout && block.type === 'heading' && block.level !== 3 && /^(資源ごみの出し方|スプレー缶・カセットボンベ|大型複雑ごみ（粗大ごみ）)$/.test(block.content);
+      const foldedTrash = options.trashLayout && block.type === 'heading' && block.level !== 3 && (/^(資源ごみの出し方|スプレー缶・カセットボンベ|大型複雑ごみ（粗大ごみ）)$/.test(block.content) || /^(引っ越しで大量のゴミが出るとき|引っ越しで大量のゴミが出る場合|大量のゴミ・粗大ごみ|家電リサイクル対象品)$/.test(block.content));
       if (movingLayout && options.hideContactAction && block.type === 'button' && block.actionUrl) {
         const url = new URL(block.actionUrl);
         if (url.origin === 'https://guide.univ-life.com' && url.pathname === '/kurasapo/') continue;

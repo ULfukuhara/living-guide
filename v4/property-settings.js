@@ -18,7 +18,7 @@ export function propertyPolicy(property={}) {
   washletProvided:bool(property.washlet_provided),
   electricityBilling:enumValue(property.electricity_billing,['management','provider']),
   waterBilling:enumValue(property.water_billing,['water_utility','management']),
-  hotWaterSource:enumValue(property.hot_water_source,['gas','electric']),cookingSource:cookingSource(property),
+  hotWaterSource:enumValue(property.hot_water_source,['gas','electric','central']),cookingSource:cookingSource(property),
   internetProvider:enumValue(property.internet_provider_key,['zero_net','baycom','other']),
   wifiRouterProvided:property.wifi_router_provided===undefined||property.wifi_router_provided===null||property.wifi_router_provided===''?null:bool(property.wifi_router_provided),
   electricityStopRequired:bool(property.electricity_stop_required,true),internetStopRequired:bool(property.internet_stop_required,true),

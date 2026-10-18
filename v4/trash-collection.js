@@ -1,6 +1,39 @@
 // Confirmed municipal collection districts. Review before registering additional districts.
 export const TRASH_REGIONS = [
 {
+  "id": "toyonaka_shonainishimachi2",
+  "municipality": "大阪府豊中市",
+  "label": "庄内西町2丁目",
+  "displayLabel": "庄内西町2丁目",
+  "addressPrefixes": [
+    "大阪府豊中市庄内西町2-",
+    "大阪府豊中市庄内西町2丁目"
+  ],
+  "schedule": [
+    {
+      "label": "可燃ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "プラスチック製容器包装",
+      "days": "月曜日"
+    },
+    {
+      "label": "粗大ごみ",
+      "days": "第3金曜日（事前申込み）"
+    },
+    {
+      "label": "不燃ごみ・再生資源",
+      "days": "公式カレンダーで確認"
+    }
+  ],
+  "calendarUrl": "https://www.city.toyonaka.osaka.jp/kurashi/gomi_risaikuru_bika/bunbetsu_dashikata/gominowakekata/r8shonaiwest_east1.html",
+  "sourceUrl": "https://www.city.toyonaka.osaka.jp/kurashi/gomi_risaikuru_bika/bunbetsu_dashikata/gominowakekata/r8shonaiwest_east1.html",
+  "checkedOn": "2026-10-17",
+  "exceptions": "不燃ごみ・再生資源は月ごとに日程が異なります。年末年始は収集日程が変わるため、公式カレンダーをご確認ください。",
+  "movingWasteInDetails": true
+},
+{
   "id": "osaka_noe4",
   "municipality": "大阪府大阪市城東区",
   "label": "野江4丁目",
@@ -194,7 +227,116 @@ export const TRASH_REGIONS = [
       "大阪府吹田市千里山虹が丘",
       "大阪府吹田市千里山星が丘"
     ]
-  }
+  },
+{
+  "id": "suita_senriyamahigashi4_47",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東4丁目（53番20〜23号を除く）",
+  "displayLabel": "千里山東4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東4-47-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-17",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_izumicho5",
+  "municipality": "大阪府吹田市",
+  "label": "泉町4・5丁目",
+  "displayLabel": "泉町5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市泉町5-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-17",
+  "movingWasteInDetails": true
+},
+{
+  "id": "settsu_senrioka7",
+  "municipality": "大阪府摂津市",
+  "label": "千里丘4〜7丁目",
+  "displayLabel": "千里丘7丁目",
+  "addressPrefixes": [
+    "大阪府摂津市千里丘7-"
+  ],
+  "schedule": [
+    {
+      "label": "普通ごみ（生ごみ・小型ごみ）",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "大型ごみ",
+      "days": "木曜日"
+    },
+    {
+      "label": "複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "びん・缶・食品トレイ",
+      "days": "第2・4火曜日"
+    },
+    {
+      "label": "ペットボトル",
+      "days": "第1・3金曜日"
+    },
+    {
+      "label": "段ボール・雑誌",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "新聞・古布",
+      "days": "第2水曜日"
+    },
+    {
+      "label": "指定ごみ",
+      "days": "第1金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.settsu.osaka.jp/material/files/group/41/guidebook34.pdf",
+  "sourceUrl": "https://www.city.settsu.osaka.jp/kurashi/kankyou/gomi/26532.html",
+  "checkedOn": "2026-10-17",
+  "movingWasteInDetails": true
+}
 ];
 export function trashSettings(propertyNo, property) {
   const explicit = ['trash_collection_type','trash_region_id'].some(key => Object.hasOwn(property,key));
@@ -214,7 +356,7 @@ export function trashCollection(settings, address) {
   );
   if (matches.length !== 1) return null;
   const {region,prefix}=matches[0];
-  return {...region,displayLabel:region.id === 'osaka_noe4' ? '野江4丁目' : prefix.slice(region.municipality.length)};
+  return {...region,displayLabel:region.displayLabel || (region.id === 'osaka_noe4' ? '野江4丁目' : prefix.slice(region.municipality.length))};
 }
 export function mountTrashCollection(main, collection, {element,link}) {
   if(!collection)return;
@@ -227,7 +369,7 @@ export function mountTrashCollection(main, collection, {element,link}) {
   if(collection.exceptions)section.append(element('p','muted',collection.exceptions));
   const calendar=link('収集カレンダーを確認する ↗',collection.calendarUrl,'button');calendar.target='_blank';calendar.rel='noopener noreferrer';
   section.append(calendar);main.append(section);
-  mountMovingWaste(main, collection, {element,link});
+  if(!collection.movingWasteInDetails)mountMovingWaste(main, collection, {element,link});
 }
 
 // Remove only exact duplicate Casa copy when a confirmed regional schedule is available.

@@ -336,6 +336,2113 @@ export const TRASH_REGIONS = [
   "sourceUrl": "https://www.city.settsu.osaka.jp/kurashi/kankyou/gomi/26532.html",
   "checkedOn": "2026-10-17",
   "movingWasteInDetails": true
+},
+{
+  "id": "suita_yamate2",
+  "municipality": "大阪府吹田市",
+  "label": "山手町2丁目",
+  "displayLabel": "山手町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町2-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-18",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_yamate3",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-18",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_senrihigashi3_1",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東3丁目1番",
+  "displayLabel": "千里山東3丁目1番",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東3-1-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-18",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_tarumi3",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町3丁目",
+  "displayLabel": "垂水町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町3-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-18",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_senriyamahigashi4_8",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東4丁目（53番20〜23号を除く）",
+  "displayLabel": "千里山東4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東4-8-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-18",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_861200",
+  "municipality": "大阪府吹田市",
+  "label": "千里山西1～3・5丁目",
+  "displayLabel": "千里山西1～3・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山西1-36-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_12800",
+  "municipality": "大阪府吹田市",
+  "label": "江坂町2丁目",
+  "displayLabel": "江坂町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市江坂町2-2-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_51000",
+  "municipality": "大阪府吹田市",
+  "label": "内本町1丁目",
+  "displayLabel": "内本町1丁目",
+  "addressPrefixes": [
+    "大阪府吹田市内本町1-22-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_63500",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町2丁目",
+  "displayLabel": "垂水町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町2-7-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_29300",
+  "municipality": "大阪府吹田市",
+  "label": "原町2丁目",
+  "displayLabel": "原町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市原町2-39-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4木曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3木曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1木曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_23200",
+  "municipality": "大阪府吹田市",
+  "label": "円山町",
+  "displayLabel": "円山町",
+  "addressPrefixes": [
+    "大阪府吹田市円山町20-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_50600",
+  "municipality": "大阪府吹田市",
+  "label": "佐井寺南が丘",
+  "displayLabel": "佐井寺南が丘",
+  "addressPrefixes": [
+    "大阪府吹田市佐井寺南が丘8-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_27000",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町8-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_27100",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町8-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_27200",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町13-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_27600",
+  "municipality": "大阪府吹田市",
+  "label": "朝日が丘町",
+  "displayLabel": "朝日が丘町",
+  "addressPrefixes": [
+    "大阪府吹田市朝日が丘町50-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_62500",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町19-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_51900",
+  "municipality": "大阪府吹田市",
+  "label": "佐井寺1・2丁目",
+  "displayLabel": "佐井寺1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市佐井寺2-1-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53800",
+  "municipality": "大阪府吹田市",
+  "label": "寿町2丁目",
+  "displayLabel": "寿町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市寿町2丁目27-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_52100",
+  "municipality": "大阪府吹田市",
+  "label": "千里山西1～3・5丁目",
+  "displayLabel": "千里山西1～3・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山西2-1-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_21100",
+  "municipality": "大阪府吹田市",
+  "label": "佐井寺1・2丁目",
+  "displayLabel": "佐井寺1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市佐井寺2-12-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_21200",
+  "municipality": "大阪府吹田市",
+  "label": "佐井寺1・2丁目",
+  "displayLabel": "佐井寺1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市佐井寺2-12-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_54200",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町2丁目",
+  "displayLabel": "垂水町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町2-35-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_60600",
+  "municipality": "大阪府吹田市",
+  "label": "出口町",
+  "displayLabel": "出口町",
+  "addressPrefixes": [
+    "大阪府吹田市出口町27-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_52500",
+  "municipality": "大阪府吹田市",
+  "label": "豊津町",
+  "displayLabel": "豊津町",
+  "addressPrefixes": [
+    "大阪府吹田市豊津町4-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_60200",
+  "municipality": "大阪府吹田市",
+  "label": "泉町2・3丁目",
+  "displayLabel": "泉町2・3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市泉町3-13-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_90200",
+  "municipality": "大阪府吹田市",
+  "label": "片山町1丁目 片山町2丁目（16・17番） 片山町3丁目",
+  "displayLabel": "片山町1丁目 片山町2丁目（16・17番） 片山町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市片山町3丁目37-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_26800",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東3丁目1・5・6・7番",
+  "displayLabel": "千里山東3丁目1・5・6・7番",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東3-6-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_26700",
+  "municipality": "大阪府吹田市",
+  "label": "清和園町",
+  "displayLabel": "清和園町",
+  "addressPrefixes": [
+    "大阪府吹田市清和園町23-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_29200",
+  "municipality": "大阪府吹田市",
+  "label": "片山町2丁目",
+  "displayLabel": "片山町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市片山町2-11-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3木曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4木曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2木曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_50700",
+  "municipality": "大阪府吹田市",
+  "label": "山手町1・4丁目",
+  "displayLabel": "山手町1・4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町4-24-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_60800",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東1・2丁目",
+  "displayLabel": "千里山東1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東2-21-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53300",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-19-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_821000",
+  "municipality": "大阪府吹田市",
+  "label": "泉町4・5丁目",
+  "displayLabel": "泉町4・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市泉町5-24-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_52700",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町2丁目",
+  "displayLabel": "垂水町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町2-35-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_861100",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東4丁目（下記は除く）",
+  "displayLabel": "千里山東4丁目（下記は除く）",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東4-58-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_861000",
+  "municipality": "大阪府吹田市",
+  "label": "山手町1・4丁目",
+  "displayLabel": "山手町1・4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町4-33-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_51200",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町23-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_64600",
+  "municipality": "大阪府吹田市",
+  "label": "千里山西6丁目",
+  "displayLabel": "千里山西6丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山西6-63-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_50900",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町17-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53700",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町3-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_860700",
+  "municipality": "大阪府吹田市",
+  "label": "千里山松が丘",
+  "displayLabel": "千里山松が丘",
+  "addressPrefixes": [
+    "大阪府吹田市千里山松が丘26-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_22700",
+  "municipality": "大阪府吹田市",
+  "label": "山手町1・4丁目",
+  "displayLabel": "山手町1・4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町4-4-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_23100",
+  "municipality": "大阪府吹田市",
+  "label": "千里山西1～3・5丁目",
+  "displayLabel": "千里山西1～3・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山西1-1-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_26600",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東1・2丁目",
+  "displayLabel": "千里山東1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東1-16-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_52600",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東4丁目（下記は除く）",
+  "displayLabel": "千里山東4丁目（下記は除く）",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東4-53-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53500",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町3丁目",
+  "displayLabel": "垂水町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町3-26-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4金曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1金曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3金曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_13000",
+  "municipality": "大阪府吹田市",
+  "label": "広芝町",
+  "displayLabel": "広芝町",
+  "addressPrefixes": [
+    "大阪府吹田市広芝町9-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3木曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2木曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4木曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53600",
+  "municipality": "大阪府吹田市",
+  "label": "江坂町5丁目",
+  "displayLabel": "江坂町5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市江坂町5-6-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_51800",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町1丁目",
+  "displayLabel": "垂水町1丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町1-32-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_60700",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町1丁目",
+  "displayLabel": "垂水町1丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町1-45-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_21500",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-35-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_21400",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-35-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_31200",
+  "municipality": "大阪府吹田市",
+  "label": "岸部南1～3丁目",
+  "displayLabel": "岸部南1～3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市岸部南1-9-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_13100",
+  "municipality": "大阪府吹田市",
+  "label": "垂水町2丁目",
+  "displayLabel": "垂水町2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市垂水町2-2-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_65100",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-36-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_90500",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町29-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_95200",
+  "municipality": "大阪府吹田市",
+  "label": "上山手町",
+  "displayLabel": "上山手町",
+  "addressPrefixes": [
+    "大阪府吹田市上山手町1-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_62400",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-34-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_27400",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東1・2丁目",
+  "displayLabel": "千里山東1・2丁目",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東1-16-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3月曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4月曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2月曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_24700",
+  "municipality": "大阪府吹田市",
+  "label": "泉町4・5丁目",
+  "displayLabel": "泉町4・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市泉町4-39-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_24800",
+  "municipality": "大阪府吹田市",
+  "label": "泉町4・5丁目",
+  "displayLabel": "泉町4・5丁目",
+  "addressPrefixes": [
+    "大阪府吹田市泉町4-38-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第2火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第4火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_26000",
+  "municipality": "大阪府吹田市",
+  "label": "山手町3丁目",
+  "displayLabel": "山手町3丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町3-35-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第3土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第1土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_26900",
+  "municipality": "大阪府吹田市",
+  "label": "千里山東3丁目1・5・6・7番",
+  "displayLabel": "千里山東3丁目1・5・6・7番",
+  "addressPrefixes": [
+    "大阪府吹田市千里山東3-6-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "月曜日・木曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第2・4水曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第1水曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第3水曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_53200",
+  "municipality": "大阪府吹田市",
+  "label": "山手町1・4丁目",
+  "displayLabel": "山手町1・4丁目",
+  "addressPrefixes": [
+    "大阪府吹田市山手町1-16-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "火曜日・金曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3土曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4土曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2土曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
+},
+{
+  "id": "suita_batch_54100",
+  "municipality": "大阪府吹田市",
+  "label": "朝日が丘町",
+  "displayLabel": "朝日が丘町",
+  "addressPrefixes": [
+    "大阪府吹田市朝日が丘町29-"
+  ],
+  "schedule": [
+    {
+      "label": "燃焼ごみ",
+      "days": "水曜日・土曜日"
+    },
+    {
+      "label": "資源ごみ",
+      "days": "第1・3火曜日"
+    },
+    {
+      "label": "大型複雑ごみ",
+      "days": "第4火曜日"
+    },
+    {
+      "label": "小型複雑ごみ・有害危険ごみ",
+      "days": "第2火曜日"
+    }
+  ],
+  "calendarUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "sourceUrl": "https://www.city.suita.osaka.jp/kurashi/1018418/1020112/1015233.html",
+  "checkedOn": "2026-10-19",
+  "exceptions": "収集日当日の朝8時までに、所定の場所へ出してください。年末年始の日程は公式案内をご確認ください。",
+  "movingWasteInDetails": true
 }
 ];
 export function trashSettings(propertyNo, property) {

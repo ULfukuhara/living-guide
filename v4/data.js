@@ -1,3 +1,4 @@
+import { blockVariantGroups } from './block-queries.js?v=20261019-suita-batch-1';
 import { propertyPolicy, normalizePropertySections, applyEquipmentConditions } from './property-settings.js?v=20261012-third-property-2';
 import { cancellationFormAllowed } from './cancellation-eligibility.js?v=20261011-cancellation-eligibility-1';
 import { trashSettings, trashCollection } from './trash-collection.js?v=20261012-production-1';
@@ -31,7 +32,9 @@ export async function loadGuide(search) {
     getDocs(collection(db, 'sections_master')),
     getDocs(collection(db, 'guides_master')),
     getDocs(collection(db, 'guides_master_raw')),
-    getDocs(query(collection(db, 'content_blocks'), where('enabled', '==', true))),
+    Promise.all(blockVariantGroups(normalizePropertySections(property, {}).property).map(variants =>
+      getDocs(query(collection(db, 'content_blocks'), where('enabled', '==', true), where('variant_key', 'in', variants)))
+    )).then(snapshots => ({docs:snapshots.flatMap(snapshot => snapshot.docs)})),
     getDocs(collection(db, 'block_styles_master'))
   ]);
   if (results[0].status === 'rejected' || results.slice(1, 4).every(result => result.status === 'rejected')) {

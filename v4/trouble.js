@@ -294,8 +294,9 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const ebroad = policy.internetProvider === 'ebroad' || /イーブロード|https:\/\/u\.e-broad\.jp\/spt\//.test(section?.body || '');
   const jcom = !zeroNet && !baycom && !ebroad && /J[:：]?COM\b|https:\/\/(?:www\.)?jcom\.co\.jp(?:\/|$)/i.test(section?.body || '');
   const ucom = !zeroNet && !baycom && !ebroad && !jcom && /UCOM光|https:\/\/(?:www\.)?ucom-r\.ne\.jp\//i.test(section?.body || '');
-  const sharedProvider = zeroNet || baycom || ebroad || jcom || ucom;
-  const providerWeb = (jcom || ucom) ? section?.blocks?.find(block => (jcom
+  const scopedProvider = /^v4_suita_/.test(section?.variant || '') && /B-CUBIC|Best Bit Net|Fiber net|eo光|フレッツ光|BUFFALO|バッファロー/i.test(section?.body || '');
+  const sharedProvider = zeroNet || baycom || ebroad || jcom || ucom || scopedProvider;
+  const providerWeb = scopedProvider ? section?.blocks?.find(block => block.type === 'button' && /^https?:/.test(block.actionUrl || '')) : (jcom || ucom) ? section?.blocks?.find(block => (jcom
     ? /^https:\/\/(?:www\.)?jcom\.co\.jp\/contactus\//i
     : /^https:\/\/(?:www\.)?ucom-r\.ne\.jp\/search\.html(?:[?#]|$)/i).test(block.actionUrl || '')) : undefined;
   main.append(el('p', 'trouble-intro', TROUBLE_INTRO));
@@ -303,7 +304,7 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const providerContact = sharedProvider ? section?.blocks?.find(block => block.type === 'button' && /^tel:[+\d\s()-]+$/.test(block.actionUrl || '')) : undefined;
   const property = el('section', 'panel trouble-internet-property');
   property.append(el('h2', '', 'この物件のインターネット'));
-  property.append(el('p', '', zeroNet ? '無料インターネット（0net）をご利用いただけます。' : baycom ? 'ベイコムの無料インターネットをご利用いただけます。利用開始や機器の案内はベイコムへご確認ください。' : ebroad ? 'イーブロードの無料インターネットをご利用いただけます。接続の不具合はイーブロードへお問い合わせください。' : jcom ? 'J:COMのインターネットをご利用いただけます。接続の不具合は、J:COMへお問い合わせください。' : ucom ? 'UCOM光レジデンスをご利用いただけます。接続方法やサポート窓口は、建物専用ページをご確認ください。' : '利用方法や契約先は、この物件のインターネット案内をご確認ください。ご自身で契約している場合は、契約先が問い合わせ窓口です。'));
+  property.append(el('p', '', zeroNet ? '無料インターネット（0net）をご利用いただけます。' : baycom ? 'ベイコムの無料インターネットをご利用いただけます。利用開始や機器の案内はベイコムへご確認ください。' : ebroad ? 'イーブロードの無料インターネットをご利用いただけます。接続の不具合はイーブロードへお問い合わせください。' : jcom ? 'J:COMのインターネットをご利用いただけます。接続の不具合は、J:COMへお問い合わせください。' : ucom ? 'UCOM光レジデンスをご利用いただけます。接続方法やサポート窓口は、建物専用ページをご確認ください。' : scopedProvider ? 'この物件に導入されているインターネットをご利用いただけます。接続の不具合は、案内に記載された提供会社へお問い合わせください。' : '利用方法や契約先は、この物件のインターネット案内をご確認ください。ご自身で契約している場合は、契約先が問い合わせ窓口です。'));
   if (noRouter) property.append(el('p', '', 'Wi-Fiルーターは備え付けではありません。Wi-Fiを使う場合は、ご自身で用意したルーターをご確認ください。'));
   if (section) property.append(link('利用方法・設備の案内を見る →', '#section/internet', 'trouble-guide-link'));
   main.append(property);
@@ -328,13 +329,13 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   more.append(further);steps.append(more);
   const help = el('section', 'panel trouble-help');
   help.append(el('h2', '', '解決しない場合の問い合わせ'));
-  help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : baycom ? 'ベイコムのサポート窓口へ、接続状況と試した内容をお知らせください。' : ebroad ? 'イーブロードのサポート窓口へ、接続状況と試した内容をお知らせください。' : jcom ? 'J:COMのサポート窓口へ、接続状況と試した内容をお知らせください。' : ucom ? 'UCOM光レジデンスの建物専用ページから、接続方法やお問い合わせ先をご確認ください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
+  help.append(el('p', '', zeroNet ? '0netのサポート窓口へ、接続状況と試した内容をお知らせください。' : baycom ? 'ベイコムのサポート窓口へ、接続状況と試した内容をお知らせください。' : ebroad ? 'イーブロードのサポート窓口へ、接続状況と試した内容をお知らせください。' : jcom ? 'J:COMのサポート窓口へ、接続状況と試した内容をお知らせください。' : ucom ? 'UCOM光レジデンスの建物専用ページから、接続方法やお問い合わせ先をご確認ください。' : scopedProvider ? 'この物件のインターネット案内に記載されたサービス提供会社へ、接続状況と試した内容をお知らせください。' : 'ご自身で契約している回線事業者・プロバイダへお問い合わせください。契約先が分からない場合や、建物側の設備については管理会社へご相談ください。'));
   if (providerContact) {
     const phone = providerContact.actionUrl.replace(/^tel:/, '');
     const label = phone === '08001003311' ? '0800-100-3311に電話する' : phone === '0120401173' ? '0120-40-1173に電話する' : providerContact.actionLabel;
     help.append(link(label, providerContact.actionUrl, 'button'));
   }
-  else if (providerWeb) help.append(link(jcom ? 'J:COMの問い合わせ先を確認する' : 'UCOM光レジデンスの建物専用ページを確認する', providerWeb.actionUrl, 'button'));
+  else if (providerWeb) help.append(link(scopedProvider ? 'サービス提供会社の案内を確認する' : jcom ? 'J:COMの問い合わせ先を確認する' : 'UCOM光レジデンスの建物専用ページを確認する', providerWeb.actionUrl, 'button'));
   else if (ebroad) help.append(link('イーブロードのサポートを確認する', 'https://u.e-broad.jp/spt/', 'button'));
   else if (zeroNet && section) help.append(link('0netの問い合わせ先を確認する →', '#section/internet', 'button'));
   const report = el('details', 'trouble-property-guide');

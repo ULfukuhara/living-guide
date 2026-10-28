@@ -38,12 +38,21 @@ export function normalizePropertySections(property,masters) {
  }
  // The equipment source column takes priority over a V4 content selection.
  if(String(property.mailbox ?? '').trim().toLowerCase()==='no_post')normalized.mailbox=false;
- if(!Object.hasOwn(normalized,'drainage')||normalized.drainage===undefined||property.drainage===null||property.drainage==='')normalized.drainage=property.water_area;
+ if(!Object.hasOwn(normalized,'drainage')||normalized.drainage===undefined||normalized.drainage===null||normalized.drainage==='')normalized.drainage=property.water_area;
  return {property:normalized,masters:{...masters,drainage:masters.drainage||masters.plumbing||{label_ja:'水まわり全般'},heater:masters.heater||{label_ja:'暖房器具'}}};
 }
 
 // Only explicitly confirmed washlets receive equipment-specific guidance.
 export function applyEquipmentConditions(sections, policy) {
+ const drainage=sections.drainage;
+ if(drainage?.variant==='v4_drainage_standard'&&drainage.blocks?.length){
+  const blocks=drainage.blocks.filter(block=>
+   (!block.id.startsWith('drainage_v4_drainage_standard_freeze_')||policy?.hotWaterSource==='gas')
+   &&(block.id!=='drainage_v4_drainage_standard_contact'||policy?.kurasapoEnabled===true)
+  ).map(block=>block.id==='drainage_v4_drainage_standard_leak_heading'&&policy?.kurasapoEnabled!==true
+   ?{...block,content:'水漏れを見つけたら管理会社へ連絡'}:block);
+  sections={...sections,drainage:{...drainage,blocks,body:blocks.map(block=>block.content||block.actionLabel||'').join('\n')}};
+ }
  if (policy?.washletProvided === true || !sections.toilet) return sections;
  const toilet = sections.toilet;
  const blocks = (toilet.blocks || []).filter(block => !block.id.startsWith('toilet_v4_eq_common_washlet_')).map(block => block.type === 'text' && (block.content || '').includes('暖房便座・温水洗浄便座') ? { ...block, content: block.content.split(/\r?\n/).filter(line => !line.includes('暖房便座・温水洗浄便座')).join('\n') } : block);

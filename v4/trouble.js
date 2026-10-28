@@ -294,7 +294,7 @@ function mountInternetTrouble(main, guide, { element: el, link }) {
   const ebroad = policy.internetProvider === 'ebroad' || /イーブロード|https:\/\/u\.e-broad\.jp\/spt\//.test(section?.body || '');
   const jcom = !zeroNet && !baycom && !ebroad && /J[:：]?COM\b|https:\/\/(?:www\.)?jcom\.co\.jp(?:\/|$)/i.test(section?.body || '');
   const ucom = !zeroNet && !baycom && !ebroad && !jcom && /UCOM光|https:\/\/(?:www\.)?ucom-r\.ne\.jp\//i.test(section?.body || '');
-  const scopedProvider = /^v4_suita_/.test(section?.variant || '') && /B-CUBIC|Best Bit Net|Fiber net|eo光|フレッツ光|BUFFALO|バッファロー/i.test(section?.body || '');
+  const scopedProvider = /^v4_(?:suita|rollout|answers)_/.test(section?.variant || '') && /B-CUBIC|Best Bit Net|Fiber net|eo光|フレッツ光|BUFFALO|バッファロー|Life Reliance|ライフリライアンス|FGBB|3Advance|スリーアドバンス/i.test(section?.body || '');
   const sharedProvider = zeroNet || baycom || ebroad || jcom || ucom || scopedProvider;
   const providerWeb = scopedProvider ? section?.blocks?.find(block => block.type === 'button' && /^https?:/.test(block.actionUrl || '')) : (jcom || ucom) ? section?.blocks?.find(block => (jcom
     ? /^https:\/\/(?:www\.)?jcom\.co\.jp\/contactus\//i

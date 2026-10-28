@@ -1,6 +1,7 @@
+import { normalizeBool } from './content.js?v=20261012-production-1';
 // Public projection only. Never fetch internal Cybozu records from a tenant browser.
 export function cancellationFormAllowed(property) {
-  return property?.cancellation_form_enabled === true;
+  return normalizeBool(property?.cancellation_form_enabled);
 }
 export function prepareCancellationSection(section, allowed) {
   if (allowed || !section) return section;

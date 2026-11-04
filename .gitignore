@@ -67,3 +67,9 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Local work files (not part of the public site)
+_removed_candidates/
+artifacts/
+v3/
+v2/living-visual.svg

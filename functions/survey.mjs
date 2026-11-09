@@ -45,7 +45,7 @@ export const submitMoveInSurvey = onRequest(
         const window = (await transaction.get(quota)).data();
         const fingerprints = window?.minute === minute ? window.fingerprints : [];
         if (fingerprints.includes(fingerprint)) return 200;
-        if (fingerprints.length >= 60) return 429;
+        if (fingerprints.length >= 10) return 429;
 
         const property = await transaction.get(db.collection("properties_shiori").doc(survey.propertyNo));
         if (!property.exists) return 400;

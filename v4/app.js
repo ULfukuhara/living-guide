@@ -309,6 +309,10 @@ function render() {
       const symptom = {toilet: ['トイレで困ったとき →', 'toilet-trouble'], drainage: ['水漏れで困ったとき →', 'water-leak'], air_conditioner: ['エアコンが効かないとき →', 'air-conditioner-trouble'], room_equipment: ['設備の不具合で困ったとき →', 'other-trouble']}[sectionKey];
       if (symptom) main.append(link(symptom[0], '#' + symptom[1], 'trouble-guide-link'));
       if (sectionKey === 'key') main.append(link('鍵をなくしたとき →', '#lost-key', 'trouble-guide-link'));
+      if (sectionKey === 'management_other') {
+        const params = new URLSearchParams({ propertyNo: guide.propertyNo, source: 'shiori_v4' });
+        main.append(link('入居直後アンケートに回答する →', '/survey.html?' + params, 'trouble-guide-link'));
+      }
       const survey = sectionKey === 'management_other' && /アンケート/.test(guide.sections[sectionKey]?.label || '');
       if (!survey) main.append(helpBanner(sectionKey === 'moving' ? 'intro' : ['key', 'electricity', 'gas', 'water', 'internet', 'mailbox'].includes(sectionKey) ? sectionKey : sectionGroup(sectionKey) === 'equipment' ? 'equipment' : sectionGroup(sectionKey) === 'procedures' ? sectionKey : sectionGroup(sectionKey) === 'rules' ? 'rules' : sectionGroup(sectionKey) === 'trash' ? 'trash' : undefined));
     } else if (route === 'trouble') {

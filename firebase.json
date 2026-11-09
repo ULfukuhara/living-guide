@@ -10,8 +10,7 @@
       "**/.*/**",
       "AGENTS.md",
       "CLAUDE.md",
-      "**/*.log",
-      "survey.html"
+      "**/*.log"
     ],
     "headers": [
       {

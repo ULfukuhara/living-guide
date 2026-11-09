@@ -6,13 +6,30 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "_removed_candidates/**"
+      "_removed_candidates/**",
+      "**/.*/**",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "**/*.log",
+      "survey.html"
     ],
     "headers": [
       {
         "source": "/v4/**",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, max-age=0, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
         ]
       }
     ]

@@ -1,0 +1,11 @@
+{
+  "name": "living-guide-functions",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "22" },
+  "main": "survey.mjs",
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}

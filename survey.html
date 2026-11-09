@@ -155,13 +155,8 @@
   <script type="module">
     import { db } from "/assets/firebase-init.js";
     import {
-      collection,
-      addDoc,
-      query,
-      where,
-      limit,
-      getDocs,
-      serverTimestamp
+      doc,
+      getDoc
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     // URL params
@@ -192,19 +187,12 @@
     // token → postdials から物件No取得
     async function fetchPropertyNoFromToken() {
       if (!token) return "";
-      const q1 = query(collection(db, "postdials"), where("token", "==", token), limit(1));
-      const snap = await getDocs(q1);
-      if (snap.empty) return "";
-      const data = snap.docs[0].data() || {};
+      if (!/^[A-Za-z0-9_-]{20,200}$/.test(token)) return "";
+      const snap = await getDoc(doc(db, "postdials", token));
+      if (!snap.exists()) return "";
+      const data = snap.data();
       const bukkenNo = data["物件No"] || data["propertyNo"] || data["bukkenNo"] || "";
       return String(bukkenNo).trim();
-    }
-
-    async function checkAnsweredByToken() {
-      if (!token) return false;
-      const q1 = query(collection(db, "movein_survey"), where("token", "==", token), limit(1));
-      const snap = await getDocs(q1);
-      return !snap.empty;
     }
 
     function localKey() {
@@ -262,15 +250,22 @@
           room_score: getScore("room"),
           broker_score: getScore("broker"),
           management_score: getScore("management"),
-          comment: document.getElementById("comment").value || "",
-          created_at: serverTimestamp(),
-          user_agent: navigator.userAgent
+          comment: document.getElementById("comment").value || ""
         };
 
-        await addDoc(collection(db, "movein_survey"), data);
+        const response = await fetch("/api/move-in-survey", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (response.status === 429) {
+          showError("送信が集中しています。1分ほどおいて再度お試しください。");
+          return;
+        }
+        if (!response.ok) throw new Error("Survey request failed: " + response.status);
 
-        // token無し（公開URL）の場合だけ localStorage で「回答済み」を残す
-        if (!token) markAnsweredLocal();
+        // 回答済みの表示は、このブラウザの記録を使う。
+        markAnsweredLocal();
 
         // ✅ 送信後メッセージ（再回答かどうかで分岐）
         if (isResubmission) {
@@ -326,34 +321,14 @@
       }
 
       // 「回答済み」なら statusBox を表示（再回答ボタンあり）
-      try {
-        if (token) {
-          const answered = await checkAnsweredByToken();
-          if (answered) {
-            showStatus({
-              title: "✅ このアンケートはすでにご回答いただいています",
-              desc: "追加でお気づきの点がありましたら、再度ご回答いただけます。",
-              showRetry: true,
-              showClose: false
-            });
-          } else {
-            showForm();
-          }
-        } else {
-          if (checkAnsweredLocal()) {
-            showStatus({
-              title: "✅ このアンケートはすでにご回答いただいています",
-              desc: "追加でお気づきの点がありましたら、再度ご回答いただけます。",
-              showRetry: true,
-              showClose: false
-            });
-          } else {
-            showForm();
-          }
-        }
-      } catch (e) {
-        console.error(e);
-        // 判定に失敗しても入力はできるようにする
+      if (checkAnsweredLocal()) {
+        showStatus({
+          title: "✅ このアンケートはすでにご回答いただいています",
+          desc: "追加でお気づきの点がありましたら、再度ご回答いただけます。",
+          showRetry: true,
+          showClose: false
+        });
+      } else {
         showForm();
       }
 

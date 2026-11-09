@@ -24,6 +24,21 @@
     ],
     "predeploy": [
       "node tools/prepare-hosting.mjs"
+    ],
+    "rewrites": [
+      {
+        "function": {
+          "functionId": "submitMoveInSurvey",
+          "region": "asia-northeast1"
+        },
+        "source": "/api/move-in-survey"
+      }
     ]
-  }
+  },
+  "functions": [
+    {
+      "codebase": "guide-survey",
+      "source": "functions"
+    }
+  ]
 }

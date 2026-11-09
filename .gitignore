@@ -73,3 +73,6 @@ _removed_candidates/
 artifacts/
 v3/
 v2/living-visual.svg
+
+# Generated from the Hosting allowlist
+/hosting-public/

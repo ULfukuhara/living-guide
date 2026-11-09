@@ -1,17 +1,7 @@
 {
   "hosting": {
     "target": "guide",
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**",
-      "_removed_candidates/**",
-      "**/.*/**",
-      "AGENTS.md",
-      "CLAUDE.md",
-      "**/*.log"
-    ],
+    "public": "hosting-public",
     "headers": [
       {
         "source": "/v4/**",
@@ -31,6 +21,9 @@
           }
         ]
       }
+    ],
+    "predeploy": [
+      "node tools/prepare-hosting.mjs"
     ]
   }
 }

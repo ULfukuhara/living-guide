@@ -22,20 +22,12 @@
 
 <body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
   <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6 space-y-5">
-    <p id="metaLine" class="text-[10px] text-slate-400"></p>
-
     <div id="errorLine" class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
 
     <!-- 状態表示（回答済み / 送信完了） -->
     <div id="statusBox" class="hidden space-y-4 text-center">
       <p id="statusTitle" class="text-sm text-emerald-700 font-semibold"></p>
       <p id="statusDesc" class="text-xs text-slate-500"></p>
-
-      <!-- 回答済みの時だけ表示 -->
-      <button id="retryBtn"
-        class="hidden w-full rounded-lg border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-        もう一度回答する
-      </button>
 
       <!-- 送信完了の時だけ表示（任意） -->
       <a id="closeLink" href="https://guide.univ-life.com/"
@@ -153,20 +145,10 @@
   </div>
 
   <script type="module">
-    import { db } from "/assets/firebase-init.js";
-    import {
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    // URL params
     const pageUrl = new URL(window.location.href);
-    const token = (pageUrl.searchParams.get("token") || "").trim();
-    let propertyNo = (pageUrl.searchParams.get("propertyNo") || "").trim(); // ★ tokenから補完するのでlet
-    const source = (pageUrl.searchParams.get("source") || "unknown").trim();
-
-    // 状態：既に回答済みで表示された→再回答したかどうか
-    let isResubmission = false;
+    const fragment = new URLSearchParams(pageUrl.hash.slice(1));
+    const token = (fragment.get("token") || pageUrl.searchParams.get("token") || "").trim();
+    const source = (fragment.get("source") || pageUrl.searchParams.get("source") || "unknown").trim();
 
     function showError(msg) {
       const el = document.getElementById("errorLine");
@@ -184,49 +166,20 @@
       return el ? Number(el.value) : null;
     }
 
-    // token → postdials から物件No取得
-    async function fetchPropertyNoFromToken() {
-      if (!token) return "";
-      if (!/^[A-Za-z0-9_-]{20,200}$/.test(token)) return "";
-      const snap = await getDoc(doc(db, "postdials", token));
-      if (!snap.exists()) return "";
-      const data = snap.data();
-      const bukkenNo = data["物件No"] || data["propertyNo"] || data["bukkenNo"] || "";
-      return String(bukkenNo).trim();
-    }
-
-    function localKey() {
-      return `movein_survey_answered_${propertyNo || "unknown"}`;
-    }
-    function checkAnsweredLocal() {
-      try { return localStorage.getItem(localKey()) === "1"; } catch { return false; }
-    }
-    function markAnsweredLocal() {
-      try { localStorage.setItem(localKey(), "1"); } catch {}
-    }
-
-    function showStatus({ title, desc, showRetry = false, showClose = false } = {}) {
+    function showStatus({ title, desc, showClose = false } = {}) {
       document.getElementById("surveyForm").classList.add("hidden");
 
       const box = document.getElementById("statusBox");
       const titleEl = document.getElementById("statusTitle");
       const descEl = document.getElementById("statusDesc");
-      const retryBtn = document.getElementById("retryBtn");
       const closeLink = document.getElementById("closeLink");
 
       titleEl.textContent = title || "";
       descEl.textContent = desc || "";
 
-      retryBtn.classList.toggle("hidden", !showRetry);
       closeLink.classList.toggle("hidden", !showClose);
 
       box.classList.remove("hidden");
-    }
-
-    function showForm() {
-      hideError();
-      document.getElementById("statusBox").classList.add("hidden");
-      document.getElementById("surveyForm").classList.remove("hidden");
     }
 
     async function submitSurvey() {
@@ -244,8 +197,7 @@
 
       try {
         const data = {
-          token: token || null,
-          propertyNo: propertyNo || null,
+          token,
           source,
           room_score: getScore("room"),
           broker_score: getScore("broker"),
@@ -262,27 +214,24 @@
           showError("送信が集中しています。1分ほどおいて再度お試しください。");
           return;
         }
-        if (!response.ok) throw new Error("Survey request failed: " + response.status);
-
-        // 回答済みの表示は、このブラウザの記録を使う。
-        markAnsweredLocal();
-
-        // ✅ 送信後メッセージ（再回答かどうかで分岐）
-        if (isResubmission) {
-          showStatus({
-            title: "✅ 再度のご回答を受け付けました",
-            desc: "追加入力いただいた内容も、サービス改善に活用いたします。ご協力ありがとうございます。",
-            showRetry: false,
-            showClose: true
-          });
-        } else {
-          showStatus({
-            title: "✅ ご回答ありがとうございました",
-            desc: "いただいた内容はサービス改善に活用いたします。ご協力ありがとうございます。",
-            showRetry: false,
-            showClose: true
-          });
+        if (response.status === 409) {
+          showStatus({ title: "このQRコードからは回答済みです。", showClose: true });
+          return;
         }
+        if (response.status === 400) {
+          showStatus({
+            title: "このQRコードからは回答できません。",
+            desc: "入居時のご案内をご確認ください。",
+            showClose: true
+          });
+          return;
+        }
+        if (!response.ok) throw new Error("Survey request failed: " + response.status);
+        showStatus({
+          title: "ご回答ありがとうございました。",
+          desc: "いただいた内容はサービス改善に活用いたします。",
+          showClose: true
+        });
       } catch (e) {
         console.error(e);
         showError("送信に失敗しました。時間をおいて再度お試しください。");
@@ -292,54 +241,16 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      // tokenあり & propertyNoなし → Firestore(postdials) から補完
-      if (token && !propertyNo) {
-        try {
-          propertyNo = await fetchPropertyNoFromToken();
-          if (!propertyNo) {
-            showError("tokenから物件Noを特定できませんでした。管理会社へご連絡ください。");
-          }
-        } catch (e) {
-          console.error(e);
-          showError("物件情報の取得に失敗しました。時間をおいて再度お試しください。");
-        }
-      }
-
-      // メタ表示
-      const metaParts = [];
-      if (token) metaParts.push("tokenあり");
-      if (propertyNo) metaParts.push(`物件No: ${propertyNo}`);
-      metaParts.push(`source: ${source}`);
-      document.getElementById("metaLine").textContent = metaParts.join(" / ");
-
-      // 最低限の入力チェック
-      if (!token && !propertyNo) {
-        showError("URLに ?propertyNo=XXXX もしくは ?token=XXXX を付けてください。");
-        showForm();
-        return;
-      }
-
-      // 「回答済み」なら statusBox を表示（再回答ボタンあり）
-      if (checkAnsweredLocal()) {
-        showStatus({
-          title: "✅ このアンケートはすでにご回答いただいています",
-          desc: "追加でお気づきの点がありましたら、再度ご回答いただけます。",
-          showRetry: true,
-          showClose: false
-        });
-      } else {
-        showForm();
-      }
-
-      // 再回答：フォーム表示＋フラグON（送信後に「再度受け付けました」を出す）
-      document.getElementById("retryBtn").addEventListener("click", () => {
-        isResubmission = true;
-        showForm();
-      });
-
+    if (/^[A-Za-z0-9_-]{20,200}$/.test(token)) {
+      document.getElementById("surveyForm").classList.remove("hidden");
       document.getElementById("submitBtn").addEventListener("click", submitSurvey);
-    });
+    } else {
+      showStatus({
+        title: "部屋専用QRコードからご回答ください。",
+        desc: "部屋専用の入居のしおりから、アンケートを開いてください。",
+        showClose: true
+      });
+    }
   </script>
 </body>
 </html>

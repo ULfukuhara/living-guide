@@ -835,7 +835,7 @@
       }
     }
 
-    function renderGroupedTabsWithAccordion(sections, propertyNo) {
+    function renderGroupedTabsWithAccordion(sections, token) {
       const tabNav = document.getElementById("tabNav");
       const tabPanels = document.getElementById("tabPanels");
       const searchWrap = document.getElementById("sectionSearchWrap");
@@ -916,7 +916,7 @@
           const card = document.createElement("div");
           card.className = "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden";
 
-          const surveyUrl = '/survey.html?' + new URLSearchParams({ propertyNo, source: 'shiori_public' });
+          const surveyUrl = token ? '/survey.html#' + new URLSearchParams({ token, source: 'shiori_room' }) : '';
           const groupId = `${gIndex}-${sec.key}`; // ✅ lightbox group key
 
           card.innerHTML = `
@@ -1387,7 +1387,7 @@
         const sectionConfig = buildSectionConfig(propertyData);
         const mergedSections = mergeSections(masterMap, sectionConfig, masterList, defaultVariantKey);
 
-        renderGroupedTabsWithAccordion(mergedSections, propertyNo);
+        renderGroupedTabsWithAccordion(mergedSections, token);
         renderQuickHelpCard(mergedSections);
 
         if (hasPartialFailure) {

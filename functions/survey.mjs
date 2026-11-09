@@ -8,15 +8,14 @@ const db = getFirestore();
 
 function readSurvey(body) {
   if (!body || typeof body !== "object") return null;
-  const { token, propertyNo, source, room_score, broker_score, management_score, comment } = body;
+  const { token, source, room_score, broker_score, management_score, comment } = body;
   if (
-    !(token == null || (typeof token === "string" && /^[A-Za-z0-9_-]{20,200}$/.test(token))) ||
-    typeof propertyNo !== "string" || !/^\d{1,50}$/.test(propertyNo) ||
+    typeof token !== "string" || !/^[A-Za-z0-9_-]{20,200}$/.test(token) ||
     typeof source !== "string" || source.length > 100 ||
     typeof comment !== "string" || comment.length > 3000 ||
     ![room_score, broker_score, management_score].every(score => Number.isInteger(score) && score >= 1 && score <= 5)
   ) return null;
-  return { token: token ?? null, propertyNo, source, room_score, broker_score, management_score, comment };
+  return { token, source, room_score, broker_score, management_score, comment };
 }
 
 export const submitMoveInSurvey = onRequest(
@@ -33,35 +32,38 @@ export const submitMoveInSurvey = onRequest(
       return;
     }
 
-    const minute = Math.floor(Date.now() / 60_000);
     const quota = db.doc("guide_internal/survey_submission_window");
-    const answer = db.collection("movein_survey").doc();
-    const fingerprint = createHash("sha256").update(JSON.stringify([
-      survey.propertyNo, survey.token, survey.room_score, survey.broker_score,
-      survey.management_score, survey.comment.trim()
-    ])).digest("hex");
+    const answers = db.collection("movein_survey");
+    const tokenHash = createHash("sha256").update(survey.token).digest("hex");
+    const answer = answers.doc("qr_" + tokenHash);
     try {
       const status = await db.runTransaction(async transaction => {
-        const window = (await transaction.get(quota)).data();
-        const fingerprints = window?.minute === minute ? window.fingerprints : [];
-        if (fingerprints.includes(fingerprint)) return 200;
-        if (fingerprints.length >= 10) return 429;
+        const now = Date.now();
+        const room = (await transaction.get(db.collection("postdials").doc(survey.token))).data();
+        const expires = room?.tokenExpiresAt;
+        const propertyNo = String(room?.propertyNo || room?.["物件No"] || room?.bukkenNo || "").trim();
+        if (
+          room?.token !== survey.token || room?.tokenIsActive !== true ||
+          !/^\d{1,50}$/.test(propertyNo) ||
+          (expires !== undefined && !(expires?.toMillis?.() > now))
+        ) return 400;
 
-        const property = await transaction.get(db.collection("properties_shiori").doc(survey.propertyNo));
+        if ((await transaction.get(answer)).exists) return 409;
+        const previous = await transaction.get(answers.where("token", "==", survey.token).limit(1));
+        if (!previous.empty) return 409;
+
+        const property = await transaction.get(db.collection("properties_shiori").doc(propertyNo));
         if (!property.exists) return 400;
-        if (survey.token) {
-          const room = (await transaction.get(db.collection("postdials").doc(survey.token))).data();
-          const expires = room?.tokenExpiresAt;
-          if (
-            room?.token !== survey.token || room?.tokenIsActive !== true ||
-            String(room.propertyNo || room["物件No"] || room.bukkenNo || "") !== survey.propertyNo ||
-            (expires !== undefined && !(expires?.toMillis?.() > Date.now()))
-          ) return 400;
-        }
 
-        transaction.set(quota, { minute, fingerprints: [...fingerprints, fingerprint] });
+        const minute = Math.floor(now / 60_000);
+        const window = (await transaction.get(quota)).data();
+        const count = window?.minute === minute ? (window.count ?? window.fingerprints.length) : 0;
+        if (count >= 10) return 429;
+
+        transaction.set(quota, { minute, count: count + 1 });
         transaction.create(answer, {
           ...survey,
+          propertyNo,
           user_agent: (req.get("user-agent") || "").slice(0, 500),
           created_at: FieldValue.serverTimestamp()
         });
